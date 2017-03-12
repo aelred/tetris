@@ -6,12 +6,25 @@ use sdl2::pixels::Color;
 use sdl2::pixels::Color::RGB;
 
 const NUM_TETROMINOES: usize = 7;
-const TETROMINO_WIDTH: usize = 4;
-const TETROMINO_HEIGHT: usize = 4;
-pub const NUM_ROTATIONS: usize = 4;
+const WIDTH: usize = 4;
+const HEIGHT: usize = 4;
+const NUM_ROTATIONS: usize = 4;
+
+#[derive(Copy, Clone)]
+pub struct Rotation(usize);
+
+impl Rotation {
+    pub fn new() -> Rotation {
+        Rotation(0)
+    }
+
+    pub fn rotate(&self) -> Rotation {
+        Rotation(self.0 + 1 % NUM_ROTATIONS)
+    }
+}
 
 pub struct Tetromino {
-    rotations: [[[bool; TETROMINO_HEIGHT]; TETROMINO_WIDTH]; NUM_ROTATIONS],
+    rotations: [[[bool; HEIGHT]; WIDTH]; NUM_ROTATIONS],
     pub color: Color,
 }
 
@@ -21,10 +34,10 @@ impl Tetromino {
         TETROMINOES[rng.gen_range(0, NUM_TETROMINOES)]
     }
 
-    pub fn each_cell<F>(&self, rot_index: usize, mut f: F)
+    pub fn each_cell<F>(&self, rot: Rotation, mut f: F)
         where F: FnMut(Pos) -> ()
     {
-        for (x, col) in self.rotations[rot_index].iter().enumerate() {
+        for (x, col) in self.rotations[rot.0].iter().enumerate() {
             for (y, cell) in col.iter().enumerate() {
                 if *cell {
                     f(Pos {

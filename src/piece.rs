@@ -1,7 +1,7 @@
 use tile::draw_tile;
 use board::Board;
-use tetromino::NUM_ROTATIONS;
 use tetromino::Tetromino;
+use tetromino::Rotation;
 use pos::Pos;
 use board::WIDTH;
 
@@ -16,7 +16,7 @@ const INITIAL_POS: Pos = Pos {
 
 pub struct Piece {
     tetromino: &'static Tetromino,
-    rot: usize,
+    rot: Rotation,
     pos: Pos,
     drop_tick: u8,
     lock_delay: bool,
@@ -26,7 +26,7 @@ impl Piece {
     pub fn new() -> Piece {
         Piece {
             tetromino: Tetromino::random(),
-            rot: 0,
+            rot: Rotation::new(),
             pos: INITIAL_POS,
             drop_tick: 0,
             lock_delay: false,
@@ -61,7 +61,7 @@ impl Piece {
         self.reset_lock_delay();
 
         let old_rot = self.rot;
-        self.rot = (self.rot + 1) % NUM_ROTATIONS;
+        self.rot = self.rot.rotate();
 
         if self.collides(board) {
             self.rot = old_rot;
@@ -97,7 +97,7 @@ impl Piece {
         board.check_clear();
 
         self.tetromino = Tetromino::random();
-        self.rot = 0;
+        self.rot = Rotation::new();
         self.pos = INITIAL_POS;
         self.drop_tick = 0;
         self.lock_delay = false;
