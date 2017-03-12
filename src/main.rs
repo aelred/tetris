@@ -1,10 +1,15 @@
+mod tetromino;
+mod pos;
+
 extern crate sdl2;
 extern crate rand;
 
-use std::thread::sleep;
-use std::ops::Add;
+use pos::Pos;
+use tetromino::Tetromino;
+use tetromino::NUM_ROTATIONS;
 
-use rand::Rng;
+use std::thread::sleep;
+
 use sdl2::Sdl;
 use sdl2::video::Window;
 use sdl2::render::Renderer;
@@ -20,11 +25,6 @@ const WIDTH: usize = 10;
 const HEIGHT: usize = 24;
 const TILE_SIZE: i16 = 24;
 
-const NUM_TETROMINOES: usize = 7;
-const TETROMINO_WIDTH: usize = 4;
-const TETROMINO_HEIGHT: usize = 4;
-const NUM_ROTATIONS: usize = 4;
-
 const WINDOW_WIDTH: u32 = WIDTH as u32 * TILE_SIZE as u32;
 const WINDOW_HEIGHT: u32 = HEIGHT as u32 * TILE_SIZE as u32;
 const TICK: u64 = 33;
@@ -34,18 +34,6 @@ const INITIAL_POS: Pos = Pos {
     x: WIDTH as isize / 2 - 2,
     y: -4,
 };
-
-struct Tetromino {
-    rotations: [[[bool; TETROMINO_HEIGHT]; TETROMINO_WIDTH]; NUM_ROTATIONS],
-    color: Color,
-}
-
-impl Tetromino {
-    fn random() -> &'static Tetromino {
-        let mut rng = rand::thread_rng();
-        TETROMINOES[rng.gen_range(0, NUM_TETROMINOES)]
-    }
-}
 
 struct Board([[Option<Color>; WIDTH]; HEIGHT]);
 
@@ -106,23 +94,6 @@ impl Board {
     }
 }
 
-#[derive(Copy, Clone)]
-struct Pos {
-    x: isize,
-    y: isize,
-}
-
-impl Add for Pos {
-    type Output = Pos;
-
-    fn add(self, other: Pos) -> Pos {
-        Pos {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
 struct Piece {
     tetromino: &'static Tetromino,
     rot: usize,
@@ -167,7 +138,8 @@ impl Piece {
     }
 
     fn lock(&mut self, board: &mut Board) {
-        self.each_cell(|pos| board.fill(self.pos + pos, self.tetromino.color));
+        self.tetromino.each_cell(self.rot,
+                                 |pos| board.fill(self.pos + pos, self.tetromino.color));
         board.check_clear();
 
         self.tetromino = Tetromino::random();
@@ -180,9 +152,9 @@ impl Piece {
     fn collides(&self, board: &Board) -> bool {
         let mut collides = false;
 
-        self.each_cell(|pos| if board.touches(self.pos + pos) {
-                           collides = true;
-                       });
+        self.tetromino.each_cell(self.rot, |pos| if board.touches(self.pos + pos) {
+            collides = true;
+        });
 
         collides
     }
@@ -225,22 +197,8 @@ impl Piece {
     }
 
     fn draw(&self, renderer: &Renderer) {
-        self.each_cell(|pos| draw_box(&renderer, self.pos + pos, self.tetromino.color));
-    }
-
-    fn each_cell<F>(&self, mut f: F)
-        where F: FnMut(Pos) -> ()
-    {
-        for (x, col) in self.tetromino.rotations[self.rot].iter().enumerate() {
-            for (y, cell) in col.iter().enumerate() {
-                if *cell {
-                    f(Pos {
-                          x: x as isize,
-                          y: y as isize,
-                      })
-                };
-            }
-        }
+        self.tetromino.each_cell(self.rot,
+                                 |pos| draw_box(&renderer, self.pos + pos, self.tetromino.color));
     }
 }
 
@@ -310,146 +268,3 @@ fn draw_box(renderer: &Renderer, pos: Pos, col: Color) {
                           (y + 1) * TILE_SIZE - 1,
                           col);
 }
-
-static TETROMINOES: [&'static Tetromino; NUM_TETROMINOES] = [&O_TET, &I_TET, &J_TET, &L_TET,
-                                                             &S_TET, &T_TET, &Z_TET];
-
-static O_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [false, true, true, false],
-                 [false, true, true, false],
-                 [false, false, false, false]],
-                [[false, false, false, false],
-                 [false, true, true, false],
-                 [false, true, true, false],
-                 [false, false, false, false]],
-                [[false, false, false, false],
-                 [false, true, true, false],
-                 [false, true, true, false],
-                 [false, false, false, false]],
-                [[false, false, false, false],
-                 [false, true, true, false],
-                 [false, true, true, false],
-                 [false, false, false, false]]],
-    color: RGB(255, 255, 0),
-};
-
-static I_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [false, false, false, false],
-                 [true, true, true, true],
-                 [false, false, false, false]],
-                [[false, false, true, false],
-                 [false, false, true, false],
-                 [false, false, true, false],
-                 [false, false, true, false]],
-                [[false, false, false, false],
-                 [false, false, false, false],
-                 [true, true, true, true],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, false, false],
-                 [false, true, false, false],
-                 [false, true, false, false]]],
-    color: RGB(0, 255, 255),
-};
-
-static J_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, true, false],
-                 [false, false, true, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, false, false],
-                 [true, true, false, false],
-                 [false, false, false, false]],
-                [[true, false, false, false],
-                 [true, true, true, false],
-                 [false, false, false, false],
-                 [false, false, false, false]],
-                [[false, true, true, false],
-                 [false, true, false, false],
-                 [false, true, false, false],
-                 [false, false, false, false]]],
-    color: RGB(0, 0, 255),
-};
-
-static L_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, true, false],
-                 [true, false, false, false],
-                 [false, false, false, false]],
-                [[true, true, false, false],
-                 [false, true, false, false],
-                 [false, true, false, false],
-                 [false, false, false, false]],
-                [[false, false, true, false],
-                 [true, true, true, false],
-                 [false, false, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, false, false],
-                 [false, true, true, false],
-                 [false, false, false, false]]],
-    color: RGB(255, 165, 0),
-};
-
-static S_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [false, true, true, false],
-                 [true, true, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, true, false],
-                 [false, false, true, false],
-                 [false, false, false, false]],
-                [[false, true, true, false],
-                 [true, true, false, false],
-                 [false, false, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, true, false],
-                 [false, false, true, false],
-                 [false, false, false, false]]],
-    color: RGB(0, 255, 0),
-};
-
-static T_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, true, false],
-                 [false, true, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [true, true, false, false],
-                 [false, true, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [true, true, true, false],
-                 [false, false, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, true, false],
-                 [false, true, false, false],
-                 [false, false, false, false]]],
-    color: RGB(255, 0, 255),
-};
-
-static Z_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, false, false],
-                 [false, true, true, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [true, true, false, false],
-                 [true, false, false, false],
-                 [false, false, false, false]],
-                [[true, true, false, false],
-                 [false, true, true, false],
-                 [false, false, false, false],
-                 [false, false, false, false]],
-                [[false, false, true, false],
-                 [false, true, true, false],
-                 [false, true, false, false],
-                 [false, false, false, false]]],
-    color: RGB(255, 0, 0),
-};
