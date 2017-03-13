@@ -7,7 +7,8 @@ use board::WIDTH;
 
 use sdl2::render::Renderer;
 
-const DROP_SPEED: u8 = 10;
+const GRAVITY: f32 = 0.1;
+const RECIP_GRAVITY: u8 = (1.0 / GRAVITY) as u8;
 
 const INITIAL_POS: Pos = Pos {
     x: WIDTH as isize / 2 - 2,
@@ -34,7 +35,7 @@ impl Piece {
     }
 
     pub fn update(&mut self, board: &mut Board) {
-        if self.drop_tick == DROP_SPEED {
+        if self.drop_tick == RECIP_GRAVITY {
             self.drop(board);
             self.drop_tick = 0;
         }
