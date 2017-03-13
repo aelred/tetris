@@ -7,6 +7,10 @@ mod piece;
 extern crate sdl2;
 extern crate rand;
 
+#[cfg(test)]
+#[macro_use]
+extern crate quickcheck;
+
 use tile::TILE_SIZE;
 use board::Board;
 use board::WIDTH;

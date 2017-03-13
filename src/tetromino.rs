@@ -43,7 +43,7 @@ impl Bag {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Rotation(usize);
 
 impl Rotation {
@@ -221,3 +221,56 @@ static Z_TET: Tetromino = Tetromino {
                  [false, false, false, false]]],
     color: RGB(255, 0, 0),
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quickcheck::Arbitrary;
+    use quickcheck::Gen;
+
+    impl Arbitrary for Bag {
+        fn arbitrary<G: Gen>(g: &mut G) -> Bag {
+            let mut bag = Bag::new();
+            for _ in 0..g.gen_range(0, NUM_TETROMINOES * 2) {
+                bag.next();
+            }
+            bag
+        }
+    }
+
+    impl Arbitrary for Rotation {
+        fn arbitrary<G: Gen>(g: &mut G) -> Rotation {
+            if g.gen() {
+                Rotation::arbitrary(g).rotate()
+            } else {
+                Rotation::new()
+            }
+        }
+    }
+
+    impl Arbitrary for &'static Tetromino {
+        fn arbitrary<G: Gen>(g: &mut G) -> &'static Tetromino {
+            g.choose(&TETROMINOES).unwrap()
+        }
+    }
+
+    quickcheck! {
+        fn bag_always_returns_a_valid_tetromino(bag: Bag) -> bool {
+            let mut bag = bag;
+            let tetromino = bag.next();
+            TETROMINOES.iter().any(|t| *t == tetromino)
+        }
+
+        fn bag_never_returns_same_tetromino_three_times(bag: Bag) -> bool {
+            let mut bag = bag;
+            let first = bag.next();
+            let second = bag.next();
+            let third = bag.next();
+            !(first == second && second == third)
+        }
+
+        fn rotation_four_times_is_identity(rot: Rotation) -> bool {
+            rot == rot.rotate().rotate().rotate().rotate()
+        }
+    }
+}
