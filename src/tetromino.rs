@@ -10,6 +10,39 @@ const WIDTH: usize = 4;
 const HEIGHT: usize = 4;
 const NUM_ROTATIONS: usize = 4;
 
+#[derive(Debug, Clone)]
+pub struct Bag {
+    tetrominoes: [&'static Tetromino; NUM_TETROMINOES],
+    index: usize,
+}
+
+impl Bag {
+    pub fn new() -> Bag {
+        Bag {
+            tetrominoes: Bag::random_sequence(),
+            index: 0,
+        }
+    }
+
+    pub fn next(&mut self) -> &'static Tetromino {
+        if self.index >= NUM_TETROMINOES {
+            self.tetrominoes = Bag::random_sequence();
+            self.index = 0;
+        }
+
+        let next = self.tetrominoes[self.index];
+        self.index += 1;
+        next
+    }
+
+    fn random_sequence() -> [&'static Tetromino; NUM_TETROMINOES] {
+        let mut rng = rand::thread_rng();
+        let mut sequence = TETROMINOES;
+        rng.shuffle(&mut sequence);
+        sequence
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct Rotation(usize);
 
@@ -19,21 +52,17 @@ impl Rotation {
     }
 
     pub fn rotate(&self) -> Rotation {
-        Rotation(self.0 + 1 % NUM_ROTATIONS)
+        Rotation((self.0 + 1) % NUM_ROTATIONS)
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Tetromino {
     rotations: [[[bool; HEIGHT]; WIDTH]; NUM_ROTATIONS],
     pub color: Color,
 }
 
 impl Tetromino {
-    pub fn random() -> &'static Tetromino {
-        let mut rng = rand::thread_rng();
-        TETROMINOES[rng.gen_range(0, NUM_TETROMINOES)]
-    }
-
     pub fn each_cell<F>(&self, rot: Rotation, mut f: F)
         where F: FnMut(Pos) -> ()
     {

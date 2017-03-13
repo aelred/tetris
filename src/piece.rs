@@ -1,6 +1,7 @@
 use tile::draw_tile;
 use board::Board;
 use tetromino::Tetromino;
+use tetromino::Bag;
 use tetromino::Rotation;
 use pos::Pos;
 use board::WIDTH;
@@ -21,16 +22,20 @@ pub struct Piece {
     pos: Pos,
     drop_tick: u8,
     lock_delay: bool,
+    bag: Bag,
 }
 
 impl Piece {
     pub fn new() -> Piece {
+        let mut bag = Bag::new();
+
         Piece {
-            tetromino: Tetromino::random(),
+            tetromino: bag.next(),
             rot: Rotation::new(),
             pos: INITIAL_POS,
             drop_tick: 0,
             lock_delay: false,
+            bag: bag,
         }
     }
 
@@ -97,7 +102,7 @@ impl Piece {
         self.each_cell(|pos| board.fill(pos, self.tetromino.color));
         board.check_clear();
 
-        self.tetromino = Tetromino::random();
+        self.tetromino = self.bag.next();
         self.rot = Rotation::new();
         self.pos = INITIAL_POS;
         self.drop_tick = 0;
