@@ -269,6 +269,26 @@ mod tests {
             !(first == second && second == third)
         }
 
+        fn bag_always_returns_same_piece_within_thirteen_times(bag: Bag) -> bool {
+            let mut bag = bag;
+            let initial = bag.next();
+            for _ in 0..13 {
+                let result = bag.next();
+                if result == initial {
+                    return true;
+                }
+            }
+            false
+        }
+
+        fn rotation_is_at_most_three(rot: Rotation) -> bool {
+            rot.0 <= 3
+        }
+
+        fn rotation_increments_modulo_4(rot: Rotation) -> bool {
+            rot.rotate().0 == (rot.0 + 1) % NUM_ROTATIONS
+        }
+
         fn rotation_four_times_is_identity(rot: Rotation) -> bool {
             rot == rot.rotate().rotate().rotate().rotate()
         }
