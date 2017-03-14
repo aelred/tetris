@@ -11,10 +11,7 @@ use sdl2::render::Renderer;
 const GRAVITY: f32 = 0.1;
 const RECIP_GRAVITY: u8 = (1.0 / GRAVITY) as u8;
 
-const INITIAL_POS: Pos = Pos {
-    x: WIDTH as isize / 2 - 2,
-    y: -4,
-};
+const INITIAL_X: isize = WIDTH as isize / 2 - 2;
 
 pub struct Piece {
     tetromino: &'static Tetromino,
@@ -32,7 +29,7 @@ impl Piece {
         Piece {
             tetromino: bag.next(),
             rot: Rotation::new(),
-            pos: INITIAL_POS,
+            pos: initial_pos(),
             drop_tick: 0,
             lock_delay: false,
             bag: bag,
@@ -49,10 +46,10 @@ impl Piece {
     }
 
     pub fn drop(&mut self, board: &mut Board) {
-        self.pos.y += 1;
+        self.pos = self.pos + Pos::new(0, 1);
 
         if self.collides(board) {
-            self.pos.y -= 1;
+            self.pos = self.pos + Pos::new(0, -1);
             if self.lock_delay {
                 self.lock(board);
             } else {
@@ -77,20 +74,20 @@ impl Piece {
     pub fn left(&mut self, board: &Board) {
         self.reset_lock_delay();
 
-        self.pos.x -= 1;
+        self.pos = self.pos + Pos::new(-1, 0);
 
         if self.collides(board) {
-            self.pos.x += 1;
+            self.pos = self.pos + Pos::new(1, 0);
         }
     }
 
     pub fn right(&mut self, board: &Board) {
         self.reset_lock_delay();
 
-        self.pos.x += 1;
+        self.pos = self.pos + Pos::new(1, 0);
 
         if self.collides(board) {
-            self.pos.x -= 1;
+            self.pos = self.pos + Pos::new(-1, 0);
         }
     }
 
@@ -104,7 +101,7 @@ impl Piece {
 
         self.tetromino = self.bag.next();
         self.rot = Rotation::new();
-        self.pos = INITIAL_POS;
+        self.pos = initial_pos();
         self.drop_tick = 0;
         self.lock_delay = false;
     }
@@ -130,4 +127,8 @@ impl Piece {
     {
         self.tetromino.each_cell(self.rot, |pos| f(self.pos + pos));
     }
+}
+
+fn initial_pos() -> Pos {
+    Pos::new(INITIAL_X, 0)
 }

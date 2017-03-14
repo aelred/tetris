@@ -2,8 +2,22 @@ use std::ops::Add;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Pos {
-    pub x: isize,
-    pub y: isize,
+    x: isize,
+    y: isize,
+}
+
+impl Pos {
+    pub fn new(x: isize, y: isize) -> Pos {
+        Pos { x: x, y: y }
+    }
+
+    pub fn x(self) -> isize {
+        self.x
+    }
+
+    pub fn y(self) -> isize {
+        self.y
+    }
 }
 
 impl Add for Pos {

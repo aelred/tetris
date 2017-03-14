@@ -16,11 +16,11 @@ impl Board {
     }
 
     pub fn touches(&self, pos: Pos) -> bool {
-        pos.y >= 0 && (out_bounds(pos) || self.0[pos.y as usize][pos.x as usize].is_some())
+        out_bounds(pos) || self.0[pos.y() as usize][pos.x() as usize].is_some()
     }
 
     pub fn fill(&mut self, pos: Pos, color: Color) {
-        self.0[pos.y as usize][pos.x as usize] = Some(color);
+        self.0[pos.y() as usize][pos.x() as usize] = Some(color);
     }
 
     pub fn check_clear(&mut self) {
@@ -50,14 +50,7 @@ impl Board {
         for (y, row) in self.0.iter().enumerate() {
             for (x, cell) in row.iter().enumerate() {
                 match *cell {
-                    Some(color) => {
-                        draw_tile(&renderer,
-                                  Pos {
-                                      x: x as isize,
-                                      y: y as isize,
-                                  },
-                                  color)
-                    }
+                    Some(color) => draw_tile(&renderer, Pos::new(x as isize, y as isize), color),
                     None => (),
                 }
             }
@@ -66,7 +59,7 @@ impl Board {
 }
 
 fn out_bounds(pos: Pos) -> bool {
-    pos.x < 0 || pos.x >= WIDTH as isize || pos.y >= HEIGHT as isize
+    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as isize || pos.y() >= HEIGHT as isize
 }
 
 #[cfg(test)]
@@ -102,14 +95,14 @@ mod tests {
     quickcheck! {
 
         fn a_new_board_is_empty(pos: Pos) -> TestResult {
-            if out_bounds(pos) || pos.y < 0 {
+            if out_bounds(pos) {
                 return TestResult::discard();
             }
             TestResult::from_bool(!Board::new().touches(pos))
         }
 
         fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, r: u8, g: u8, b: u8) -> TestResult {
-            if out_bounds(pos) || pos.y < 0 {
+            if out_bounds(pos) {
                 return TestResult::discard();
             }
 
@@ -120,7 +113,7 @@ mod tests {
         }
 
         fn after_filling_a_space_no_other_space_changes(board: Board, pos1: Pos, pos2: Pos, r: u8, g: u8, b: u8) -> TestResult {
-            if pos1 == pos2 || out_bounds(pos1) || pos1.y < 0 {
+            if pos1 == pos2 || out_bounds(pos1) {
                 return TestResult::discard();
             }
 
