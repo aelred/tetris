@@ -230,20 +230,22 @@ mod tests {
 
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {
-            let mut bag = Bag::new();
-            for _ in 0..g.gen_range(0, NUM_TETROMINOES * 2) {
+            if g.gen_weighted_bool(g.size()) {
+                Bag::new()
+            } else {
+                let mut bag = Bag::arbitrary(g);
                 bag.next();
+                bag
             }
-            bag
         }
     }
 
     impl Arbitrary for Rotation {
         fn arbitrary<G: Gen>(g: &mut G) -> Rotation {
             if g.gen() {
-                Rotation::arbitrary(g).rotate()
-            } else {
                 Rotation::new()
+            } else {
+                Rotation::arbitrary(g).rotate()
             }
         }
     }
@@ -273,8 +275,7 @@ mod tests {
             let mut bag = bag;
             let initial = bag.next();
             for _ in 0..13 {
-                let result = bag.next();
-                if result == initial {
+                if bag.next() == initial {
                     return true;
                 }
             }
