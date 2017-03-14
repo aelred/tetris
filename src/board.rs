@@ -50,7 +50,7 @@ impl Board {
         for (y, row) in self.0.iter().enumerate() {
             for (x, cell) in row.iter().enumerate() {
                 match *cell {
-                    Some(color) => draw_tile(&renderer, Pos::new(x as isize, y as isize), color),
+                    Some(color) => draw_tile(&renderer, Pos::new(x, y), color),
                     None => (),
                 }
             }
@@ -59,7 +59,7 @@ impl Board {
 }
 
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as isize || pos.y() >= HEIGHT as isize
+    pos.x() >= WIDTH || pos.y() >= HEIGHT
 }
 
 #[cfg(test)]

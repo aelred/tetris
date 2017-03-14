@@ -69,7 +69,7 @@ impl Tetromino {
         for (x, col) in self.rotations[rot.0].iter().enumerate() {
             for (y, cell) in col.iter().enumerate() {
                 if *cell {
-                    f(Pos::new(x as isize, y as isize))
+                    f(Pos::new(x, y))
                 };
             }
         }
