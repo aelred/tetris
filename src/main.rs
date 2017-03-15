@@ -1,7 +1,6 @@
-#![macro_escape]
-
 #[macro_use]
 mod macros;
+
 mod tetromino;
 mod pos;
 mod board;
