@@ -54,7 +54,7 @@ impl Board {
         for (y, row) in self.0.iter().enumerate() {
             for (x, cell) in row.iter().enumerate() {
                 match *cell {
-                    Some(color) => draw_tile(&renderer, Pos::new(x, y), color),
+                    Some(color) => draw_tile(&renderer, Pos::new(x as isize, y as isize), color),
                     None => (),
                 }
             }
@@ -63,7 +63,7 @@ impl Board {
 }
 
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() >= WIDTH || pos.y() >= HEIGHT
+    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as isize || pos.y() >= HEIGHT as isize
 }
 
 #[cfg(test)]
@@ -96,38 +96,28 @@ mod tests {
         }
     }
 
-    fn discard() -> TestResult {
-        TestResult::discard()
-    }
-
-    fn assert(test: bool) -> TestResult {
-        TestResult::from_bool(test)
+    fn in_bounds(pos: Pos) -> bool {
+        !out_bounds(pos)
     }
 
     quickcheck! {
 
         fn a_new_board_is_empty(pos: Pos) -> TestResult {
-            if out_bounds(pos) {
-                return discard();
-            }
-            assert(!Board::new().touches(pos))
+            when!(in_bounds(pos));
+            then!(!Board::new().touches(pos))
         }
 
         fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, r: u8, g: u8, b: u8) -> TestResult {
-            if out_bounds(pos) {
-                return discard();
-            }
-
+            when!(in_bounds(pos));
             let color = Color::RGB(r, g, b);
             let mut board = board;
             board.fill(pos, color);
-            assert(board.touches(pos))
+            then!(board.touches(pos))
         }
 
         fn after_filling_a_space_no_other_space_changes(board: Board, pos1: Pos, pos2: Pos, r: u8, g: u8, b: u8) -> TestResult {
-            if pos1 == pos2 || out_bounds(pos1) {
-                return discard();
-            }
+            when!(pos1 != pos2);
+            when!(in_bounds(pos1));
 
             let color = Color::RGB(r, g, b);
             let mut board = board;
@@ -135,40 +125,39 @@ mod tests {
             let touches_before = board.touches(pos2);
             board.fill(pos1, color);
             let touches_after = board.touches(pos2);
-            assert(touches_before == touches_after)
+            then!(touches_before == touches_after)
         }
 
-        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: usize, y: usize) -> TestResult {
-            if out_bounds(Pos::new(x, y)) {
-                return discard();
-            }
+        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: isize, y: usize) -> TestResult {
+            when!(in_bounds(Pos::new(x, y as isize)));
             let mut board = board;
             board.clear_row(y);
-            assert(!board.touches(Pos::new(x, 0)))
+            then!(!board.touches(Pos::new(x, 0)))
         }
 
         fn after_clearing_a_row_nothing_under_it_is_changed(board: Board, y: usize, under: Pos) -> TestResult {
-            if out_bounds(under) || under.y() <= y {
-                return discard();
-            }
+            when!(in_bounds(under));
+            when!(under.y() > y as isize);
+
             let mut board = board;
 
             let before = board.touches(under);
             board.clear_row(y);
             let after = board.touches(under);
-            assert(before == after)
+            then!(before == after)
         }
 
         fn after_clearing_a_row_everything_above_it_shifts_down(board: Board, y: usize, above: Pos) -> TestResult {
-            if y >= HEIGHT || out_bounds(above) || above.y() >= y {
-                return discard();
-            }
+            when!(y < HEIGHT);
+            when!(!out_bounds(above));
+            when!(above.y() < y as isize);
+
             let mut board = board;
 
             let before = board.touches(above);
             board.clear_row(y);
             let after = board.touches(above.down());
-            assert(before == after)
+            then!(before == after)
         }
     }
 }

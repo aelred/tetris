@@ -1,3 +1,7 @@
+#![macro_escape]
+
+#[macro_use]
+mod macros;
 mod tetromino;
 mod pos;
 mod board;
@@ -12,6 +16,7 @@ extern crate rand;
 extern crate quickcheck;
 
 use tile::TILE_SIZE;
+use tile::HIDE_ROWS;
 use board::Board;
 use board::WIDTH;
 use board::HEIGHT;
@@ -28,7 +33,7 @@ use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
 const WINDOW_WIDTH: u32 = WIDTH as u32 * TILE_SIZE as u32;
-const WINDOW_HEIGHT: u32 = HEIGHT as u32 * TILE_SIZE as u32;
+const WINDOW_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * TILE_SIZE as u32;
 const TICK: u64 = 33;
 
 fn main() {

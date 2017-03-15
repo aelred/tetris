@@ -11,7 +11,7 @@ use sdl2::render::Renderer;
 const GRAVITY: f32 = 0.1;
 const RECIP_GRAVITY: u8 = (1.0 / GRAVITY) as u8;
 
-const INITIAL_X: usize = WIDTH / 2 - 2;
+const INITIAL_X: isize = WIDTH as isize / 2 - 2;
 
 pub struct Piece {
     tetromino: &'static Tetromino,
@@ -46,10 +46,10 @@ impl Piece {
     }
 
     pub fn drop(&mut self, board: &mut Board) {
-        self.pos = self.pos.right();
+        self.pos = self.pos.down();
 
         if self.collides(board) {
-            self.pos = self.pos.left();
+            self.pos = self.pos.up();
             if self.lock_delay {
                 self.lock(board);
             } else {
@@ -84,10 +84,10 @@ impl Piece {
     pub fn right(&mut self, board: &Board) {
         self.reset_lock_delay();
 
-        self.pos = self.pos.down();
+        self.pos = self.pos.right();
 
         if self.collides(board) {
-            self.pos = self.pos.up();
+            self.pos = self.pos.left();
         }
     }
 

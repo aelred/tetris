@@ -2,20 +2,20 @@ use std::ops::Add;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Pos {
-    x: usize,
-    y: usize,
+    x: isize,
+    y: isize,
 }
 
 impl Pos {
-    pub fn new(x: usize, y: usize) -> Pos {
+    pub fn new(x: isize, y: isize) -> Pos {
         Pos { x: x, y: y }
     }
 
-    pub fn x(self) -> usize {
+    pub fn x(self) -> isize {
         self.x
     }
 
-    pub fn y(self) -> usize {
+    pub fn y(self) -> isize {
         self.y
     }
 
@@ -87,6 +87,22 @@ mod tests {
 
         fn add_has_identity_element(p: Pos) -> bool {
             p + ID == p && ID + p == p
+        }
+
+        fn when_moving_left_piece_is_one_space_left(p: Pos) -> bool {
+            p.left().x() == p.x() - 1
+        }
+
+        fn when_moving_left_piece_has_same_y(p: Pos) -> bool {
+            p.left().y() == p.y()
+        }
+
+        fn when_moving_right_piece_is_one_space_right(p: Pos) -> bool {
+            p.right().x() == p.x() + 1
+        }
+
+        fn when_moving_right_piece_has_same_y(p: Pos) -> bool {
+            p.right().y() == p.y()
         }
     }
 }
