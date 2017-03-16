@@ -26,7 +26,8 @@ use std::thread::sleep;
 use sdl2::Sdl;
 use sdl2::video::Window;
 use sdl2::pixels::Color::RGB;
-use sdl2::event::Event::{Quit, KeyDown, KeyUp};
+use sdl2::event::Event;
+use sdl2::event::WindowEvent::{FocusGained, FocusLost};
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
@@ -35,6 +36,8 @@ const WINDOW_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * TILE_SIZE as u32
 const TICK: u64 = 33;
 
 fn main() {
+
+    let mut paused = false;
 
     let mut board = Board::new();
     let mut piece = Piece::new();
@@ -54,8 +57,15 @@ fn main() {
 
         for event in event_pump.poll_iter() {
             match event {
-                Quit { .. } => break 'main,
-                KeyDown { keycode: Some(keycode), .. } => {
+                Event::Quit { .. } => break 'main,
+                Event::Window { win_event, .. } => {
+                    match win_event {
+                        FocusGained => paused = false,
+                        FocusLost => paused = true,
+                        _ => {}
+                    }
+                }
+                Event::KeyDown { keycode: Some(keycode), .. } => {
                     match keycode {
                         Keycode::Escape => break 'main,
                         Keycode::Left => piece.left(&board),
@@ -66,7 +76,7 @@ fn main() {
                         _ => {}
                     }
                 }
-                KeyUp { keycode: Some(keycode), .. } => {
+                Event::KeyUp { keycode: Some(keycode), .. } => {
                     match keycode {
                         Keycode::Down => piece.stop_drop(),
                         _ => {}
@@ -80,7 +90,9 @@ fn main() {
 
         piece.draw(&renderer);
 
-        piece.update(&mut board);
+        if !paused {
+            piece.update(&mut board);
+        }
 
         renderer.present();
 
