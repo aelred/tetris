@@ -8,9 +8,9 @@ use board::WIDTH;
 
 use sdl2::render::Renderer;
 
-const SOFT_DROP_SPEED: u8 = 10;
-const GRAVITY: f32 = 0.1;
-const RECIP_GRAVITY: u8 = (1.0 / GRAVITY) as u8;
+const NORMAL_GRAVITY: f32 = 0.1;
+const SOFT_DROP_GRAVITY: f32 = 1.0;
+const HARD_DROP_GRAVITY: f32 = 20.0;
 
 const INITIAL_X: isize = WIDTH as isize / 2 - 2;
 
@@ -18,9 +18,9 @@ pub struct Piece {
     tetromino: &'static Tetromino,
     rot: Rotation,
     pos: Pos,
-    drop_tick: u8,
+    drop_tick: f32,
     lock_delay: bool,
-    soft_drop: bool,
+    gravity: f32,
     bag: Bag,
 }
 
@@ -32,20 +32,20 @@ impl Piece {
             tetromino: bag.next(),
             rot: Rotation::new(),
             pos: initial_pos(),
-            drop_tick: 0,
+            drop_tick: 0.0,
             lock_delay: false,
-            soft_drop: false,
+            gravity: NORMAL_GRAVITY,
             bag: bag,
         }
     }
 
     pub fn update(&mut self, board: &mut Board) {
-        while self.drop_tick >= RECIP_GRAVITY {
-            self.drop_tick -= RECIP_GRAVITY;
+        while self.drop_tick >= 1.0 {
+            self.drop_tick -= 1.0;
             self.drop(board);
         }
 
-        self.drop_tick += if self.soft_drop { SOFT_DROP_SPEED } else { 1 };
+        self.drop_tick += self.gravity;
     }
 
     pub fn rotate(&mut self, board: &Board) {
@@ -80,11 +80,15 @@ impl Piece {
     }
 
     pub fn start_soft_drop(&mut self) {
-        self.soft_drop = true;
+        self.gravity = SOFT_DROP_GRAVITY;
     }
 
-    pub fn stop_soft_drop(&mut self) {
-        self.soft_drop = false;
+    pub fn start_hard_drop(&mut self) {
+        self.gravity = HARD_DROP_GRAVITY;
+    }
+
+    pub fn stop_drop(&mut self) {
+        self.gravity = NORMAL_GRAVITY;
     }
 
     pub fn draw(&self, renderer: &Renderer) {
@@ -113,7 +117,8 @@ impl Piece {
         self.tetromino = self.bag.next();
         self.rot = Rotation::new();
         self.pos = initial_pos();
-        self.drop_tick = 0;
+        self.drop_tick = 0.0;
+        self.gravity = NORMAL_GRAVITY;
         self.lock_delay = false;
     }
 
@@ -129,7 +134,7 @@ impl Piece {
 
     fn reset_lock_delay(&mut self) {
         if self.lock_delay {
-            self.drop_tick = 0;
+            self.drop_tick = 0.0;
         }
     }
 

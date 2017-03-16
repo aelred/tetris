@@ -62,12 +62,13 @@ fn main() {
                         Keycode::Right => piece.right(&board),
                         Keycode::Up => piece.rotate(&board),
                         Keycode::Down => piece.start_soft_drop(),
+                        Keycode::Space => piece.start_hard_drop(),
                         _ => {}
                     }
                 }
                 KeyUp { keycode: Some(keycode), .. } => {
                     match keycode {
-                        Keycode::Down => piece.stop_soft_drop(),
+                        Keycode::Down => piece.stop_drop(),
                         _ => {}
                     }
                 }
