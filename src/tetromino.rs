@@ -58,7 +58,7 @@ impl Rotation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tetromino {
-    rotations: [[[bool; HEIGHT]; WIDTH]; NUM_ROTATIONS],
+    rotations: [[[bool; WIDTH]; HEIGHT]; NUM_ROTATIONS],
     pub color: Color,
 }
 
@@ -66,8 +66,8 @@ impl Tetromino {
     pub fn each_cell<F>(&self, rot: Rotation, mut f: F)
         where F: FnMut(Pos) -> ()
     {
-        for (x, col) in self.rotations[rot.0].iter().enumerate() {
-            for (y, cell) in col.iter().enumerate() {
+        for (y, row) in self.rotations[rot.0].iter().enumerate() {
+            for (x, cell) in row.iter().enumerate() {
                 if *cell {
                     f(Pos::new(x as isize, y as isize))
                 };
@@ -101,8 +101,8 @@ static O_TET: Tetromino = Tetromino {
 
 static I_TET: Tetromino = Tetromino {
     rotations: [[[false, false, false, false],
-                 [false, false, false, false],
                  [true, true, true, true],
+                 [false, false, false, false],
                  [false, false, false, false]],
                 [[false, false, true, false],
                  [false, false, true, false],
@@ -120,41 +120,41 @@ static I_TET: Tetromino = Tetromino {
 };
 
 static J_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, true, false],
-                 [false, false, true, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [false, true, false, false],
-                 [true, true, false, false],
-                 [false, false, false, false]],
-                [[true, false, false, false],
+    rotations: [[[true, false, false, false],
                  [true, true, true, false],
                  [false, false, false, false],
                  [false, false, false, false]],
                 [[false, true, true, false],
                  [false, true, false, false],
                  [false, true, false, false],
+                 [false, false, false, false]],
+                [[false, false, false, false],
+                 [true, true, true, false],
+                 [false, false, true, false],
+                 [false, false, false, false]],
+                [[false, true, false, false],
+                 [false, true, false, false],
+                 [true, true, false, false],
                  [false, false, false, false]]],
     color: RGB(0, 0, 255),
 };
 
 static L_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, true, false],
-                 [true, false, false, false],
-                 [false, false, false, false]],
-                [[true, true, false, false],
-                 [false, true, false, false],
-                 [false, true, false, false],
-                 [false, false, false, false]],
-                [[false, false, true, false],
+    rotations: [[[false, false, true, false],
                  [true, true, true, false],
                  [false, false, false, false],
                  [false, false, false, false]],
                 [[false, true, false, false],
                  [false, true, false, false],
                  [false, true, true, false],
+                 [false, false, false, false]],
+                [[false, false, false, false],
+                 [true, true, true, false],
+                 [true, false, false, false],
+                 [false, false, false, false]],
+                [[true, true, false, false],
+                 [false, true, false, false],
+                 [false, true, false, false],
                  [false, false, false, false]]],
     color: RGB(255, 165, 0),
 };
@@ -180,20 +180,20 @@ static S_TET: Tetromino = Tetromino {
 };
 
 static T_TET: Tetromino = Tetromino {
-    rotations: [[[false, false, false, false],
-                 [true, true, true, false],
-                 [false, true, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
-                 [true, true, false, false],
-                 [false, true, false, false],
-                 [false, false, false, false]],
-                [[false, true, false, false],
+    rotations: [[[false, true, false, false],
                  [true, true, true, false],
                  [false, false, false, false],
                  [false, false, false, false]],
                 [[false, true, false, false],
                  [false, true, true, false],
+                 [false, true, false, false],
+                 [false, false, false, false]],
+                [[false, false, false, false],
+                 [true, true, true, false],
+                 [false, true, false, false],
+                 [false, false, false, false]],
+                [[false, true, false, false],
+                 [true, true, false, false],
                  [false, true, false, false],
                  [false, false, false, false]]],
     color: RGB(255, 0, 255),
