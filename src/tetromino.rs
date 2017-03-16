@@ -67,9 +67,9 @@ impl Tetromino {
     pub fn each_cell<F>(&self, rot: Rotation, mut f: F)
         where F: FnMut(Pos) -> ()
     {
-        for (y, row) in self.rotations[rot.0].iter().enumerate() {
-            for (x, cell) in row.iter().enumerate() {
-                if *cell {
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
+                if self.rotations[rot.0][y as usize][x as usize] {
                     f(Pos::new(x as i8, y as i8))
                 };
             }

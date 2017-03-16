@@ -54,9 +54,9 @@ impl Board {
     pub fn draw(&self, pos: Pos, renderer: &Renderer) {
         draw_border(renderer, pos, pos + Pos::new(WIDTH as i8, HEIGHT as i8));
 
-        for (y, row) in self.0.iter().enumerate() {
-            for (x, cell) in row.iter().enumerate() {
-                if let Some(color) = *cell {
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
+                if let Some(color) = self.0[y as usize][x as usize] {
                     let cell_pos = Pos::new(x as i8, y as i8);
                     draw_tile(renderer, cell_pos + pos, color)
                 }
