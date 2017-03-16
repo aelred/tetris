@@ -8,6 +8,7 @@ use board::WIDTH;
 
 use sdl2::render::Renderer;
 
+const SOFT_DROP_SPEED: u8 = 10;
 const GRAVITY: f32 = 0.1;
 const RECIP_GRAVITY: u8 = (1.0 / GRAVITY) as u8;
 
@@ -19,6 +20,7 @@ pub struct Piece {
     pos: Pos,
     drop_tick: u8,
     lock_delay: bool,
+    soft_drop: bool,
     bag: Bag,
 }
 
@@ -32,32 +34,18 @@ impl Piece {
             pos: initial_pos(),
             drop_tick: 0,
             lock_delay: false,
+            soft_drop: false,
             bag: bag,
         }
     }
 
     pub fn update(&mut self, board: &mut Board) {
-        if self.drop_tick == RECIP_GRAVITY {
+        while self.drop_tick >= RECIP_GRAVITY {
+            self.drop_tick -= RECIP_GRAVITY;
             self.drop(board);
-            self.drop_tick = 0;
         }
 
-        self.drop_tick += 1;
-    }
-
-    pub fn drop(&mut self, board: &mut Board) {
-        self.pos = self.pos.down();
-
-        if self.collides(board) {
-            self.pos = self.pos.up();
-            if self.lock_delay {
-                self.lock(board);
-            } else {
-                self.lock_delay = true;
-            }
-        } else if self.lock_delay {
-            self.lock_delay = false;
-        }
+        self.drop_tick += if self.soft_drop { SOFT_DROP_SPEED } else { 1 };
     }
 
     pub fn rotate(&mut self, board: &Board) {
@@ -91,8 +79,31 @@ impl Piece {
         }
     }
 
+    pub fn start_soft_drop(&mut self) {
+        self.soft_drop = true;
+    }
+
+    pub fn stop_soft_drop(&mut self) {
+        self.soft_drop = false;
+    }
+
     pub fn draw(&self, renderer: &Renderer) {
         self.each_cell(|pos| draw_tile(&renderer, pos, self.tetromino.color));
+    }
+
+    fn drop(&mut self, board: &mut Board) {
+        self.pos = self.pos.down();
+
+        if self.collides(board) {
+            self.pos = self.pos.up();
+            if self.lock_delay {
+                self.lock(board);
+            } else {
+                self.lock_delay = true;
+            }
+        } else if self.lock_delay {
+            self.lock_delay = false;
+        }
     }
 
     fn lock(&mut self, board: &mut Board) {

@@ -26,8 +26,7 @@ use std::thread::sleep;
 use sdl2::Sdl;
 use sdl2::video::Window;
 use sdl2::pixels::Color::RGB;
-use sdl2::event::Event::Quit;
-use sdl2::event::Event::KeyDown;
+use sdl2::event::Event::{Quit, KeyDown, KeyUp};
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
@@ -62,7 +61,13 @@ fn main() {
                         Keycode::Left => piece.left(&board),
                         Keycode::Right => piece.right(&board),
                         Keycode::Up => piece.rotate(&board),
-                        Keycode::Down => piece.drop(&mut board),
+                        Keycode::Down => piece.start_soft_drop(),
+                        _ => {}
+                    }
+                }
+                KeyUp { keycode: Some(keycode), .. } => {
+                    match keycode {
+                        Keycode::Down => piece.stop_soft_drop(),
                         _ => {}
                     }
                 }
