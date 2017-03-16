@@ -1,10 +1,12 @@
-use tile::draw_tile;
 use board::Board;
+use tetromino;
 use tetromino::Tetromino;
 use tetromino::Bag;
 use tetromino::Rotation;
+use tetromino::ZERO_ROTATION;
 use pos::Pos;
 use board::WIDTH;
+use tile::draw_border;
 
 use sdl2::render::Renderer;
 
@@ -14,8 +16,10 @@ const HARD_DROP_GRAVITY: f32 = 20.0;
 
 const INITIAL_X: isize = WIDTH as isize / 2 - 2;
 
+#[derive(Debug)]
 pub struct Piece {
     tetromino: &'static Tetromino,
+    next_tetromino: &'static Tetromino,
     rot: Rotation,
     pos: Pos,
     drop_tick: f32,
@@ -30,7 +34,8 @@ impl Piece {
 
         Piece {
             tetromino: bag.next(),
-            rot: Rotation::new(),
+            next_tetromino: bag.next(),
+            rot: ZERO_ROTATION,
             pos: initial_pos(),
             drop_tick: 0.0,
             lock_delay: false,
@@ -91,8 +96,12 @@ impl Piece {
         self.gravity = NORMAL_GRAVITY;
     }
 
-    pub fn draw(&self, offset: Pos, renderer: &Renderer) {
-        self.each_cell(|pos| draw_tile(&renderer, pos + offset, self.tetromino.color));
+    pub fn draw(&self, offset: Pos, next_pos: Pos, renderer: &Renderer) {
+        self.tetromino.draw(self.rot, self.pos + offset, &renderer);
+        self.next_tetromino.draw(ZERO_ROTATION, next_pos, &renderer);
+        draw_border(&renderer,
+                    next_pos,
+                    next_pos + Pos::new(tetromino::WIDTH as isize, tetromino::HEIGHT as isize));
     }
 
     fn drop(&mut self, board: &mut Board) {
@@ -114,8 +123,9 @@ impl Piece {
         self.each_cell(|pos| board.fill(pos, self.tetromino.color));
         board.check_clear();
 
-        self.tetromino = self.bag.next();
-        self.rot = Rotation::new();
+        self.tetromino = self.next_tetromino;
+        self.next_tetromino = self.bag.next();
+        self.rot = ZERO_ROTATION;
         self.pos = initial_pos();
         self.drop_tick = 0.0;
         self.gravity = NORMAL_GRAVITY;

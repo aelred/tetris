@@ -37,14 +37,18 @@ const TOP_BORDER: u32 = 1;
 const RIGHT_BORDER: u32 = 6;
 const BOTTOM_BORDER: u32 = 1;
 
-const WINDOW_WIDTH: u32 = (WIDTH as u32 + LEFT_BORDER + RIGHT_BORDER) * TILE_SIZE as u32;
-const WINDOW_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32 + TOP_BORDER + BOTTOM_BORDER) *
-                           TILE_SIZE as u32;
+const NEXT_PIECE_X: u32 = LEFT_BORDER + WIDTH as u32 + 1;
+const NEXT_PIECE_Y: u32 = TOP_BORDER + HEIGHT as u32 - tetromino::HEIGHT as u32;
+
+const WINDOW_WIDTH: u32 = WIDTH as u32 + LEFT_BORDER + RIGHT_BORDER;
+const WINDOW_HEIGHT: u32 = HEIGHT as u32 - HIDE_ROWS as u32 + TOP_BORDER + BOTTOM_BORDER;
+
 const TICK: u64 = 33;
 
 fn main() {
 
     let board_pos = Pos::new(LEFT_BORDER as isize, TOP_BORDER as isize);
+    let next_pos = Pos::new(NEXT_PIECE_X as isize, NEXT_PIECE_Y as isize);
 
     let mut paused = false;
 
@@ -97,7 +101,7 @@ fn main() {
 
         board.draw(board_pos, &renderer);
 
-        piece.draw(board_pos, &renderer);
+        piece.draw(board_pos, next_pos, &renderer);
 
         if !paused {
             piece.update(&mut board);
@@ -112,7 +116,9 @@ fn main() {
 fn create_window(sdl_context: &Sdl) -> Window {
     let video_subsystem = sdl_context.video().unwrap();
 
-    video_subsystem.window("Tetris", WINDOW_WIDTH, WINDOW_HEIGHT)
+    video_subsystem.window("Tetris",
+                           WINDOW_WIDTH * TILE_SIZE as u32,
+                           WINDOW_HEIGHT * TILE_SIZE as u32)
         .position_centered()
         .opengl()
         .build()

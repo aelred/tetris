@@ -1,14 +1,19 @@
 extern crate rand;
 
 use pos::Pos;
+use tile::draw_tile;
+
 use rand::Rng;
 use sdl2::pixels::Color;
 use sdl2::pixels::Color::RGB;
+use sdl2::render::Renderer;
 
 const NUM_TETROMINOES: usize = 7;
-const WIDTH: usize = 4;
-const HEIGHT: usize = 4;
 const NUM_ROTATIONS: usize = 4;
+
+pub const WIDTH: usize = 4;
+pub const HEIGHT: usize = 4;
+pub const ZERO_ROTATION: Rotation = Rotation(0);
 
 #[derive(Debug, Clone)]
 pub struct Bag {
@@ -47,10 +52,6 @@ impl Bag {
 pub struct Rotation(usize);
 
 impl Rotation {
-    pub fn new() -> Rotation {
-        Rotation(0)
-    }
-
     pub fn rotate(&self) -> Rotation {
         Rotation((self.0 + 1) % NUM_ROTATIONS)
     }
@@ -73,6 +74,11 @@ impl Tetromino {
                 };
             }
         }
+    }
+
+    pub fn draw(&self, rot: Rotation, pos: Pos, renderer: &Renderer) {
+        self.each_cell(rot,
+                       |cell_pos| draw_tile(&renderer, pos + cell_pos, self.color));
     }
 }
 
@@ -241,7 +247,7 @@ mod tests {
     impl Arbitrary for Rotation {
         fn arbitrary<G: Gen>(g: &mut G) -> Rotation {
             if g.gen() {
-                Rotation::new()
+                ZERO_ROTATION
             } else {
                 Rotation::arbitrary(g).rotate()
             }
