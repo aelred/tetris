@@ -14,7 +14,7 @@ const NORMAL_GRAVITY: f32 = 0.1;
 const SOFT_DROP_GRAVITY: f32 = 1.0;
 const HARD_DROP_GRAVITY: f32 = 20.0;
 
-const INITIAL_X: isize = WIDTH as isize / 2 - 2;
+const INITIAL_X: i8 = WIDTH as i8 / 2 - 2;
 
 #[derive(Debug)]
 pub struct Piece {
@@ -33,8 +33,8 @@ impl Piece {
         let mut bag = Bag::new();
 
         Piece {
-            tetromino: bag.next(),
-            next_tetromino: bag.next(),
+            tetromino: bag.next_tetromino(),
+            next_tetromino: bag.next_tetromino(),
             rot: ZERO_ROTATION,
             pos: initial_pos(),
             drop_tick: 0.0,
@@ -97,11 +97,11 @@ impl Piece {
     }
 
     pub fn draw(&self, offset: Pos, next_pos: Pos, renderer: &Renderer) {
-        self.tetromino.draw(self.rot, self.pos + offset, &renderer);
-        self.next_tetromino.draw(ZERO_ROTATION, next_pos, &renderer);
-        draw_border(&renderer,
+        self.tetromino.draw(self.rot, self.pos + offset, renderer);
+        self.next_tetromino.draw(ZERO_ROTATION, next_pos, renderer);
+        draw_border(renderer,
                     next_pos,
-                    next_pos + Pos::new(tetromino::WIDTH as isize, tetromino::HEIGHT as isize));
+                    next_pos + Pos::new(tetromino::WIDTH as i8, tetromino::HEIGHT as i8));
     }
 
     fn drop(&mut self, board: &mut Board) {
@@ -124,7 +124,7 @@ impl Piece {
         board.check_clear();
 
         self.tetromino = self.next_tetromino;
-        self.next_tetromino = self.bag.next();
+        self.next_tetromino = self.bag.next_tetromino();
         self.rot = ZERO_ROTATION;
         self.pos = initial_pos();
         self.drop_tick = 0.0;

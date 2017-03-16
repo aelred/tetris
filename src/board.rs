@@ -5,15 +5,15 @@ use pos::Pos;
 use sdl2::pixels::Color;
 use sdl2::render::Renderer;
 
-pub const WIDTH: usize = 10;
-pub const HEIGHT: usize = 24;
+pub const WIDTH: u8 = 10;
+pub const HEIGHT: u8 = 24;
 
 #[derive(Clone, Debug)]
-pub struct Board([[Option<Color>; WIDTH]; HEIGHT]);
+pub struct Board([[Option<Color>; WIDTH as usize]; HEIGHT as usize]);
 
 impl Board {
     pub fn new() -> Board {
-        Board([[None; WIDTH]; HEIGHT])
+        Board([[None; WIDTH as usize]; HEIGHT as usize])
     }
 
     pub fn touches(&self, pos: Pos) -> bool {
@@ -28,7 +28,7 @@ impl Board {
         for y in 0..HEIGHT {
             let mut clear = true;
 
-            'check_clear: for cell in self.0[y].iter() {
+            'check_clear: for cell in &self.0[y as usize] {
                 if cell.is_none() {
                     clear = false;
                     break 'check_clear;
@@ -41,29 +41,24 @@ impl Board {
         }
     }
 
-    fn clear_row(&mut self, y: usize) {
-        for yy in (1..y + 1).rev() {
+    fn clear_row(&mut self, y: u8) {
+        for yy in (1..y as usize + 1).rev() {
             self.0[yy] = self.0[yy - 1];
         }
 
-        for x in 0..WIDTH {
+        for x in 0..WIDTH as usize {
             self.0[0][x] = None;
         }
     }
 
     pub fn draw(&self, pos: Pos, renderer: &Renderer) {
-        draw_border(&renderer,
-                    pos,
-                    pos + Pos::new(WIDTH as isize, HEIGHT as isize));
+        draw_border(renderer, pos, pos + Pos::new(WIDTH as i8, HEIGHT as i8));
 
         for (y, row) in self.0.iter().enumerate() {
             for (x, cell) in row.iter().enumerate() {
-                match *cell {
-                    Some(color) => {
-                        let cell_pos = Pos::new(x as isize, y as isize);
-                        draw_tile(&renderer, cell_pos + pos, color)
-                    }
-                    None => (),
+                if let Some(color) = *cell {
+                    let cell_pos = Pos::new(x as i8, y as i8);
+                    draw_tile(renderer, cell_pos + pos, color)
                 }
             }
         }
@@ -71,7 +66,7 @@ impl Board {
 }
 
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as isize || pos.y() >= HEIGHT as isize
+    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as i8 || pos.y() >= HEIGHT as i8
 }
 
 #[cfg(test)]
@@ -85,7 +80,8 @@ mod tests {
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<Color>; WIDTH]; HEIGHT] = mem::uninitialized();
+                let mut array: [[Option<Color>; WIDTH as usize]; HEIGHT as usize] =
+                    mem::uninitialized();
 
                 for row in array.iter_mut() {
                     for cell in row.iter_mut() {
@@ -136,16 +132,16 @@ mod tests {
             then!(touches_before == touches_after)
         }
 
-        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: isize, y: usize) -> TestResult {
-            when!(in_bounds(Pos::new(x, y as isize)));
+        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: i8, y: u8) -> TestResult {
+            when!(in_bounds(Pos::new(x, y as i8)));
             let mut board = board;
             board.clear_row(y);
             then!(!board.touches(Pos::new(x, 0)))
         }
 
-        fn after_clearing_a_row_nothing_under_it_is_changed(board: Board, y: usize, under: Pos) -> TestResult {
+        fn after_clearing_a_row_nothing_under_it_is_changed(board: Board, y: u8, under: Pos) -> TestResult {
             when!(in_bounds(under));
-            when!(under.y() > y as isize);
+            when!(under.y() > y as i8);
 
             let mut board = board;
 
@@ -155,10 +151,10 @@ mod tests {
             then!(before == after)
         }
 
-        fn after_clearing_a_row_everything_above_it_shifts_down(board: Board, y: usize, above: Pos) -> TestResult {
+        fn after_clearing_a_row_everything_above_it_shifts_down(board: Board, y: u8, above: Pos) -> TestResult {
             when!(y < HEIGHT);
             when!(!out_bounds(above));
-            when!(above.y() < y as isize);
+            when!(above.y() < y as i8);
 
             let mut board = board;
 

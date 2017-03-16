@@ -11,8 +11,8 @@ use sdl2::render::Renderer;
 const NUM_TETROMINOES: usize = 7;
 const NUM_ROTATIONS: usize = 4;
 
-pub const WIDTH: usize = 4;
-pub const HEIGHT: usize = 4;
+pub const WIDTH: u8 = 4;
+pub const HEIGHT: u8 = 4;
 pub const ZERO_ROTATION: Rotation = Rotation(0);
 
 #[derive(Debug, Clone)]
@@ -29,7 +29,7 @@ impl Bag {
         }
     }
 
-    pub fn next(&mut self) -> &'static Tetromino {
+    pub fn next_tetromino(&mut self) -> &'static Tetromino {
         if self.index >= NUM_TETROMINOES {
             self.tetrominoes = Bag::random_sequence();
             self.index = 0;
@@ -59,7 +59,7 @@ impl Rotation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tetromino {
-    rotations: [[[bool; WIDTH]; HEIGHT]; NUM_ROTATIONS],
+    rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS],
     pub color: Color,
 }
 
@@ -70,7 +70,7 @@ impl Tetromino {
         for (y, row) in self.rotations[rot.0].iter().enumerate() {
             for (x, cell) in row.iter().enumerate() {
                 if *cell {
-                    f(Pos::new(x as isize, y as isize))
+                    f(Pos::new(x as i8, y as i8))
                 };
             }
         }
@@ -78,7 +78,7 @@ impl Tetromino {
 
     pub fn draw(&self, rot: Rotation, pos: Pos, renderer: &Renderer) {
         self.each_cell(rot,
-                       |cell_pos| draw_tile(&renderer, pos + cell_pos, self.color));
+                       |cell_pos| draw_tile(renderer, pos + cell_pos, self.color));
     }
 }
 
@@ -238,7 +238,7 @@ mod tests {
                 Bag::new()
             } else {
                 let mut bag = Bag::arbitrary(g);
-                bag.next();
+                bag.next_tetromino();
                 bag
             }
         }
@@ -263,23 +263,23 @@ mod tests {
     quickcheck! {
         fn bag_always_returns_a_valid_tetromino(bag: Bag) -> bool {
             let mut bag = bag;
-            let tetromino = bag.next();
+            let tetromino = bag.next_tetromino();
             TETROMINOES.iter().any(|t| *t == tetromino)
         }
 
         fn bag_never_returns_same_tetromino_three_times(bag: Bag) -> bool {
             let mut bag = bag;
-            let first = bag.next();
-            let second = bag.next();
-            let third = bag.next();
+            let first = bag.next_tetromino();
+            let second = bag.next_tetromino();
+            let third = bag.next_tetromino();
             !(first == second && second == third)
         }
 
         fn bag_always_returns_same_piece_within_thirteen_times(bag: Bag) -> bool {
             let mut bag = bag;
-            let initial = bag.next();
+            let initial = bag.next_tetromino();
             for _ in 0..13 {
-                if bag.next() == initial {
+                if bag.next_tetromino() == initial {
                     return true;
                 }
             }

@@ -32,23 +32,23 @@ use sdl2::event::WindowEvent::{FocusGained, FocusLost};
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
-const LEFT_BORDER: u32 = 1;
-const TOP_BORDER: u32 = 1;
-const RIGHT_BORDER: u32 = 6;
-const BOTTOM_BORDER: u32 = 1;
+const LEFT_BORDER: u8 = 1;
+const TOP_BORDER: u8 = 1;
+const RIGHT_BORDER: u8 = 6;
+const BOTTOM_BORDER: u8 = 1;
 
-const NEXT_PIECE_X: u32 = LEFT_BORDER + WIDTH as u32 + 1;
-const NEXT_PIECE_Y: u32 = TOP_BORDER + HEIGHT as u32 - tetromino::HEIGHT as u32;
+const NEXT_PIECE_X: u8 = LEFT_BORDER + WIDTH + 1;
+const NEXT_PIECE_Y: u8 = TOP_BORDER + HEIGHT - tetromino::HEIGHT;
 
-const WINDOW_WIDTH: u32 = WIDTH as u32 + LEFT_BORDER + RIGHT_BORDER;
-const WINDOW_HEIGHT: u32 = HEIGHT as u32 - HIDE_ROWS as u32 + TOP_BORDER + BOTTOM_BORDER;
+const WINDOW_WIDTH: u8 = WIDTH + LEFT_BORDER + RIGHT_BORDER;
+const WINDOW_HEIGHT: u8 = HEIGHT - HIDE_ROWS + TOP_BORDER + BOTTOM_BORDER;
 
 const TICK: u64 = 33;
 
 fn main() {
 
-    let board_pos = Pos::new(LEFT_BORDER as isize, TOP_BORDER as isize);
-    let next_pos = Pos::new(NEXT_PIECE_X as isize, NEXT_PIECE_Y as isize);
+    let board_pos = Pos::new(LEFT_BORDER as i8, TOP_BORDER as i8);
+    let next_pos = Pos::new(NEXT_PIECE_X as i8, NEXT_PIECE_Y as i8);
 
     let mut paused = false;
 
@@ -90,9 +90,8 @@ fn main() {
                     }
                 }
                 Event::KeyUp { keycode: Some(keycode), .. } => {
-                    match keycode {
-                        Keycode::Down => piece.stop_drop(),
-                        _ => {}
+                    if let Keycode::Down = keycode {
+                        piece.stop_drop()
                     }
                 }
                 _ => {}
@@ -117,8 +116,8 @@ fn create_window(sdl_context: &Sdl) -> Window {
     let video_subsystem = sdl_context.video().unwrap();
 
     video_subsystem.window("Tetris",
-                           WINDOW_WIDTH * TILE_SIZE as u32,
-                           WINDOW_HEIGHT * TILE_SIZE as u32)
+                           WINDOW_WIDTH as u32 * TILE_SIZE as u32,
+                           WINDOW_HEIGHT as u32 * TILE_SIZE as u32)
         .position_centered()
         .opengl()
         .build()
