@@ -91,8 +91,8 @@ impl Piece {
         self.gravity = NORMAL_GRAVITY;
     }
 
-    pub fn draw(&self, renderer: &Renderer) {
-        self.each_cell(|pos| draw_tile(&renderer, pos, self.tetromino.color));
+    pub fn draw(&self, offset: Pos, renderer: &Renderer) {
+        self.each_cell(|pos| draw_tile(&renderer, pos + offset, self.tetromino.color));
     }
 
     fn drop(&mut self, board: &mut Board) {

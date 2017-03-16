@@ -7,6 +7,8 @@ use sdl2::render::Renderer;
 pub const WIDTH: usize = 10;
 pub const HEIGHT: usize = 24;
 
+const BORDER_COLOR: Color = Color::RGB(100, 100, 100);
+
 #[derive(Clone, Debug)]
 pub struct Board([[Option<Color>; WIDTH]; HEIGHT]);
 
@@ -50,11 +52,25 @@ impl Board {
         }
     }
 
-    pub fn draw(&self, renderer: &Renderer) {
+    pub fn draw(&self, pos: Pos, renderer: &Renderer) {
+        for y in 0..HEIGHT {
+            draw_tile(&renderer, pos + Pos::new(-1, y as isize), BORDER_COLOR);
+            draw_tile(&renderer,
+                      pos + Pos::new(WIDTH as isize, y as isize),
+                      BORDER_COLOR);
+        }
+
+        for x in -1..WIDTH as isize + 1 {
+            draw_tile(&renderer, pos + Pos::new(x, HEIGHT as isize), BORDER_COLOR);
+        }
+
         for (y, row) in self.0.iter().enumerate() {
             for (x, cell) in row.iter().enumerate() {
                 match *cell {
-                    Some(color) => draw_tile(&renderer, Pos::new(x as isize, y as isize), color),
+                    Some(color) => {
+                        let cell_pos = Pos::new(x as isize, y as isize);
+                        draw_tile(&renderer, cell_pos + pos, color)
+                    }
                     None => (),
                 }
             }

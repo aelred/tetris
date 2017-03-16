@@ -20,6 +20,7 @@ use board::Board;
 use board::WIDTH;
 use board::HEIGHT;
 use piece::Piece;
+use pos::Pos;
 
 use std::thread::sleep;
 
@@ -31,11 +32,19 @@ use sdl2::event::WindowEvent::{FocusGained, FocusLost};
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
-const WINDOW_WIDTH: u32 = WIDTH as u32 * TILE_SIZE as u32;
-const WINDOW_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * TILE_SIZE as u32;
+const LEFT_BORDER: u32 = 1;
+const TOP_BORDER: u32 = 1;
+const RIGHT_BORDER: u32 = 6;
+const BOTTOM_BORDER: u32 = 1;
+
+const WINDOW_WIDTH: u32 = (WIDTH as u32 + LEFT_BORDER + RIGHT_BORDER) * TILE_SIZE as u32;
+const WINDOW_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32 + TOP_BORDER + BOTTOM_BORDER) *
+                           TILE_SIZE as u32;
 const TICK: u64 = 33;
 
 fn main() {
+
+    let board_pos = Pos::new(LEFT_BORDER as isize, TOP_BORDER as isize);
 
     let mut paused = false;
 
@@ -86,9 +95,9 @@ fn main() {
             }
         }
 
-        board.draw(&renderer);
+        board.draw(board_pos, &renderer);
 
-        piece.draw(&renderer);
+        piece.draw(board_pos, &renderer);
 
         if !paused {
             piece.update(&mut board);
