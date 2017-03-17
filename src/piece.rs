@@ -14,7 +14,7 @@ const NORMAL_GRAVITY: f32 = 0.1;
 const SOFT_DROP_GRAVITY: f32 = 1.0;
 const HARD_DROP_GRAVITY: f32 = 20.0;
 
-const INITIAL_X: i8 = WIDTH as i8 / 2 - 2;
+const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 
 #[derive(Debug)]
 pub struct Piece {
@@ -101,7 +101,7 @@ impl Piece {
         self.next_tetromino.draw(ZERO_ROTATION, next_pos, renderer);
         draw_border(renderer,
                     next_pos,
-                    next_pos + Pos::new(tetromino::WIDTH as i8, tetromino::HEIGHT as i8));
+                    next_pos + Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
     }
 
     fn drop(&mut self, board: &mut Board) {

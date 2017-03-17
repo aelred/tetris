@@ -53,12 +53,12 @@ impl Board {
     }
 
     pub fn draw(&self, pos: Pos, renderer: &Renderer) {
-        draw_border(renderer, pos, pos + Pos::new(WIDTH as i8, HEIGHT as i8));
+        draw_border(renderer, pos, pos + Pos::new(WIDTH as i16, HEIGHT as i16));
 
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if let Some(color) = self.0[y as usize][x as usize] {
-                    let cell_pos = Pos::new(x as i8, y as i8);
+                    let cell_pos = Pos::new(x as i16, y as i16);
                     draw_tile(renderer, cell_pos + pos, color)
                 }
             }
@@ -67,7 +67,7 @@ impl Board {
 }
 
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as i8 || pos.y() >= HEIGHT as i8
+    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as i16 || pos.y() >= HEIGHT as i16
 }
 
 #[cfg(test)]
@@ -133,8 +133,8 @@ mod tests {
             then!(touches_before == touches_after)
         }
 
-        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: i8, y: u8) -> TestResult {
-            when!(in_bounds(Pos::new(x, y as i8)));
+        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: i16, y: u8) -> TestResult {
+            when!(in_bounds(Pos::new(x, y as i16)));
             let mut board = board;
             board.clear_row(y);
             then!(!board.touches(Pos::new(x, 0)))
@@ -142,7 +142,7 @@ mod tests {
 
         fn after_clearing_a_row_nothing_under_it_is_changed(board: Board, y: u8, under: Pos) -> TestResult {
             when!(in_bounds(under));
-            when!(under.y() > y as i8);
+            when!(under.y() > y as i16);
 
             let mut board = board;
 
@@ -155,7 +155,7 @@ mod tests {
         fn after_clearing_a_row_everything_above_it_shifts_down(board: Board, y: u8, above: Pos) -> TestResult {
             when!(y < HEIGHT);
             when!(!out_bounds(above));
-            when!(above.y() < y as i8);
+            when!(above.y() < y as i16);
 
             let mut board = board;
 

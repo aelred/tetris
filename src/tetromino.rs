@@ -70,7 +70,7 @@ impl Tetromino {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.rotations[rot.0][y as usize][x as usize] {
-                    f(Pos::new(x as i8, y as i8))
+                    f(Pos::new(x as i16, y as i16))
                 };
             }
         }

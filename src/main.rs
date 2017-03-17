@@ -47,8 +47,8 @@ const TICK: u64 = 33;
 
 fn main() {
 
-    let board_pos = Pos::new(LEFT_BORDER as i8, TOP_BORDER as i8);
-    let next_pos = Pos::new(NEXT_PIECE_X as i8, NEXT_PIECE_Y as i8);
+    let board_pos = Pos::new(LEFT_BORDER as i16, TOP_BORDER as i16);
+    let next_pos = Pos::new(NEXT_PIECE_X as i16, NEXT_PIECE_Y as i16);
 
     let mut paused = false;
 

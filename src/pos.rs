@@ -2,20 +2,20 @@ use std::ops::Add;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Pos {
-    x: i8,
-    y: i8,
+    x: i16,
+    y: i16,
 }
 
 impl Pos {
-    pub fn new(x: i8, y: i8) -> Pos {
+    pub fn new(x: i16, y: i16) -> Pos {
         Pos { x: x, y: y }
     }
 
-    pub fn x(self) -> i8 {
+    pub fn x(self) -> i16 {
         self.x
     }
 
-    pub fn y(self) -> i8 {
+    pub fn y(self) -> i16 {
         self.y
     }
 
