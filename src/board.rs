@@ -21,6 +21,7 @@ impl Board {
     }
 
     pub fn fill(&mut self, pos: Pos, color: Color) {
+        assert!(!out_bounds(pos));
         self.0[pos.y() as usize][pos.x() as usize] = Some(color);
     }
 
