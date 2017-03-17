@@ -76,7 +76,7 @@ impl Tetromino {
         }
     }
 
-    pub fn draw(&self, rot: Rotation, pos: Pos, renderer: &Renderer) {
+    pub fn draw(&self, renderer: &Renderer, rot: Rotation, pos: Pos) {
         self.each_cell(rot,
                        |cell_pos| draw_tile(renderer, pos + cell_pos, self.color));
     }

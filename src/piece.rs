@@ -6,6 +6,7 @@ use tetromino::Rotation;
 use tetromino::ZERO_ROTATION;
 use pos::Pos;
 use board::WIDTH;
+use board::HIDE_ROWS;
 use tile::draw_border;
 
 use sdl2::render::Renderer;
@@ -96,12 +97,16 @@ impl Piece {
         self.gravity = NORMAL_GRAVITY;
     }
 
-    pub fn draw(&self, offset: Pos, next_pos: Pos, renderer: &Renderer) {
-        self.tetromino.draw(self.rot, self.pos + offset, renderer);
-        self.next_tetromino.draw(ZERO_ROTATION, next_pos, renderer);
+    pub fn draw(&self, renderer: &Renderer) {
+        self.tetromino.draw(renderer,
+                            self.rot,
+                            self.pos + Pos::new(0, -(HIDE_ROWS as i16)));
+    }
+
+    pub fn draw_next(&self, renderer: &Renderer) {
         draw_border(renderer,
-                    next_pos,
-                    next_pos + Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
+                    Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
+        self.next_tetromino.draw(renderer, ZERO_ROTATION, Pos::new(1, 1));
     }
 
     fn drop(&mut self, board: &mut Board) {

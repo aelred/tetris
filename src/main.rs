@@ -15,16 +15,16 @@ extern crate rand;
 extern crate quickcheck;
 
 use tile::TILE_SIZE;
-use tile::HIDE_ROWS;
+use board::HIDE_ROWS;
 use board::Board;
 use board::WIDTH;
 use board::HEIGHT;
 use piece::Piece;
-use pos::Pos;
 
 use std::thread::sleep;
 
 use sdl2::Sdl;
+use sdl2::rect::Rect;
 use sdl2::video::Window;
 use sdl2::pixels::Color::RGB;
 use sdl2::event::Event;
@@ -32,23 +32,33 @@ use sdl2::event::WindowEvent::{FocusGained, FocusLost};
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
-const LEFT_BORDER: u8 = 1;
-const TOP_BORDER: u8 = 1;
-const RIGHT_BORDER: u8 = 6;
-const BOTTOM_BORDER: u8 = 1;
+const BOARD_BORDER: u32 = TILE_SIZE as u32;
+const BOARD_WIDTH: u32 = WIDTH as u32 * TILE_SIZE as u32;
+const BOARD_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * TILE_SIZE as u32;
 
-const NEXT_PIECE_X: u8 = LEFT_BORDER + WIDTH + 1;
-const NEXT_PIECE_Y: u8 = TOP_BORDER + HEIGHT - tetromino::HEIGHT;
+const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
+const PREVIEW_Y: i32 = WINDOW_HEIGHT as i32 - (tetromino::HEIGHT + 2) as i32 * TILE_SIZE as i32;
+const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * TILE_SIZE as u32;
+const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * TILE_SIZE as u32;
 
-const WINDOW_WIDTH: u8 = WIDTH + LEFT_BORDER + RIGHT_BORDER;
-const WINDOW_HEIGHT: u8 = HEIGHT - HIDE_ROWS + TOP_BORDER + BOTTOM_BORDER;
+const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
+const WINDOW_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const TICK: u64 = 33;
 
 fn main() {
 
-    let board_pos = Pos::new(LEFT_BORDER as i16, TOP_BORDER as i16);
-    let next_pos = Pos::new(NEXT_PIECE_X as i16, NEXT_PIECE_Y as i16);
+    let board_border_view = Rect::new(0,
+                                      0,
+                                      BOARD_WIDTH + BOARD_BORDER * 2,
+                                      BOARD_HEIGHT + BOARD_BORDER * 2);
+
+    let board_view = Rect::new(BOARD_BORDER as i32,
+                               BOARD_BORDER as i32,
+                               BOARD_WIDTH,
+                               BOARD_HEIGHT);
+
+    let preview_view = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 
     let mut paused = false;
 
@@ -98,9 +108,19 @@ fn main() {
             }
         }
 
-        board.draw(board_pos, &renderer);
+        renderer.set_viewport(Some(board_border_view));
 
-        piece.draw(board_pos, next_pos, &renderer);
+        board.draw_border(&renderer);
+
+        renderer.set_viewport(Some(board_view));
+
+        board.draw(&renderer);
+
+        piece.draw(&renderer);
+
+        renderer.set_viewport(Some(preview_view));
+
+        piece.draw_next(&renderer);
 
         if !paused {
             piece.update(&mut board);
@@ -115,9 +135,7 @@ fn main() {
 fn create_window(sdl_context: &Sdl) -> Window {
     let video_subsystem = sdl_context.video().unwrap();
 
-    video_subsystem.window("Tetris",
-                           WINDOW_WIDTH as u32 * TILE_SIZE as u32,
-                           WINDOW_HEIGHT as u32 * TILE_SIZE as u32)
+    video_subsystem.window("Tetris", WINDOW_WIDTH, WINDOW_HEIGHT)
         .position_centered()
         .opengl()
         .build()

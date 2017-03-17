@@ -8,28 +8,32 @@ use sdl2::render::Renderer;
 pub const WIDTH: u8 = 10;
 pub const HEIGHT: u8 = 24;
 
+pub const HIDE_ROWS: u8 = 4;
+
 #[derive(Clone, Debug)]
-pub struct Board([[Option<Color>; WIDTH as usize]; HEIGHT as usize]);
+pub struct Board {
+    grid: [[Option<Color>; WIDTH as usize]; HEIGHT as usize],
+}
 
 impl Board {
     pub fn new() -> Board {
-        Board([[None; WIDTH as usize]; HEIGHT as usize])
+        Board { grid: [[None; WIDTH as usize]; HEIGHT as usize] }
     }
 
     pub fn touches(&self, pos: Pos) -> bool {
-        out_bounds(pos) || self.0[pos.y() as usize][pos.x() as usize].is_some()
+        out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
 
     pub fn fill(&mut self, pos: Pos, color: Color) {
         assert!(!out_bounds(pos));
-        self.0[pos.y() as usize][pos.x() as usize] = Some(color);
+        self.grid[pos.y() as usize][pos.x() as usize] = Some(color);
     }
 
     pub fn check_clear(&mut self) {
         for y in 0..HEIGHT {
             let mut clear = true;
 
-            'check_clear: for cell in &self.0[y as usize] {
+            'check_clear: for cell in &self.grid[y as usize] {
                 if cell.is_none() {
                     clear = false;
                     break 'check_clear;
@@ -44,25 +48,33 @@ impl Board {
 
     fn clear_row(&mut self, y: u8) {
         for yy in (1..y as usize + 1).rev() {
-            self.0[yy] = self.0[yy - 1];
+            self.grid[yy] = self.grid[yy - 1];
         }
 
         for x in 0..WIDTH as usize {
-            self.0[0][x] = None;
+            self.grid[0][x] = None;
         }
     }
 
-    pub fn draw(&self, pos: Pos, renderer: &Renderer) {
-        draw_border(renderer, pos, pos + Pos::new(WIDTH as i16, HEIGHT as i16));
+    pub fn draw_border(&self, renderer: &Renderer) {
+        draw_border(renderer,
+                    Pos::new(WIDTH as i16, (HEIGHT - HIDE_ROWS) as i16));
+    }
 
-        for y in 0..HEIGHT {
+    pub fn draw(&self, renderer: &Renderer) {
+        for y in HIDE_ROWS..HEIGHT {
             for x in 0..WIDTH {
-                if let Some(color) = self.0[y as usize][x as usize] {
+                if let Some(color) = self.grid[y as usize][x as usize] {
+                    let y = y - HIDE_ROWS;
                     let cell_pos = Pos::new(x as i16, y as i16);
-                    draw_tile(renderer, cell_pos + pos, color)
+                    self.draw_tile(renderer, cell_pos, color)
                 }
             }
         }
+    }
+
+    pub fn draw_tile(&self, renderer: &Renderer, pos: Pos, color: Color) {
+        draw_tile(renderer, pos, color);
     }
 }
 
@@ -96,7 +108,7 @@ mod tests {
                     }
                 }
 
-                Board(array)
+                Board { grid: array }
             }
         }
     }
