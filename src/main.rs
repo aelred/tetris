@@ -108,21 +108,21 @@ fn main() {
             }
         }
 
-        renderer.set_viewport(Some(board_border_view));
-
-        board.draw_border(&renderer);
-
-        renderer.set_viewport(Some(board_view));
-
-        board.draw(&renderer);
-
-        piece.draw(&renderer);
-
-        renderer.set_viewport(Some(preview_view));
-
-        piece.draw_next(&renderer);
-
         if !paused {
+            renderer.set_viewport(Some(board_border_view));
+
+            board.draw_border(&renderer);
+
+            renderer.set_viewport(Some(board_view));
+
+            board.draw(&renderer);
+
+            piece.draw(&renderer);
+
+            renderer.set_viewport(Some(preview_view));
+
+            piece.draw_next(&renderer);
+
             piece.update(&mut board);
         }
 
