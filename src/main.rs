@@ -48,6 +48,129 @@ const WINDOW_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const TICK: u64 = 33;
 
+fn board_border_view() -> Rect {
+    Rect::new(0,
+              0,
+              BOARD_WIDTH + BOARD_BORDER * 2,
+              BOARD_HEIGHT + BOARD_BORDER * 2)
+}
+
+fn board_view() -> Rect {
+    Rect::new(BOARD_BORDER as i32,
+              BOARD_BORDER as i32,
+              BOARD_WIDTH,
+              BOARD_HEIGHT)
+}
+
+fn preview_view() -> Rect {
+    Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT)
+}
+
+enum State {
+    Play {
+        piece: Box<Piece>,
+        board: Box<Board>,
+    },
+    Paused,
+}
+
+
+impl State {
+    fn play() -> State {
+        State::Play {
+            piece: Box::new(Piece::new()),
+            board: Box::new(Board::new()),
+        }
+    }
+
+    fn update(&mut self, renderer: &mut Renderer, events: &[Event]) -> StateChange {
+        match *self {
+            State::Play { ref mut piece, ref mut board } => {
+                State::play_update(piece, board, renderer, events)
+            }
+            State::Paused => State::pause_update(events),
+        }
+    }
+
+    fn play_update(piece: &mut Piece,
+                   board: &mut Board,
+                   renderer: &mut Renderer,
+                   events: &[Event])
+                   -> StateChange {
+        renderer.set_viewport(Some(board_border_view()));
+        board.draw_border(renderer);
+
+        renderer.set_viewport(Some(board_view()));
+        board.draw(renderer);
+        piece.draw(renderer);
+
+        renderer.set_viewport(Some(preview_view()));
+        piece.draw_next(renderer);
+
+        piece.update(board);
+
+        let mut state_change = StateChange::None;
+
+        for event in events {
+            match *event {
+                Event::Window { win_event, .. } => {
+                    if let FocusLost = win_event {
+                        state_change = StateChange::Push(State::Paused);
+                    }
+                }
+                Event::KeyDown { keycode: Some(keycode), .. } => {
+                    match keycode {
+                        Keycode::Left => piece.left(board),
+                        Keycode::Right => piece.right(board),
+                        Keycode::Up => piece.rotate(board),
+                        Keycode::Down => piece.start_soft_drop(),
+                        Keycode::Space => piece.start_hard_drop(),
+                        _ => {}
+                    }
+                }
+                Event::KeyUp { keycode: Some(keycode), .. } => {
+                    if let Keycode::Down = keycode {
+                        piece.stop_drop()
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        state_change
+    }
+
+    fn pause_update(events: &[Event]) -> StateChange {
+        for event in events {
+            if let Event::Window { win_event: FocusGained, .. } = *event {
+                return StateChange::Pop;
+            }
+        }
+
+        StateChange::None
+    }
+}
+
+enum StateChange {
+    None,
+    Push(State),
+    Pop,
+}
+
+impl StateChange {
+    fn apply(self, states: &mut Vec<State>) {
+        match self {
+            StateChange::None => {}
+            StateChange::Push(state) => {
+                states.push(state);
+            }
+            StateChange::Pop => {
+                states.pop();
+            }
+        }
+    }
+}
+
 fn main() {
 
     let sdl_context = sdl2::init().unwrap();
@@ -63,75 +186,32 @@ fn main() {
 
 fn play_tetris(renderer: &mut Renderer, event_pump: &mut EventPump) {
 
-    let board_border_view = Rect::new(0,
-                                      0,
-                                      BOARD_WIDTH + BOARD_BORDER * 2,
-                                      BOARD_HEIGHT + BOARD_BORDER * 2);
+    let mut states = Vec::new();
+    let mut events = Vec::new();
+    states.push(State::play());
 
-    let board_view = Rect::new(BOARD_BORDER as i32,
-                               BOARD_BORDER as i32,
-                               BOARD_WIDTH,
-                               BOARD_HEIGHT);
-
-    let preview_view = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
-    let mut board = Board::new();
-    let mut piece = Piece::new();
-
-    let mut paused = false;
-
-    'main: loop {
-
+    loop {
         renderer.set_draw_color(RGB(32, 48, 32));
         renderer.clear();
 
+        events.clear();
+
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit { .. } => break 'main,
-                Event::Window { win_event, .. } => {
-                    match win_event {
-                        FocusGained => paused = false,
-                        FocusLost => paused = true,
-                        _ => {}
-                    }
-                }
-                Event::KeyDown { keycode: Some(keycode), .. } => {
-                    match keycode {
-                        Keycode::Escape => break 'main,
-                        Keycode::Left => piece.left(&board),
-                        Keycode::Right => piece.right(&board),
-                        Keycode::Up => piece.rotate(&board),
-                        Keycode::Down => piece.start_soft_drop(),
-                        Keycode::Space => piece.start_hard_drop(),
-                        _ => {}
-                    }
-                }
-                Event::KeyUp { keycode: Some(keycode), .. } => {
-                    if let Keycode::Down = keycode {
-                        piece.stop_drop()
-                    }
-                }
+                Event::Quit { .. } |
+                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => return,
                 _ => {}
             }
+
+            events.push(event);
         }
 
-        if !paused {
-            renderer.set_viewport(Some(board_border_view));
+        let state_change = {
+            let mut state = states.last_mut().unwrap();
+            state.update(renderer, &events)
+        };
 
-            board.draw_border(&renderer);
-
-            renderer.set_viewport(Some(board_view));
-
-            board.draw(&renderer);
-
-            piece.draw(&renderer);
-
-            renderer.set_viewport(Some(preview_view));
-
-            piece.draw_next(&renderer);
-
-            piece.update(&mut board);
-        }
+        state_change.apply(&mut states);
 
         renderer.present();
 
