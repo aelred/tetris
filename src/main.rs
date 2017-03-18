@@ -24,6 +24,8 @@ use piece::Piece;
 use std::thread::sleep;
 
 use sdl2::Sdl;
+use sdl2::render::Renderer;
+use sdl2::EventPump;
 use sdl2::rect::Rect;
 use sdl2::video::Window;
 use sdl2::pixels::Color::RGB;
@@ -48,6 +50,19 @@ const TICK: u64 = 33;
 
 fn main() {
 
+    let sdl_context = sdl2::init().unwrap();
+
+    let window = create_window(&sdl_context);
+
+    let mut renderer = window.renderer().build().unwrap();
+
+    let mut event_pump = sdl_context.event_pump().unwrap();
+
+    play_tetris(&mut renderer, &mut event_pump);
+}
+
+fn play_tetris(renderer: &mut Renderer, event_pump: &mut EventPump) {
+
     let board_border_view = Rect::new(0,
                                       0,
                                       BOARD_WIDTH + BOARD_BORDER * 2,
@@ -60,18 +75,10 @@ fn main() {
 
     let preview_view = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 
-    let mut paused = false;
-
     let mut board = Board::new();
     let mut piece = Piece::new();
 
-    let sdl_context = sdl2::init().unwrap();
-
-    let window = create_window(&sdl_context);
-
-    let mut renderer = window.renderer().build().unwrap();
-
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut paused = false;
 
     'main: loop {
 
