@@ -9,7 +9,7 @@ use sdl2::pixels::Color::RGB;
 use sdl2::render::Renderer;
 
 const NUM_TETROMINOES: usize = 7;
-const NUM_ROTATIONS: usize = 4;
+const NUM_ROTATIONS: i8 = 4;
 
 pub const WIDTH: u8 = 4;
 pub const HEIGHT: u8 = 4;
@@ -28,14 +28,20 @@ impl Bag {
         }
     }
 
-    pub fn next_tetromino(&mut self) -> &'static Tetromino {
+    pub fn peek(&self) -> &'static Tetromino {
+        self.tetrominoes[self.index]
+    }
+
+    pub fn pop(&mut self) -> &'static Tetromino {
+        let next = self.tetrominoes[self.index];
+
+        self.index += 1;
+
         if self.index >= NUM_TETROMINOES {
             self.tetrominoes = Bag::random_sequence();
             self.index = 0;
         }
 
-        let next = self.tetrominoes[self.index];
-        self.index += 1;
         next
     }
 
@@ -48,11 +54,17 @@ impl Bag {
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct Rotation(usize);
+pub struct Rotation(i8);
 
 impl Rotation {
-    pub fn rotate(&self) -> Rotation {
-        Rotation((self.0 + 1) % NUM_ROTATIONS)
+    pub fn clockwise(&self) -> Rotation {
+        let new = self.0 + 1;
+        Rotation(((new % NUM_ROTATIONS) + NUM_ROTATIONS) % NUM_ROTATIONS)
+    }
+
+    pub fn anticlockwise(&self) -> Rotation {
+        let new = self.0 - 1;
+        Rotation(((new % NUM_ROTATIONS) + NUM_ROTATIONS) % NUM_ROTATIONS)
     }
 }
 
@@ -64,7 +76,7 @@ impl Default for Rotation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tetromino {
-    rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS],
+    rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS as usize],
     pub color: Color,
 }
 
@@ -74,7 +86,7 @@ impl Tetromino {
 
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
-                if self.rotations[rot.0][y as usize][x as usize] {
+                if self.rotations[rot.0 as usize][y as usize][x as usize] {
                     blocks.push(Pos::new(x as i16, y as i16));
                 };
             }
@@ -246,7 +258,7 @@ mod tests {
                 Bag::new()
             } else {
                 let mut bag = Bag::arbitrary(g);
-                bag.next_tetromino();
+                bag.pop();
                 bag
             }
         }
@@ -256,8 +268,10 @@ mod tests {
         fn arbitrary<G: Gen>(g: &mut G) -> Rotation {
             if g.gen() {
                 Rotation::default()
+            } else if g.gen() {
+                Rotation::arbitrary(g).clockwise()
             } else {
-                Rotation::arbitrary(g).rotate()
+                Rotation::arbitrary(g).anticlockwise()
             }
         }
     }
@@ -271,39 +285,60 @@ mod tests {
     quickcheck! {
         fn bag_always_returns_a_valid_tetromino(bag: Bag) -> bool {
             let mut bag = bag;
-            let tetromino = bag.next_tetromino();
+            let tetromino = bag.pop();
             TETROMINOES.iter().any(|t| *t == tetromino)
         }
 
         fn bag_never_returns_same_tetromino_three_times(bag: Bag) -> bool {
             let mut bag = bag;
-            let first = bag.next_tetromino();
-            let second = bag.next_tetromino();
-            let third = bag.next_tetromino();
+            let first = bag.pop();
+            let second = bag.pop();
+            let third = bag.pop();
             !(first == second && second == third)
         }
 
         fn bag_always_returns_same_piece_within_thirteen_times(bag: Bag) -> bool {
             let mut bag = bag;
-            let initial = bag.next_tetromino();
+            let initial = bag.pop();
             for _ in 0..13 {
-                if bag.next_tetromino() == initial {
+                if bag.pop() == initial {
                     return true;
                 }
             }
             false
         }
 
-        fn rotation_is_at_most_three(rot: Rotation) -> bool {
-            rot.0 <= 3
+        fn peek_has_same_result_as_pop(bag: Bag) -> bool {
+            let mut bag = bag;
+            bag.peek() == bag.pop()
         }
 
-        fn rotation_increments_modulo_4(rot: Rotation) -> bool {
-            rot.rotate().0 == (rot.0 + 1) % NUM_ROTATIONS
+        fn clockwise_rotation_once_is_different(rot: Rotation) -> bool {
+            rot != rot.clockwise()
         }
 
-        fn rotation_four_times_is_identity(rot: Rotation) -> bool {
-            rot == rot.rotate().rotate().rotate().rotate()
+        fn clockwise_rotation_twice_is_different(rot: Rotation) -> bool {
+            rot != rot.clockwise().clockwise()
+        }
+
+        fn clockwise_rotation_thrice_is_different(rot: Rotation) -> bool {
+            rot != rot.clockwise().clockwise().clockwise()
+        }
+
+        fn clockwise_rotation_four_times_is_identity(rot: Rotation) -> bool {
+            rot == rot.clockwise().clockwise().clockwise().clockwise()
+        }
+
+        fn anticlockwise_rotation_four_times_is_identity(rot: Rotation) -> bool {
+            rot == rot.anticlockwise().anticlockwise().anticlockwise().anticlockwise()
+        }
+
+        fn anticlockwise_is_inverse_of_clockwise(rot: Rotation) -> bool {
+            rot.clockwise().anticlockwise() == rot
+        }
+
+        fn clockwise_is_inverse_of_anticlockwise(rot: Rotation) -> bool {
+            rot.anticlockwise().clockwise() == rot
         }
     }
 }

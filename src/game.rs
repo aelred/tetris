@@ -5,7 +5,11 @@ use board::Board;
 use piece::Piece;
 use state::State;
 use state::StateChange;
+use pos::Pos;
 use tetromino;
+use tetromino::Rotation;
+use tetromino::Bag;
+use block::draw_border;
 
 use sdl2::event::Event;
 use sdl2::rect::Rect;
@@ -13,16 +17,29 @@ use sdl2::keyboard::Keycode;
 use sdl2::render::Renderer;
 use sdl2::event::WindowEvent::FocusLost;
 
+const NORMAL_GRAVITY: f32 = 0.1;
+const SOFT_DROP_GRAVITY: f32 = 1.0;
+const HARD_DROP_GRAVITY: f32 = 20.0;
+
 pub struct Game {
     piece: Piece,
     board: Board,
+    bag: Bag,
+    drop_tick: f32,
+    lock_delay: bool,
+    gravity: f32,
 }
 
 impl Game {
     pub fn new() -> Game {
+        let mut bag = Bag::new();
         Game {
-            piece: Piece::new(),
+            piece: Piece::new(bag.pop()),
             board: Board::new(),
+            bag: bag,
+            drop_tick: 0.0,
+            lock_delay: false,
+            gravity: NORMAL_GRAVITY,
         }
     }
 
@@ -37,17 +54,17 @@ impl Game {
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
                     match keycode {
-                        Keycode::Left => self.piece.left(&self.board),
-                        Keycode::Right => self.piece.right(&self.board),
-                        Keycode::Up => self.piece.rotate(&self.board),
-                        Keycode::Down => self.piece.start_soft_drop(),
-                        Keycode::Space => self.piece.start_hard_drop(),
+                        Keycode::Left => self.left(),
+                        Keycode::Right => self.right(),
+                        Keycode::Up => self.rotate(),
+                        Keycode::Down => self.gravity = SOFT_DROP_GRAVITY,
+                        Keycode::Space => self.gravity = HARD_DROP_GRAVITY,
                         _ => {}
                     }
                 }
                 Event::KeyUp { keycode: Some(keycode), .. } => {
                     if let Keycode::Down = keycode {
-                        self.piece.stop_drop()
+                        self.gravity = NORMAL_GRAVITY;
                     }
                 }
                 _ => {}
@@ -61,16 +78,113 @@ impl Game {
         self.board.draw(renderer);
         self.piece.draw(renderer);
 
-        renderer.set_viewport(Some(*PREVIEW_VIEW));
-        self.piece.draw_next(renderer);
+        self.draw_next(renderer);
 
-        let is_game_over = self.piece.update(&mut self.board);
+        let is_game_over = self.update_piece();
 
         if is_game_over {
             StateChange::Replace(State::GameOver)
         } else {
             StateChange::None
         }
+    }
+
+    fn rotate(&mut self) {
+        self.piece.rotate_clockwise();
+        self.reset_lock_delay();
+
+        if self.collides() {
+            self.piece.rotate_anticlockwise();
+        }
+    }
+
+    fn left(&mut self) {
+        self.piece.left();
+        self.reset_lock_delay();
+
+        if self.collides() {
+            self.piece.right();
+        }
+    }
+
+    fn right(&mut self) {
+        self.piece.right();
+        self.reset_lock_delay();
+
+        if self.collides() {
+            self.piece.left();
+        }
+    }
+
+    fn update_piece(&mut self) -> bool {
+        while self.drop_tick >= 1.0 {
+            self.drop_tick -= 1.0;
+            let is_game_over = self.drop();
+            if is_game_over {
+                return true;
+            }
+        }
+
+        self.drop_tick += self.gravity;
+
+        false
+    }
+
+    fn reset_lock_delay(&mut self) {
+        if self.lock_delay {
+            self.drop_tick = 0.0;
+        }
+    }
+
+    fn drop(&mut self) -> bool {
+        self.piece.down();
+
+        if self.collides() {
+            self.piece.up();
+            if self.lock_delay {
+                return self.lock();
+            } else {
+                self.lock_delay = true;
+            }
+        } else if self.lock_delay {
+            self.lock_delay = false;
+        }
+
+        false
+    }
+
+    fn lock(&mut self) -> bool {
+        let mut is_game_over = self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
+
+        self.piece = Piece::new(self.bag.pop());
+        self.gravity = NORMAL_GRAVITY;
+        self.lock_delay = false;
+
+        if self.collides() {
+            is_game_over = true;
+        }
+
+        is_game_over
+    }
+
+    fn draw_next(&self, renderer: &mut Renderer) {
+        renderer.set_viewport(Some(*PREVIEW_VIEW));
+
+        draw_border(renderer,
+                    Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
+        self.bag.peek().draw(renderer, Rotation::default(), Pos::new(1, 1));
+    }
+
+    fn collides(&self) -> bool {
+        let mut collides = false;
+
+        for block in self.piece.blocks() {
+            if self.board.touches(block) {
+                collides = true;
+            }
+        }
+
+        collides
     }
 }
 
