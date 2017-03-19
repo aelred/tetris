@@ -131,7 +131,7 @@ impl Piece {
     }
 
     fn lock(&mut self, board: &mut Board) -> bool {
-        let mut is_game_over = board.fill(self.tetromino.blocks(self.rot), self.tetromino.color);
+        let mut is_game_over = board.fill(self.blocks(), self.tetromino.color);
 
         self.tetromino = self.next_tetromino;
         self.next_tetromino = self.bag.next_tetromino();
@@ -151,7 +151,7 @@ impl Piece {
     fn collides(&self, board: &Board) -> bool {
         let mut collides = false;
 
-        for block in self.tetromino.blocks(self.rot) {
+        for block in self.blocks() {
             if board.touches(block) {
                 collides = true;
             }
@@ -164,6 +164,14 @@ impl Piece {
         if self.lock_delay {
             self.drop_tick = 0.0;
         }
+    }
+
+    fn blocks(&self) -> Vec<Pos> {
+        self.tetromino
+            .blocks(self.rot)
+            .iter()
+            .map(|pos| *pos + self.pos)
+            .collect()
     }
 }
 
