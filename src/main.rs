@@ -65,7 +65,7 @@ fn play_tetris(renderer: &mut Renderer, font: &Font, event_pump: &mut EventPump)
 
     let mut states = Vec::new();
     let mut events = Vec::new();
-    states.push(State::play());
+    states.push(State::Title);
 
     loop {
         renderer.set_draw_color(Color::RGB(32, 48, 32));
