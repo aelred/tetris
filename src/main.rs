@@ -20,10 +20,10 @@ use state::WINDOW_WIDTH;
 use state::WINDOW_HEIGHT;
 
 use std::thread::sleep;
-use std::path::Path;
 use std::cmp::max;
 
 use sdl2::Sdl;
+use sdl2::rwops::RWops;
 use sdl2::ttf;
 use sdl2::ttf::Font;
 use sdl2::render::Renderer;
@@ -36,7 +36,8 @@ use std::time::Duration;
 
 const TICK: u64 = 33;
 
-static FONT_PATH: &'static str = "assets/8-BIT WONDER.TTF";
+static FONT_DATA: &'static [u8] = include_bytes!("8-BIT WONDER.TTF");
+
 const FONT_MULTIPLE: u16 = 9;
 
 // Funny division is done here to round to nearest multiple of FONT_MULTIPLE
@@ -47,10 +48,9 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let ttf_context = ttf::init().unwrap();
 
-    let font_path = Path::new(FONT_PATH);
-
+    let font_data = RWops::from_bytes(FONT_DATA).unwrap();
     let font_size = max(FONT_SIZE, FONT_MULTIPLE);
-    let font = ttf_context.load_font(font_path, font_size).unwrap();
+    let font = ttf_context.load_font_from_rwops(font_data, font_size).unwrap();
 
     let window = create_window(&sdl_context);
 
