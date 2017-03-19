@@ -1,7 +1,7 @@
 extern crate rand;
 
 use pos::Pos;
-use tile::draw_tile;
+use block::draw_block;
 
 use rand::Rng;
 use sdl2::pixels::Color;
@@ -78,7 +78,7 @@ impl Tetromino {
 
     pub fn draw(&self, renderer: &Renderer, rot: Rotation, pos: Pos) {
         self.each_cell(rot,
-                       |cell_pos| draw_tile(renderer, pos + cell_pos, self.color));
+                       |cell_pos| draw_block(renderer, pos + cell_pos, self.color));
     }
 }
 

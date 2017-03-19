@@ -1,4 +1,4 @@
-use tile::TILE_SIZE;
+use block::BLOCK_SIZE;
 use board::HIDE_ROWS;
 use board::Board;
 use board::WIDTH;
@@ -15,14 +15,14 @@ use sdl2::event::WindowEvent::{FocusGained, FocusLost};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 
-const BOARD_BORDER: u32 = TILE_SIZE as u32;
-const BOARD_WIDTH: u32 = WIDTH as u32 * TILE_SIZE as u32;
-const BOARD_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * TILE_SIZE as u32;
+const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
+const BOARD_WIDTH: u32 = WIDTH as u32 * BLOCK_SIZE as u32;
+const BOARD_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE as u32;
 
 const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 = WINDOW_HEIGHT as i32 - (tetromino::HEIGHT + 2) as i32 * TILE_SIZE as i32;
-const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * TILE_SIZE as u32;
-const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * TILE_SIZE as u32;
+const PREVIEW_Y: i32 = WINDOW_HEIGHT as i32 - (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
+const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
+const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 
 pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
 pub const WINDOW_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;

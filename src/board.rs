@@ -1,5 +1,5 @@
-use tile::draw_tile;
-use tile::draw_border;
+use block::draw_block;
+use block::draw_border;
 use pos::Pos;
 
 use sdl2::pixels::Color;
@@ -67,14 +67,14 @@ impl Board {
                 if let Some(color) = self.grid[y as usize][x as usize] {
                     let y = y - HIDE_ROWS;
                     let cell_pos = Pos::new(x as i16, y as i16);
-                    self.draw_tile(renderer, cell_pos, color)
+                    self.draw_block(renderer, cell_pos, color)
                 }
             }
         }
     }
 
-    pub fn draw_tile(&self, renderer: &Renderer, pos: Pos, color: Color) {
-        draw_tile(renderer, pos, color);
+    pub fn draw_block(&self, renderer: &Renderer, pos: Pos, color: Color) {
+        draw_block(renderer, pos, color);
     }
 }
 

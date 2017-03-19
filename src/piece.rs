@@ -7,7 +7,7 @@ use tetromino::ZERO_ROTATION;
 use pos::Pos;
 use board::WIDTH;
 use board::HIDE_ROWS;
-use tile::draw_border;
+use block::draw_border;
 
 use sdl2::render::Renderer;
 
