@@ -27,6 +27,20 @@ const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
 pub const WINDOW_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
+lazy_static! {
+    static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
+                                                   0,
+                                                   BOARD_WIDTH + BOARD_BORDER * 2,
+                                                   BOARD_HEIGHT + BOARD_BORDER * 2);
+
+    static ref BOARD_VIEW: Rect = Rect::new(BOARD_BORDER as i32,
+                                            BOARD_BORDER as i32,
+                                            BOARD_WIDTH,
+                                            BOARD_HEIGHT);
+
+    static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+}
+
 pub enum State {
     Title,
     Play {
@@ -114,14 +128,14 @@ impl State {
             }
         }
 
-        renderer.set_viewport(Some(board_border_view()));
+        renderer.set_viewport(Some(*BOARD_BORDER_VIEW));
         board.draw_border(renderer);
 
-        renderer.set_viewport(Some(board_view()));
+        renderer.set_viewport(Some(*BOARD_VIEW));
         board.draw(renderer);
         piece.draw(renderer);
 
-        renderer.set_viewport(Some(preview_view()));
+        renderer.set_viewport(Some(*PREVIEW_VIEW));
         piece.draw_next(renderer);
 
         let is_game_over = piece.update(board);
@@ -211,24 +225,6 @@ fn draw_text(text: &str,
     renderer.copy(&texture, None, Some(target)).unwrap();
 
     target
-}
-
-fn board_border_view() -> Rect {
-    Rect::new(0,
-              0,
-              BOARD_WIDTH + BOARD_BORDER * 2,
-              BOARD_HEIGHT + BOARD_BORDER * 2)
-}
-
-fn board_view() -> Rect {
-    Rect::new(BOARD_BORDER as i32,
-              BOARD_BORDER as i32,
-              BOARD_WIDTH,
-              BOARD_HEIGHT)
-}
-
-fn preview_view() -> Rect {
-    Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT)
 }
 
 fn center_view(x: i32, y: i32, width: u32, height: u32) -> Rect {

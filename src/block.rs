@@ -4,8 +4,8 @@ use sdl2::pixels::Color;
 use sdl2::render::Renderer;
 use sdl2::gfx::primitives::DrawRenderer;
 
-pub const INNER_BLOCK_SIZE: u8 = 14;
-pub const BLOCK_BORDER: u8 = 1;
+const INNER_BLOCK_SIZE: u8 = 14;
+const BLOCK_BORDER: u8 = 1;
 pub const BLOCK_SIZE: u8 = INNER_BLOCK_SIZE + BLOCK_BORDER * 2;
 
 const BORDER_COLOR: Color = Color::RGB(100, 100, 100);

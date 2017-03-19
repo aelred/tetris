@@ -5,6 +5,7 @@ authors = ["Felix Chapman <aelred717@gmail.com>"]
 
 [dependencies]
 rand="0.3"
+lazy_static = "0.2"
 
 [dev-dependencies]
 quickcheck="0.3"

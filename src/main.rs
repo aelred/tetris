@@ -8,6 +8,9 @@ mod block;
 mod piece;
 mod state;
 
+#[macro_use]
+extern crate lazy_static;
+
 extern crate sdl2;
 extern crate rand;
 

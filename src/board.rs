@@ -24,12 +24,27 @@ impl Board {
         out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
 
-    pub fn fill(&mut self, pos: Pos, color: Color) {
+    pub fn fill(&mut self, cells: Vec<Pos>, color: Color) -> bool {
+        let mut is_game_over = true;
+
+        for cell in cells {
+            if cell.y() > HIDE_ROWS as i16 {
+                is_game_over = false;
+            }
+            self.fill_pos(cell, color);
+        }
+
+        self.check_clear();
+
+        is_game_over
+    }
+
+    fn fill_pos(&mut self, pos: Pos, color: Color) {
         assert!(!out_bounds(pos));
         self.grid[pos.y() as usize][pos.x() as usize] = Some(color);
     }
 
-    pub fn check_clear(&mut self) {
+    fn check_clear(&mut self) {
         for y in 0..HEIGHT {
             let mut clear = true;
 
@@ -128,7 +143,7 @@ mod tests {
             when!(in_bounds(pos));
             let color = Color::RGB(r, g, b);
             let mut board = board;
-            board.fill(pos, color);
+            board.fill_pos(pos, color);
             then!(board.touches(pos))
         }
 
@@ -140,7 +155,7 @@ mod tests {
             let mut board = board;
 
             let touches_before = board.touches(pos2);
-            board.fill(pos1, color);
+            board.fill_pos(pos1, color);
             let touches_after = board.touches(pos2);
             then!(touches_before == touches_after)
         }

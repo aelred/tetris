@@ -13,7 +13,6 @@ const NUM_ROTATIONS: usize = 4;
 
 pub const WIDTH: u8 = 4;
 pub const HEIGHT: u8 = 4;
-pub const ZERO_ROTATION: Rotation = Rotation(0);
 
 #[derive(Debug, Clone)]
 pub struct Bag {
@@ -57,6 +56,12 @@ impl Rotation {
     }
 }
 
+impl Default for Rotation {
+    fn default() -> Rotation {
+        Rotation(0)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tetromino {
     rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS],
@@ -64,21 +69,24 @@ pub struct Tetromino {
 }
 
 impl Tetromino {
-    pub fn each_cell<F>(&self, rot: Rotation, mut f: F)
-        where F: FnMut(Pos) -> ()
-    {
+    pub fn blocks(&self, rot: Rotation) -> Vec<Pos> {
+        let mut blocks = Vec::new();
+
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.rotations[rot.0][y as usize][x as usize] {
-                    f(Pos::new(x as i16, y as i16))
+                    blocks.push(Pos::new(x as i16, y as i16));
                 };
             }
         }
+
+        blocks
     }
 
     pub fn draw(&self, renderer: &Renderer, rot: Rotation, pos: Pos) {
-        self.each_cell(rot,
-                       |cell_pos| draw_block(renderer, pos + cell_pos, self.color));
+        for block in self.blocks(rot) {
+            draw_block(renderer, pos + block, self.color);
+        }
     }
 }
 
@@ -247,7 +255,7 @@ mod tests {
     impl Arbitrary for Rotation {
         fn arbitrary<G: Gen>(g: &mut G) -> Rotation {
             if g.gen() {
-                ZERO_ROTATION
+                Rotation::default()
             } else {
                 Rotation::arbitrary(g).rotate()
             }

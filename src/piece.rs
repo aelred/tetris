@@ -3,7 +3,6 @@ use tetromino;
 use tetromino::Tetromino;
 use tetromino::Bag;
 use tetromino::Rotation;
-use tetromino::ZERO_ROTATION;
 use pos::Pos;
 use board::WIDTH;
 use board::HIDE_ROWS;
@@ -36,7 +35,7 @@ impl Piece {
         Piece {
             tetromino: bag.next_tetromino(),
             next_tetromino: bag.next_tetromino(),
-            rot: ZERO_ROTATION,
+            rot: Rotation::default(),
             pos: initial_pos(),
             drop_tick: 0.0,
             lock_delay: false,
@@ -111,7 +110,7 @@ impl Piece {
     pub fn draw_next(&self, renderer: &Renderer) {
         draw_border(renderer,
                     Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
-        self.next_tetromino.draw(renderer, ZERO_ROTATION, Pos::new(1, 1));
+        self.next_tetromino.draw(renderer, Rotation::default(), Pos::new(1, 1));
     }
 
     fn drop(&mut self, board: &mut Board) -> bool {
@@ -132,20 +131,11 @@ impl Piece {
     }
 
     fn lock(&mut self, board: &mut Board) -> bool {
-        let mut is_game_over = true;
-
-        self.each_cell(|pos| {
-                           if pos.y() > HIDE_ROWS as i16 {
-                               is_game_over = false;
-                           }
-                           board.fill(pos, self.tetromino.color);
-                       });
-
-        board.check_clear();
+        let mut is_game_over = board.fill(self.tetromino.blocks(self.rot), self.tetromino.color);
 
         self.tetromino = self.next_tetromino;
         self.next_tetromino = self.bag.next_tetromino();
-        self.rot = ZERO_ROTATION;
+        self.rot = Rotation::default();
         self.pos = initial_pos();
         self.drop_tick = 0.0;
         self.gravity = NORMAL_GRAVITY;
@@ -161,9 +151,11 @@ impl Piece {
     fn collides(&self, board: &Board) -> bool {
         let mut collides = false;
 
-        self.each_cell(|pos| if board.touches(pos) {
-                           collides = true;
-                       });
+        for block in self.tetromino.blocks(self.rot) {
+            if board.touches(block) {
+                collides = true;
+            }
+        }
 
         collides
     }
@@ -172,12 +164,6 @@ impl Piece {
         if self.lock_delay {
             self.drop_tick = 0.0;
         }
-    }
-
-    fn each_cell<F>(&self, mut f: F)
-        where F: FnMut(Pos) -> ()
-    {
-        self.tetromino.each_cell(self.rot, |pos| f(self.pos + pos));
     }
 }
 
