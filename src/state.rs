@@ -7,10 +7,13 @@ use piece::Piece;
 use tetromino;
 
 use sdl2::render::Renderer;
+use sdl2::render::TextureQuery;
 use sdl2::rect::Rect;
+use sdl2::ttf::Font;
 use sdl2::event::Event;
 use sdl2::event::WindowEvent::{FocusGained, FocusLost};
 use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
 
 const BOARD_BORDER: u32 = TILE_SIZE as u32;
 const BOARD_WIDTH: u32 = WIDTH as u32 * TILE_SIZE as u32;
@@ -40,12 +43,16 @@ impl State {
         }
     }
 
-    pub fn update(&mut self, renderer: &mut Renderer, events: &[Event]) -> StateChange {
+    pub fn update(&mut self,
+                  renderer: &mut Renderer,
+                  font: &Font,
+                  events: &[Event])
+                  -> StateChange {
         match *self {
             State::Play { ref mut piece, ref mut board } => {
                 State::play_update(piece, board, renderer, events)
             }
-            State::Paused => State::pause_update(events),
+            State::Paused => State::pause_update(renderer, font, events),
         }
     }
 
@@ -54,25 +61,12 @@ impl State {
                    renderer: &mut Renderer,
                    events: &[Event])
                    -> StateChange {
-        renderer.set_viewport(Some(board_border_view()));
-        board.draw_border(renderer);
-
-        renderer.set_viewport(Some(board_view()));
-        board.draw(renderer);
-        piece.draw(renderer);
-
-        renderer.set_viewport(Some(preview_view()));
-        piece.draw_next(renderer);
-
-        piece.update(board);
-
-        let mut state_change = StateChange::None;
 
         for event in events {
             match *event {
                 Event::Window { win_event, .. } => {
                     if let FocusLost = win_event {
-                        state_change = StateChange::Push(State::Paused);
+                        return StateChange::Push(State::Paused);
                     }
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
@@ -94,15 +88,43 @@ impl State {
             }
         }
 
-        state_change
+        renderer.set_viewport(Some(board_border_view()));
+        board.draw_border(renderer);
+
+        renderer.set_viewport(Some(board_view()));
+        board.draw(renderer);
+        piece.draw(renderer);
+
+        renderer.set_viewport(Some(preview_view()));
+        piece.draw_next(renderer);
+
+        piece.update(board);
+
+        StateChange::None
     }
 
-    fn pause_update(events: &[Event]) -> StateChange {
+    fn pause_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {
         for event in events {
             if let Event::Window { win_event: FocusGained, .. } = *event {
                 return StateChange::Pop;
             }
         }
+
+        renderer.set_viewport(None);
+
+        let surface = font.render("Paused").solid(Color::RGB(255, 255, 255)).unwrap();
+        let texture = renderer.create_texture_from_surface(&surface).unwrap();
+
+        let TextureQuery { width, height, .. } = texture.query();
+
+        let center_x = (WINDOW_WIDTH / 2) as i32;
+        let center_y = (WINDOW_HEIGHT / 2) as i32;
+
+        let target = Rect::new(center_x - width as i32 / 2,
+                               center_y - height as i32 / 2,
+                               width,
+                               height);
+        renderer.copy(&texture, None, Some(target)).unwrap();
 
         StateChange::None
     }
