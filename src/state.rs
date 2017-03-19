@@ -1,62 +1,26 @@
-use block::BLOCK_SIZE;
-use board::HIDE_ROWS;
-use board::Board;
-use board::WIDTH;
-use board::HEIGHT;
-use piece::Piece;
-use tetromino;
+use game::Game;
+use game::WINDOW_HEIGHT;
+use game::WINDOW_WIDTH;
 
 use sdl2::render::Renderer;
 use sdl2::render::TextureQuery;
 use sdl2::rect::Rect;
 use sdl2::ttf::Font;
 use sdl2::event::Event;
-use sdl2::event::WindowEvent::{FocusGained, FocusLost};
+use sdl2::event::WindowEvent::FocusGained;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 
-const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
-const BOARD_WIDTH: u32 = WIDTH as u32 * BLOCK_SIZE as u32;
-const BOARD_HEIGHT: u32 = (HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE as u32;
-
-const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 = WINDOW_HEIGHT as i32 - (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
-const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
-const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
-
-pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
-pub const WINDOW_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
-
-lazy_static! {
-    static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
-                                                   0,
-                                                   BOARD_WIDTH + BOARD_BORDER * 2,
-                                                   BOARD_HEIGHT + BOARD_BORDER * 2);
-
-    static ref BOARD_VIEW: Rect = Rect::new(BOARD_BORDER as i32,
-                                            BOARD_BORDER as i32,
-                                            BOARD_WIDTH,
-                                            BOARD_HEIGHT);
-
-    static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-}
-
 pub enum State {
     Title,
-    Play {
-        piece: Box<Piece>,
-        board: Box<Board>,
-    },
+    Play(Box<Game>),
     Paused,
     GameOver,
 }
 
 impl State {
     fn play() -> State {
-        State::Play {
-            piece: Box::new(Piece::new()),
-            board: Box::new(Board::new()),
-        }
+        State::Play(Box::new(Game::new()))
     }
 
     pub fn update(&mut self,
@@ -66,9 +30,7 @@ impl State {
                   -> StateChange {
         match *self {
             State::Title => State::title_update(renderer, font, events),
-            State::Play { ref mut piece, ref mut board } => {
-                State::play_update(piece, board, renderer, events)
-            }
+            State::Play(ref mut game) => game.update(renderer, events),
             State::Paused => State::pause_update(renderer, font, events),
             State::GameOver => State::game_over_update(renderer, font, events),
         }
@@ -94,57 +56,6 @@ impl State {
 
 
         StateChange::None
-    }
-
-    fn play_update(piece: &mut Piece,
-                   board: &mut Board,
-                   renderer: &mut Renderer,
-                   events: &[Event])
-                   -> StateChange {
-
-        for event in events {
-            match *event {
-                Event::Window { win_event, .. } => {
-                    if let FocusLost = win_event {
-                        return StateChange::Push(State::Paused);
-                    }
-                }
-                Event::KeyDown { keycode: Some(keycode), .. } => {
-                    match keycode {
-                        Keycode::Left => piece.left(board),
-                        Keycode::Right => piece.right(board),
-                        Keycode::Up => piece.rotate(board),
-                        Keycode::Down => piece.start_soft_drop(),
-                        Keycode::Space => piece.start_hard_drop(),
-                        _ => {}
-                    }
-                }
-                Event::KeyUp { keycode: Some(keycode), .. } => {
-                    if let Keycode::Down = keycode {
-                        piece.stop_drop()
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        renderer.set_viewport(Some(*BOARD_BORDER_VIEW));
-        board.draw_border(renderer);
-
-        renderer.set_viewport(Some(*BOARD_VIEW));
-        board.draw(renderer);
-        piece.draw(renderer);
-
-        renderer.set_viewport(Some(*PREVIEW_VIEW));
-        piece.draw_next(renderer);
-
-        let is_game_over = piece.update(board);
-
-        if is_game_over {
-            StateChange::Replace(State::GameOver)
-        } else {
-            StateChange::None
-        }
     }
 
     fn pause_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {

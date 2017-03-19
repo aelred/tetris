@@ -7,6 +7,7 @@ mod board;
 mod block;
 mod piece;
 mod state;
+mod game;
 
 #[macro_use]
 extern crate lazy_static;
@@ -19,8 +20,8 @@ extern crate rand;
 extern crate quickcheck;
 
 use state::State;
-use state::WINDOW_WIDTH;
-use state::WINDOW_HEIGHT;
+use game::WINDOW_WIDTH;
+use game::WINDOW_HEIGHT;
 
 use std::thread::sleep;
 use std::cmp::max;
