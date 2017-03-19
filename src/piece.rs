@@ -45,13 +45,18 @@ impl Piece {
         }
     }
 
-    pub fn update(&mut self, board: &mut Board) {
+    pub fn update(&mut self, board: &mut Board) -> bool {
         while self.drop_tick >= 1.0 {
             self.drop_tick -= 1.0;
-            self.drop(board);
+            let is_game_over = self.drop(board);
+            if is_game_over {
+                return true;
+            }
         }
 
         self.drop_tick += self.gravity;
+
+        false
     }
 
     pub fn rotate(&mut self, board: &Board) {
@@ -109,23 +114,33 @@ impl Piece {
         self.next_tetromino.draw(renderer, ZERO_ROTATION, Pos::new(1, 1));
     }
 
-    fn drop(&mut self, board: &mut Board) {
+    fn drop(&mut self, board: &mut Board) -> bool {
         self.pos = self.pos.down();
 
         if self.collides(board) {
             self.pos = self.pos.up();
             if self.lock_delay {
-                self.lock(board);
+                return self.lock(board);
             } else {
                 self.lock_delay = true;
             }
         } else if self.lock_delay {
             self.lock_delay = false;
         }
+
+        false
     }
 
-    fn lock(&mut self, board: &mut Board) {
-        self.each_cell(|pos| board.fill(pos, self.tetromino.color));
+    fn lock(&mut self, board: &mut Board) -> bool {
+        let mut is_game_over = true;
+
+        self.each_cell(|pos| {
+                           if pos.y() > HIDE_ROWS as i16 {
+                               is_game_over = false;
+                           }
+                           board.fill(pos, self.tetromino.color);
+                       });
+
         board.check_clear();
 
         self.tetromino = self.next_tetromino;
@@ -135,6 +150,12 @@ impl Piece {
         self.drop_tick = 0.0;
         self.gravity = NORMAL_GRAVITY;
         self.lock_delay = false;
+
+        if self.collides(board) {
+            is_game_over = true;
+        }
+
+        is_game_over
     }
 
     fn collides(&self, board: &Board) -> bool {

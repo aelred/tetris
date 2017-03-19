@@ -34,6 +34,7 @@ pub enum State {
         board: Box<Board>,
     },
     Paused,
+    GameOver,
 }
 
 impl State {
@@ -55,6 +56,7 @@ impl State {
                 State::play_update(piece, board, renderer, events)
             }
             State::Paused => State::pause_update(renderer, font, events),
+            State::GameOver => State::game_over_update(renderer, font, events),
         }
     }
 
@@ -67,9 +69,9 @@ impl State {
             }
         }
 
-        let tetris_target = draw_text("Tetris", 0, 0, 2, renderer, font);
+        let tetris_target = draw_text("Tetris", 0, 0, 4, renderer, font);
 
-        draw_text("Press Enter",
+        draw_text("[ Press Enter ]",
                   0,
                   tetris_target.height() as i32,
                   1,
@@ -122,9 +124,13 @@ impl State {
         renderer.set_viewport(Some(preview_view()));
         piece.draw_next(renderer);
 
-        piece.update(board);
+        let is_game_over = piece.update(board);
 
-        StateChange::None
+        if is_game_over {
+            StateChange::Replace(State::GameOver)
+        } else {
+            StateChange::None
+        }
     }
 
     fn pause_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {
@@ -140,12 +146,34 @@ impl State {
 
         StateChange::None
     }
+
+    fn game_over_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {
+        for event in events {
+            if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
+                if let Keycode::Return = keycode {
+                    return StateChange::Replace(State::play());
+                }
+            }
+        }
+
+        let game_over_target = draw_text("Game Over", 0, 0, 3, renderer, font);
+
+        draw_text("[ Press Enter ]",
+                  0,
+                  game_over_target.height() as i32,
+                  1,
+                  renderer,
+                  font);
+
+        StateChange::None
+    }
 }
 
 pub enum StateChange {
     None,
     Push(State),
     Pop,
+    Replace(State),
 }
 
 impl StateChange {
@@ -157,6 +185,10 @@ impl StateChange {
             }
             StateChange::Pop => {
                 states.pop();
+            }
+            StateChange::Replace(state) => {
+                states.pop();
+                states.push(state);
             }
         }
     }

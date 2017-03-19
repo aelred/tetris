@@ -40,7 +40,7 @@ static FONT_PATH: &'static str = "assets/8-BIT WONDER.TTF";
 const FONT_MULTIPLE: u16 = 9;
 
 // Funny division is done here to round to nearest multiple of FONT_MULTIPLE
-const FONT_SIZE: u16 = (WINDOW_HEIGHT / 16) as u16 / FONT_MULTIPLE * FONT_MULTIPLE;
+const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIPLE;
 
 fn main() {
 
@@ -68,6 +68,7 @@ fn play_tetris(renderer: &mut Renderer, font: &Font, event_pump: &mut EventPump)
     states.push(State::Title);
 
     loop {
+        renderer.set_viewport(None);
         renderer.set_draw_color(Color::RGB(32, 48, 32));
         renderer.clear();
 
