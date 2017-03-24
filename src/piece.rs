@@ -48,7 +48,7 @@ impl Piece {
         self.pos = self.pos.down();
     }
 
-    pub fn draw(&self, renderer: &Renderer) {
+    pub fn draw(&self, renderer: &mut Renderer) {
         self.tetromino.draw(renderer,
                             self.rot,
                             self.pos + Pos::new(0, -(HIDE_ROWS as i16)));

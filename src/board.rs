@@ -71,12 +71,12 @@ impl Board {
         }
     }
 
-    pub fn draw_border(&self, renderer: &Renderer) {
+    pub fn draw_border(&self, renderer: &mut Renderer) {
         draw_border(renderer,
                     Pos::new(WIDTH as i16, (HEIGHT - HIDE_ROWS) as i16));
     }
 
-    pub fn draw(&self, renderer: &Renderer) {
+    pub fn draw(&self, renderer: &mut Renderer) {
         for y in HIDE_ROWS..HEIGHT {
             for x in 0..WIDTH {
                 if let Some(color) = self.grid[y as usize][x as usize] {
@@ -88,7 +88,7 @@ impl Board {
         }
     }
 
-    pub fn draw_block(&self, renderer: &Renderer, pos: Pos, color: Color) {
+    pub fn draw_block(&self, renderer: &mut Renderer, pos: Pos, color: Color) {
         draw_block(renderer, pos, color);
     }
 }

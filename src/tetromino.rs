@@ -95,7 +95,7 @@ impl Tetromino {
         blocks
     }
 
-    pub fn draw(&self, renderer: &Renderer, rot: Rotation, pos: Pos) {
+    pub fn draw(&self, renderer: &mut Renderer, rot: Rotation, pos: Pos) {
         for block in self.blocks(rot) {
             draw_block(renderer, pos + block, self.color);
         }
