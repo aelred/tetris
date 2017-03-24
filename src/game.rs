@@ -158,6 +158,7 @@ impl Game {
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = NORMAL_GRAVITY;
+        self.drop_tick = 0.0;
         self.lock_delay = false;
 
         if self.collides() {
