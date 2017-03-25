@@ -3,6 +3,7 @@ addons:
     packages:
       - libsdl2-dev
       - libsdl2-ttf-dev
+      - gcc-5
 
 language: rust
 rust:
