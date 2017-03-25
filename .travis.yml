@@ -13,3 +13,6 @@ dist: trusty
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
+
+after_success:
+  - ./deploy.sh
