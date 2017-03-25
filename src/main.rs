@@ -15,6 +15,11 @@ extern crate lazy_static;
 extern crate sdl2;
 extern crate rand;
 
+#[cfg(target_os="emscripten")]
+extern crate emscripten;
+#[cfg(target_os="emscripten")]
+extern crate libc;
+
 #[cfg(test)]
 #[macro_use]
 extern crate quickcheck;
@@ -23,7 +28,6 @@ use state::State;
 use game::WINDOW_WIDTH;
 use game::WINDOW_HEIGHT;
 
-use std::thread::sleep;
 use std::cmp::max;
 
 use sdl2::Sdl;
@@ -36,7 +40,6 @@ use sdl2::video::Window;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use std::time::Duration;
 
 const TICK: u64 = 33;
 
@@ -77,12 +80,31 @@ fn main() {
     play_tetris(&mut context);
 }
 
-fn play_tetris(context: &mut Context) {
+#[cfg(not(target_os="emscripten"))]
+fn play_tetris(mut context: &mut Context) {
+    use std::thread::sleep;
+    use std::time::Duration;
 
     loop {
         main_loop(context);
         sleep(Duration::from_millis(TICK));
     }
+}
+
+#[cfg(target_os="emscripten")]
+fn play_tetris(mut context: &mut Context) {
+    use emscripten::em;
+    use std::mem::transmute;
+
+    extern "C" fn em_loop(arg: *mut libc::c_void) {
+        let context = unsafe { transmute::<*mut libc::c_void, &mut Context>(arg) };
+        main_loop(context);
+    }
+
+    em::set_main_loop_arg(em_loop,
+                          unsafe { transmute::<&mut Context, *mut libc::c_void>(&mut context) },
+                          (1000 / TICK) as i32,
+                          true);
 }
 
 fn main_loop(context: &mut Context) {

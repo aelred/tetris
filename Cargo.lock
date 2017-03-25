@@ -2,7 +2,9 @@
 name = "tetris"
 version = "0.1.0"
 dependencies = [
+ "emscripten 0.1.0 (git+https://github.com/lucklove/emscripten.git)",
  "lazy_static 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.21 (registry+https://github.com/rust-lang/crates.io-index)",
  "quickcheck 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.29.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -20,6 +22,23 @@ dependencies = [
 name = "bitflags"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "emscripten"
+version = "0.1.0"
+source = "git+https://github.com/lucklove/emscripten.git#b41fc294575ce21d6fac6276a820aca92d3c018e"
+dependencies = [
+ "emscripten-sys 0.1.0 (git+https://github.com/lucklove/emscripten.git)",
+ "libc 0.2.21 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "emscripten-sys"
+version = "0.1.0"
+source = "git+https://github.com/lucklove/emscripten.git#b41fc294575ce21d6fac6276a820aca92d3c018e"
+dependencies = [
+ "libc 0.2.21 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "env_logger"
@@ -185,6 +204,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [metadata]
 "checksum aho-corasick 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ca972c2ea5f742bfce5687b9aef75506a764f61d37f8f649047846a9686ddb66"
 "checksum bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aad18937a628ec6abcd26d1489012cc0e18c21798210f491af69ded9b881106d"
+"checksum emscripten 0.1.0 (git+https://github.com/lucklove/emscripten.git)" = "<none>"
+"checksum emscripten-sys 0.1.0 (git+https://github.com/lucklove/emscripten.git)" = "<none>"
 "checksum env_logger 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)" = "15abd780e45b3ea4f76b4e9a26ff4843258dd8a3eed2775a0e7368c2e7936c2f"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
 "checksum lazy_static 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)" = "7291b1dd97d331f752620b02dfdbc231df7fc01bf282a00769e1cdb963c460dc"
