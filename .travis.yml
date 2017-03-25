@@ -5,7 +5,7 @@ addons:
     packages:
       - libsdl2-dev
       - libsdl2-ttf-dev
-      - libstdc++6
+      - libstdc++-4.9-dev
 
 language: rust
 rust:
