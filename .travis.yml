@@ -15,4 +15,11 @@ before_install:
   - sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
 
 after_success:
+  - wget https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz
+  - tar -xvf emsdk-portable.tar.gz
+  - pushd emsdk-portable
+  - ./emsdk update
+  - ./emsdk install sdk-incoming-64bit
+  - popd
+  - rustup target add asmjs-unknown-emscripten
   - ./deploy.sh
