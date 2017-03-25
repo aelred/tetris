@@ -15,9 +15,6 @@ before_install:
   - sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
 
 after_success:
-  - wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz
-  - tar -xvf cmake-3.7.2-Linux-x86_64.tar.gz
-  - PATH=$(pwd)/cmake-3.7.2-Linux-x86_64/bin/:$PATH
   - git clone --depth 1 https://github.com/urho3d/emscripten-sdk.git
   - pushd emscripten-sdk
   - ./emsdk update
