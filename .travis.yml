@@ -15,9 +15,9 @@ before_install:
   - sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
 
 after_success:
-  - git clone --depth 1 https://github.com/urho3d/emscripten-sdk.git
+  - git clone --depth 1 https://github.com/urho3d/emscripten-sdk.git -b incoming
   - pushd emscripten-sdk
-  - ./emsdk activate sdk-master-64bit
+  - ./emsdk activate sdk-incoming-64bit
   - source ./emsdk_env.sh
   - popd
   - mkdir .cargo
