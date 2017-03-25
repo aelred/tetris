@@ -1,0 +1,2 @@
+[target.asmjs-unknown-emscripten]
+linker="./emcc-sdl"
