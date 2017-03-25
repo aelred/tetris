@@ -47,6 +47,13 @@ const FONT_MULTIPLE: u16 = 9;
 // Funny division is done here to round to nearest multiple of FONT_MULTIPLE
 const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIPLE;
 
+struct Context<'a> {
+    renderer: Renderer<'a>,
+    font: Font<'a, 'a>,
+    event_pump: EventPump,
+    states: Vec<State>,
+}
+
 fn main() {
 
     let sdl_context = sdl2::init().unwrap();
@@ -58,47 +65,55 @@ fn main() {
 
     let window = create_window(&sdl_context);
 
-    let mut renderer = window.renderer().build().unwrap();
+    let mut context = Context {
+        renderer: window.renderer().build().unwrap(),
+        font: font,
+        event_pump: sdl_context.event_pump().unwrap(),
+        states: Vec::new(),
+    };
 
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    context.states.push(State::Title);
 
-    play_tetris(&mut renderer, &font, &mut event_pump);
+    play_tetris(&mut context);
 }
 
-fn play_tetris(renderer: &mut Renderer, font: &Font, event_pump: &mut EventPump) {
-
-    let mut states = Vec::new();
-    let mut events = Vec::new();
-    states.push(State::Title);
+fn play_tetris(context: &mut Context) {
 
     loop {
-        renderer.set_viewport(None);
-        renderer.set_draw_color(Color::RGB(32, 48, 32));
-        renderer.clear();
-
-        events.clear();
-
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. } |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => return,
-                _ => {}
-            }
-
-            events.push(event);
-        }
-
-        let state_change = {
-            let mut state = states.last_mut().unwrap();
-            state.update(renderer, font, &events)
-        };
-
-        state_change.apply(&mut states);
-
-        renderer.present();
-
+        main_loop(context);
         sleep(Duration::from_millis(TICK));
     }
+}
+
+fn main_loop(context: &mut Context) {
+    context.renderer.set_viewport(None);
+    context.renderer.set_draw_color(Color::RGB(32, 48, 32));
+    context.renderer.clear();
+
+    let mut events = Vec::new();
+
+    for event in context.event_pump.poll_iter() {
+        match event {
+            Event::Quit { .. } |
+            Event::KeyDown { keycode: Some(Keycode::Escape), .. } => exit(),
+            _ => {}
+        }
+
+        events.push(event);
+    }
+
+    let state_change = {
+        let mut state = context.states.last_mut().unwrap();
+        state.update(&mut context.renderer, &context.font, &events)
+    };
+
+    state_change.apply(&mut context.states);
+
+    context.renderer.present();
+}
+
+fn exit() {
+    std::process::exit(0);
 }
 
 fn create_window(sdl_context: &Sdl) -> Window {
