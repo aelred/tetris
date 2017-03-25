@@ -1,3 +1,8 @@
+addons:
+  apt:
+    packages:
+      - llvm-3.9-dev
+
 language: rust
 rust:
   - nightly
