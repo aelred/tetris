@@ -23,7 +23,7 @@ after_success:
   - git clone https://github.com/juj/emsdk.git
   - cd emsdk
   - ./emsdk update-tags
-  - ./emsdk install sdk-nightly-latest-64bit
+  - ./emsdk install sdk-nightly-latest-64bit >/dev/null  # noisy
   - ./emsdk activate --embedded sdk-nightly-latest-64bit
   - source ./emsdk_env.sh
   - emcc --clear-cache --clear-ports
