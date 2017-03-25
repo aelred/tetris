@@ -1,8 +1,11 @@
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - libsdl2-dev
       - libsdl2-ttf-dev
+      - libstdc++6
 
 language: rust
 rust:
