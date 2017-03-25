@@ -1,11 +1,3 @@
-addons:
-  apt:
-    sources:
-      - sourceline: 'ppa:george-edison55/cmake-3.x'
-    packages:
-      - cmake
-      - cmake-data
-
 language: rust
 rust:
   - nightly
@@ -23,6 +15,7 @@ before_install:
   - sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
 
 after_success:
+  - curl https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh | bash
   - wget https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz
   - tar -xvf emsdk-portable.tar.gz
   - pushd emsdk-portable
