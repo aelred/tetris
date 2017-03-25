@@ -25,7 +25,6 @@ after_success:
   - source emscripten-sdk/emsdk_env.sh
   - rustup target add asmjs-unknown-emscripten
   - ./deploy.sh
-  - cat ~/.emscripten
 
 cache:
   cargo: true
