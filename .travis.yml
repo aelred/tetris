@@ -17,19 +17,7 @@ matrix:
 dist: trusty
 
 after_success:
-  - wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.tar.gz
-  - tar -xvf cmake-3.7.2-Linux-x86_64.tar.gz
-  - PATH=$(pwd)/cmake-3.7.2-Linux-x86_64/bin/:$PATH
-  - git clone https://github.com/juj/emsdk.git
-  - cd emsdk
-  - ./emsdk install sdk-incoming-64bit
-  - ./emsdk activate sdk-incoming-64bit
-  - source ./emsdk_env.sh
-  - cd ..
-  - rustup target add asmjs-unknown-emscripten
-  - ./deploy.sh
+  - ssh felix@ael.red -s "bash -s" < ./deploy.sh
 
 cache:
   cargo: true
-  directories:
-    - emsdk
