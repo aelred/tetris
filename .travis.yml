@@ -31,3 +31,5 @@ after_success:
 
 cache:
   cargo: true
+  directories:
+    - emsdk
