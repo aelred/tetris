@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd ~/sites/tetris
 
 git reset --hard
