@@ -32,5 +32,6 @@ after_success:
   - ./deploy.sh
 
 cache:
+  cargo: true
   directories:
   - emsdk-portable
