@@ -4,6 +4,8 @@ addons:
       - llvm-toolchain-trusty-3.9
     packages:
       - llvm-3.9-dev
+      - libsdl2-dev
+      - libsdl2-ttf-dev
 
 language: rust
 rust:
@@ -16,10 +18,6 @@ matrix:
     - rust: nightly
 
 dist: trusty
-
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libsdl2-dev libsdl2-ttf-dev
 
 after_success:
   - git clone --depth 1 https://github.com/urho3d/emscripten-sdk.git -b incoming
