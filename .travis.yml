@@ -31,3 +31,7 @@ after_success:
   - chmod u+x ./emcc-sdl
   - rustup target add asmjs-unknown-emscripten
   - ./deploy.sh
+
+cache:
+  directories:
+  - emsdk-portable
