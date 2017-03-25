@@ -20,9 +20,15 @@ matrix:
 dist: trusty
 
 after_success:
-  - git clone --depth 1 https://github.com/urho3d/emscripten-sdk.git -b incoming
-  - emscripten-sdk/emsdk activate sdk-incoming-64bit
-  - source emscripten-sdk/emsdk_env.sh
+  - git clone https://github.com/juj/emsdk.git
+  - cd emsdk
+  - ./emsdk update-tags
+  - ./emsdk install sdk-nightly-latest-64bit
+  - ./emsdk activate --embedded sdk-nightly-latest-64bit
+  - source ./emsdk_env.sh
+  - emcc --clear-cache --clear-ports
+  - python $EMSCRIPTEN/embuilder.py build ALL
+  - cd ..
   - rustup target add asmjs-unknown-emscripten
   - ./deploy.sh
 
