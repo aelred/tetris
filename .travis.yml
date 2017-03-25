@@ -21,7 +21,7 @@ after_success:
   - source ./emsdk_env.sh
   - popd
   - mkdir .cargo
-  - echo "[target.asmjs-unknown-emscripten]linker=\"./emcc-sdl\"" >> .cargo/config
+  - echo "[target.asmjs-unknown-emscripten]\nlinker=\"./emcc-sdl\"" >> .cargo/config
   - echo "emcc -s USE_SDL=2 -s USE_SDL_TTF=2 $@" >> emcc-sdl
   - chmod u+x ./emcc-sdl
   - rustup target add asmjs-unknown-emscripten
