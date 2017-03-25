@@ -1,5 +1,7 @@
 addons:
   apt:
+    sources:
+      - llvm-toolchain-trusty-3.9
     packages:
       - llvm-3.9-dev
 
