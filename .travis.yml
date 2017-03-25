@@ -1,12 +1,8 @@
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       - libsdl2-dev
       - libsdl2-ttf-dev
-      - gcc-5
-      - libstdc++6
 
 language: rust
 rust:
@@ -23,12 +19,9 @@ dist: trusty
 after_success:
   - git clone https://github.com/juj/emsdk.git
   - cd emsdk
-  - ./emsdk update-tags
-  - ./emsdk install sdk-nightly-latest-64bit >/dev/null  # noisy
-  - ./emsdk activate --embedded sdk-nightly-latest-64bit
+  - ./emsdk install sdk-incoming-64bit
+  - ./emsdk activate sdk-incoming-64bit
   - source ./emsdk_env.sh
-  - emcc --clear-cache --clear-ports
-  - python $EMSCRIPTEN/embuilder.py build ALL
   - cd ..
   - rustup target add asmjs-unknown-emscripten
   - ./deploy.sh
