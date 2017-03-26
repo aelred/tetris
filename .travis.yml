@@ -24,7 +24,7 @@ before_install:
 after_success:
   - chmod 600 deploy_key
   - mv deploy_key ~/.ssh/id_rsa
-  - ssh felix@ael.red -s "bash -s" < ./deploy.sh
+  - ssh felix@ael.red "bash -s" < ./deploy.sh
 
 cache:
   cargo: true
