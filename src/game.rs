@@ -20,9 +20,17 @@ use sdl2::keyboard::Keycode;
 use sdl2::render::Renderer;
 use sdl2::event::WindowEvent::FocusLost;
 
-const NORMAL_GRAVITY: f32 = 0.1;
+const INITIAL_GRAVITY: f32 = 0.04;
+const LEVELS_BETWEEN_GRAVITY_INCREASE: u32 = 10;
+const GRAVITY_INCREASE: f32 = 0.02;
 const SOFT_DROP_GRAVITY: f32 = 1.0;
 const HARD_DROP_GRAVITY: f32 = 20.0;
+
+enum Gravity {
+    Normal,
+    SoftDrop,
+    HardDrop,
+}
 
 pub struct Game {
     piece: Piece,
@@ -30,7 +38,7 @@ pub struct Game {
     bag: Bag,
     drop_tick: f32,
     lock_delay: bool,
-    gravity: f32,
+    gravity: Gravity,
     lines_cleared: u32,
     score: u32,
 }
@@ -44,7 +52,7 @@ impl Game {
             bag: bag,
             drop_tick: 0.0,
             lock_delay: false,
-            gravity: NORMAL_GRAVITY,
+            gravity: Gravity::Normal,
             lines_cleared: 0,
             score: 0,
         }
@@ -68,14 +76,14 @@ impl Game {
                         Keycode::Left => self.left(),
                         Keycode::Right => self.right(),
                         Keycode::Up => self.rotate(),
-                        Keycode::Down => self.gravity = SOFT_DROP_GRAVITY,
-                        Keycode::Space => self.gravity = HARD_DROP_GRAVITY,
+                        Keycode::Down => self.gravity = Gravity::SoftDrop,
+                        Keycode::Space => self.gravity = Gravity::HardDrop,
                         _ => {}
                     }
                 }
                 Event::KeyUp { keycode: Some(keycode), .. } => {
                     if let Keycode::Down = keycode {
-                        self.gravity = NORMAL_GRAVITY;
+                        self.gravity = Gravity::Normal;
                     }
                 }
                 _ => {}
@@ -99,6 +107,17 @@ impl Game {
             StateChange::Replace(State::GameOver)
         } else {
             StateChange::None
+        }
+    }
+
+    fn normal_gravity(&self) -> f32 {
+        let level = self.lines_cleared / LEVELS_BETWEEN_GRAVITY_INCREASE;
+
+        let g = INITIAL_GRAVITY + GRAVITY_INCREASE * level as f32;
+        if g < SOFT_DROP_GRAVITY {
+            g
+        } else {
+            SOFT_DROP_GRAVITY
         }
     }
 
@@ -138,7 +157,11 @@ impl Game {
             }
         }
 
-        self.drop_tick += self.gravity;
+        self.drop_tick += match self.gravity {
+            Gravity::Normal => self.normal_gravity(),
+            Gravity::SoftDrop => SOFT_DROP_GRAVITY,
+            Gravity::HardDrop => HARD_DROP_GRAVITY,
+        };
 
         false
     }
@@ -171,7 +194,7 @@ impl Game {
             self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
 
         self.piece = Piece::new(self.bag.pop());
-        self.gravity = NORMAL_GRAVITY;
+        self.gravity = Gravity::Normal;
         self.drop_tick = 0.0;
         self.lock_delay = false;
         self.lines_cleared += lines_cleared;
