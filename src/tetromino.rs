@@ -1,7 +1,7 @@
 extern crate rand;
 
 use pos::Pos;
-use block::draw_block;
+use draw::draw_block;
 
 use rand::Rng;
 use sdl2::pixels::Color;

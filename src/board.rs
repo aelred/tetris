@@ -1,5 +1,5 @@
-use block::draw_block;
-use block::draw_border;
+use draw::draw_block;
+use draw::draw_border;
 use pos::Pos;
 
 use sdl2::pixels::Color;
@@ -15,6 +15,11 @@ pub struct Board {
     grid: [[Option<Color>; WIDTH as usize]; HEIGHT as usize],
 }
 
+pub struct FillResult {
+    pub is_game_over: bool,
+    pub lines_cleared: u32,
+}
+
 impl Board {
     pub fn new() -> Board {
         Board { grid: [[None; WIDTH as usize]; HEIGHT as usize] }
@@ -24,7 +29,7 @@ impl Board {
         out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
 
-    pub fn fill(&mut self, cells: Vec<Pos>, color: Color) -> bool {
+    pub fn fill(&mut self, cells: Vec<Pos>, color: Color) -> FillResult {
         let mut is_game_over = true;
 
         for cell in cells {
@@ -34,9 +39,10 @@ impl Board {
             self.fill_pos(cell, color);
         }
 
-        self.check_clear();
-
-        is_game_over
+        FillResult {
+            is_game_over: is_game_over,
+            lines_cleared: self.check_clear(),
+        }
     }
 
     fn fill_pos(&mut self, pos: Pos, color: Color) {
@@ -44,7 +50,9 @@ impl Board {
         self.grid[pos.y() as usize][pos.x() as usize] = Some(color);
     }
 
-    fn check_clear(&mut self) {
+    fn check_clear(&mut self) -> u32 {
+        let mut lines_cleared = 0;
+
         for y in 0..HEIGHT {
             let mut clear = true;
 
@@ -57,8 +65,11 @@ impl Board {
 
             if clear {
                 self.clear_row(y);
+                lines_cleared += 1;
             }
         }
+
+        lines_cleared
     }
 
     fn clear_row(&mut self, y: u8) {

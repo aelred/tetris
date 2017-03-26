@@ -4,7 +4,7 @@ mod macros;
 mod tetromino;
 mod pos;
 mod board;
-mod block;
+mod draw;
 mod piece;
 mod state;
 mod game;

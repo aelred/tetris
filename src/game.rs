@@ -1,7 +1,8 @@
-use block::BLOCK_SIZE;
+use draw::BLOCK_SIZE;
 use board;
 use board::HIDE_ROWS;
 use board::Board;
+use board::FillResult;
 use piece::Piece;
 use state::State;
 use state::StateChange;
@@ -9,8 +10,10 @@ use pos::Pos;
 use tetromino;
 use tetromino::Rotation;
 use tetromino::Bag;
-use block::draw_border;
+use draw::draw_border;
+use draw::draw_text;
 
+use sdl2::ttf::Font;
 use sdl2::event::Event;
 use sdl2::rect::Rect;
 use sdl2::keyboard::Keycode;
@@ -28,6 +31,7 @@ pub struct Game {
     drop_tick: f32,
     lock_delay: bool,
     gravity: f32,
+    lines_cleared: u32,
 }
 
 impl Game {
@@ -40,10 +44,15 @@ impl Game {
             drop_tick: 0.0,
             lock_delay: false,
             gravity: NORMAL_GRAVITY,
+            lines_cleared: 0,
         }
     }
 
-    pub fn update(&mut self, renderer: &mut Renderer, events: &[Event]) -> StateChange {
+    pub fn update(&mut self,
+                  renderer: &mut Renderer,
+                  font: &Font,
+                  events: &[Event])
+                  -> StateChange {
 
         for event in events {
             match *event {
@@ -79,6 +88,8 @@ impl Game {
         self.piece.draw(renderer);
 
         self.draw_next(renderer);
+
+        self.draw_score(renderer, font);
 
         let is_game_over = self.update_piece();
 
@@ -154,18 +165,31 @@ impl Game {
     }
 
     fn lock(&mut self) -> bool {
-        let mut is_game_over = self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
+        let FillResult { mut is_game_over, lines_cleared } =
+            self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = NORMAL_GRAVITY;
         self.drop_tick = 0.0;
         self.lock_delay = false;
+        self.lines_cleared += lines_cleared;
 
         if self.collides() {
             is_game_over = true;
         }
 
         is_game_over
+    }
+
+    fn draw_score(&self, renderer: &mut Renderer, font: &Font) {
+        renderer.set_viewport(Some(*SCORE_VIEW));
+        let line_header = draw_text("lines", 0, 0, 1, renderer, font);
+        draw_text(&self.lines_cleared.to_string(),
+                  0,
+                  line_header.height() as i32,
+                  2,
+                  renderer,
+                  font);
     }
 
     fn draw_next(&self, renderer: &mut Renderer) {
@@ -202,6 +226,8 @@ lazy_static! {
                                             BOARD_HEIGHT);
 
     static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+
+    static ref SCORE_VIEW: Rect = Rect::new(PREVIEW_X + BOARD_BORDER as i32 * 2, BOARD_BORDER as i32, PREVIEW_WIDTH, BOARD_HEIGHT);
 }
 
 const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
