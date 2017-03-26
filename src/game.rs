@@ -32,6 +32,7 @@ pub struct Game {
     lock_delay: bool,
     gravity: f32,
     lines_cleared: u32,
+    score: u32,
 }
 
 impl Game {
@@ -45,6 +46,7 @@ impl Game {
             lock_delay: false,
             gravity: NORMAL_GRAVITY,
             lines_cleared: 0,
+            score: 0,
         }
     }
 
@@ -173,6 +175,7 @@ impl Game {
         self.drop_tick = 0.0;
         self.lock_delay = false;
         self.lines_cleared += lines_cleared;
+        self.score += lines_cleared * lines_cleared * 100;
 
         if self.collides() {
             is_game_over = true;
@@ -183,10 +186,22 @@ impl Game {
 
     fn draw_score(&self, renderer: &mut Renderer, font: &Font) {
         renderer.set_viewport(Some(*SCORE_VIEW));
-        let line_header = draw_text("lines", 0, 0, 1, renderer, font);
-        draw_text(&self.lines_cleared.to_string(),
+        let lines_header = draw_text("lines", 0, 0, 1, renderer, font);
+        let lines = draw_text(&self.lines_cleared.to_string(),
+                              0,
+                              lines_header.height() as i32,
+                              2,
+                              renderer,
+                              font);
+        let score_header = draw_text("score",
+                                     0,
+                                     lines.y() + lines.height() as i32 + PAD as i32,
+                                     1,
+                                     renderer,
+                                     font);
+        draw_text(&self.score.to_string(),
                   0,
-                  line_header.height() as i32,
+                  score_header.y() + score_header.height() as i32,
                   2,
                   renderer,
                   font);
@@ -227,7 +242,7 @@ lazy_static! {
 
     static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 
-    static ref SCORE_VIEW: Rect = Rect::new(PREVIEW_X + BOARD_BORDER as i32 * 2, BOARD_BORDER as i32, PREVIEW_WIDTH, BOARD_HEIGHT);
+    static ref SCORE_VIEW: Rect = Rect::new(PREVIEW_X + BOARD_BORDER as i32 + PAD as i32, PAD as i32, PREVIEW_WIDTH, BOARD_HEIGHT);
 }
 
 const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
@@ -240,6 +255,8 @@ const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
                        (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
 const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
 const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
+
+const PAD: u32 = BLOCK_SIZE as u32;
 
 pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
 pub const WINDOW_HEIGHT: u32 = TOTAL_BOARD_HEIGHT;
