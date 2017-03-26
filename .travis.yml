@@ -1,4 +1,5 @@
 addons:
+  ssh_known_hosts: ael.red
   apt:
     packages:
       - libsdl2-dev
