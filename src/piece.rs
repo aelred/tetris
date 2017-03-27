@@ -3,8 +3,7 @@ use tetromino::Rotation;
 use pos::Pos;
 use board::WIDTH;
 use board::HIDE_ROWS;
-
-use sdl2::render::Renderer;
+use draw::Drawer;
 
 const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 
@@ -48,8 +47,8 @@ impl Piece {
         self.pos = self.pos.down();
     }
 
-    pub fn draw(&self, renderer: &mut Renderer) {
-        self.tetromino.draw(renderer,
+    pub fn draw(&self, drawer: &mut Drawer) {
+        self.tetromino.draw(drawer,
                             self.rot,
                             self.pos + Pos::new(0, -(HIDE_ROWS as i16)));
     }

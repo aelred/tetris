@@ -10,14 +10,11 @@ use pos::Pos;
 use tetromino;
 use tetromino::Rotation;
 use tetromino::Bag;
-use draw::draw_border;
-use draw::draw_text;
+use draw::Drawer;
 
-use sdl2::ttf::Font;
 use sdl2::event::Event;
 use sdl2::rect::Rect;
 use sdl2::keyboard::Keycode;
-use sdl2::render::Renderer;
 use sdl2::event::WindowEvent::FocusLost;
 
 const INITIAL_GRAVITY: f32 = 0.04;
@@ -58,11 +55,7 @@ impl Game {
         }
     }
 
-    pub fn update(&mut self,
-                  renderer: &mut Renderer,
-                  font: &Font,
-                  events: &[Event])
-                  -> StateChange {
+    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
 
         for event in events {
             match *event {
@@ -90,16 +83,16 @@ impl Game {
             }
         }
 
-        renderer.set_viewport(Some(*BOARD_BORDER_VIEW));
-        self.board.draw_border(renderer);
+        drawer.set_viewport(*BOARD_BORDER_VIEW);
+        self.board.draw_border(drawer);
 
-        renderer.set_viewport(Some(*BOARD_VIEW));
-        self.board.draw(renderer);
-        self.piece.draw(renderer);
+        drawer.set_viewport(*BOARD_VIEW);
+        self.board.draw(drawer);
+        self.piece.draw(drawer);
 
-        self.draw_next(renderer);
+        self.draw_next(drawer);
 
-        self.draw_score(renderer, font);
+        self.draw_score(drawer);
 
         let is_game_over = self.update_piece();
 
@@ -207,35 +200,28 @@ impl Game {
         is_game_over
     }
 
-    fn draw_score(&self, renderer: &mut Renderer, font: &Font) {
-        renderer.set_viewport(Some(*SCORE_VIEW));
-        let lines_header = draw_text("lines", 0, 0, 1, renderer, font);
-        let lines = draw_text(&self.lines_cleared.to_string(),
-                              0,
-                              lines_header.height() as i32,
-                              2,
-                              renderer,
-                              font);
-        let score_header = draw_text("score",
+    fn draw_score(&self, drawer: &mut Drawer) {
+        drawer.set_viewport(*SCORE_VIEW);
+        let lines_header = drawer.draw_text("lines", 0, 0, 1);
+        let lines = drawer.draw_text(&self.lines_cleared.to_string(),
                                      0,
-                                     lines.y() + lines.height() as i32 + PAD as i32,
-                                     1,
-                                     renderer,
-                                     font);
-        draw_text(&self.score.to_string(),
-                  0,
-                  score_header.y() + score_header.height() as i32,
-                  2,
-                  renderer,
-                  font);
+                                     lines_header.height() as i32,
+                                     2);
+        let score_header = drawer.draw_text("score",
+                                            0,
+                                            lines.y() + lines.height() as i32 + PAD as i32,
+                                            1);
+        drawer.draw_text(&self.score.to_string(),
+                         0,
+                         score_header.y() + score_header.height() as i32,
+                         2);
     }
 
-    fn draw_next(&self, renderer: &mut Renderer) {
-        renderer.set_viewport(Some(*PREVIEW_VIEW));
+    fn draw_next(&self, drawer: &mut Drawer) {
+        drawer.set_viewport(*PREVIEW_VIEW);
 
-        draw_border(renderer,
-                    Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
-        self.bag.peek().draw(renderer, Rotation::default(), Pos::new(1, 1));
+        drawer.draw_border(Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
+        self.bag.peek().draw(drawer, Rotation::default(), Pos::new(1, 1));
     }
 
     fn collides(&self) -> bool {

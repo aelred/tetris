@@ -1,9 +1,6 @@
 use game::Game;
-use draw::draw_text_centered;
-use draw::draw_text_under;
+use draw::Drawer;
 
-use sdl2::render::Renderer;
-use sdl2::ttf::Font;
 use sdl2::event::Event;
 use sdl2::event::WindowEvent::FocusGained;
 use sdl2::keyboard::Keycode;
@@ -20,20 +17,16 @@ impl State {
         State::Play(Box::new(Game::new()))
     }
 
-    pub fn update(&mut self,
-                  renderer: &mut Renderer,
-                  font: &Font,
-                  events: &[Event])
-                  -> StateChange {
+    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
         match *self {
-            State::Title => State::title_update(renderer, font, events),
-            State::Play(ref mut game) => game.update(renderer, font, events),
-            State::Paused => State::pause_update(renderer, font, events),
-            State::GameOver { score } => State::game_over_update(score, renderer, font, events),
+            State::Title => State::title_update(drawer, events),
+            State::Play(ref mut game) => game.update(drawer, events),
+            State::Paused => State::pause_update(drawer, events),
+            State::GameOver { score } => State::game_over_update(score, drawer, events),
         }
     }
 
-    fn title_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {
+    fn title_update(drawer: &mut Drawer, events: &[Event]) -> StateChange {
         for event in events {
             if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
                 if let Keycode::Return = keycode {
@@ -42,38 +35,27 @@ impl State {
             }
         }
 
-        let tetris_target = draw_text_centered("Tetris", 0, 0, 4, renderer, font);
+        let tetris_target = drawer.draw_text_centered("Tetris", 0, 0, 4);
 
-        draw_text_centered("[ Press Enter ]",
-                           0,
-                           tetris_target.height() as i32,
-                           1,
-                           renderer,
-                           font);
+        drawer.draw_text_centered("[ Press Enter ]", 0, tetris_target.height() as i32, 1);
 
 
         StateChange::None
     }
 
-    fn pause_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {
+    fn pause_update(drawer: &mut Drawer, events: &[Event]) -> StateChange {
         for event in events {
             if let Event::Window { win_event: FocusGained, .. } = *event {
                 return StateChange::Pop;
             }
         }
 
-        renderer.set_viewport(None);
-
-        draw_text_centered("Paused", 0, 0, 1, renderer, font);
+        drawer.draw_text_centered("Paused", 0, 0, 1);
 
         StateChange::None
     }
 
-    fn game_over_update(score: u32,
-                        renderer: &mut Renderer,
-                        font: &Font,
-                        events: &[Event])
-                        -> StateChange {
+    fn game_over_update(score: u32, drawer: &mut Drawer, events: &[Event]) -> StateChange {
         for event in events {
             if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
                 if let Keycode::Return = keycode {
@@ -82,11 +64,11 @@ impl State {
             }
         }
 
-        let game_over_target = draw_text_centered("Game Over", 0, 0, 3, renderer, font);
-        let score_header = draw_text_under("final score", &game_over_target, 10, 1, renderer, font);
-        let score_text = draw_text_under(&score.to_string(), &score_header, 0, 3, renderer, font);
+        let game_over_target = drawer.draw_text_centered("Game Over", 0, 0, 3);
+        let score_header = drawer.draw_text_under("final score", &game_over_target, 10, 1);
+        let score_text = drawer.draw_text_under(&score.to_string(), &score_header, 0, 3);
 
-        draw_text_under("[ Press Enter ]", &score_text, 10, 1, renderer, font);
+        drawer.draw_text_under("[ Press Enter ]", &score_text, 10, 1);
 
         StateChange::None
     }

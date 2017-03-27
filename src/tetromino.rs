@@ -1,12 +1,11 @@
 extern crate rand;
 
 use pos::Pos;
-use draw::draw_block;
+use draw::Drawer;
 
 use rand::Rng;
 use sdl2::pixels::Color;
 use sdl2::pixels::Color::RGB;
-use sdl2::render::Renderer;
 
 const NUM_TETROMINOES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -95,9 +94,9 @@ impl Tetromino {
         blocks
     }
 
-    pub fn draw(&self, renderer: &mut Renderer, rot: Rotation, pos: Pos) {
+    pub fn draw(&self, drawer: &mut Drawer, rot: Rotation, pos: Pos) {
         for block in self.blocks(rot) {
-            draw_block(renderer, pos + block, self.color);
+            drawer.draw_block(pos + block, self.color);
         }
     }
 }

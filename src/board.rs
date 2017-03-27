@@ -1,9 +1,7 @@
-use draw::draw_block;
-use draw::draw_border;
 use pos::Pos;
+use draw::Drawer;
 
 use sdl2::pixels::Color;
-use sdl2::render::Renderer;
 
 pub const WIDTH: u8 = 10;
 pub const HEIGHT: u8 = 24;
@@ -82,25 +80,20 @@ impl Board {
         }
     }
 
-    pub fn draw_border(&self, renderer: &mut Renderer) {
-        draw_border(renderer,
-                    Pos::new(WIDTH as i16, (HEIGHT - HIDE_ROWS) as i16));
+    pub fn draw_border(&self, drawer: &mut Drawer) {
+        drawer.draw_border(Pos::new(WIDTH as i16, (HEIGHT - HIDE_ROWS) as i16));
     }
 
-    pub fn draw(&self, renderer: &mut Renderer) {
+    pub fn draw(&self, drawer: &mut Drawer) {
         for y in HIDE_ROWS..HEIGHT {
             for x in 0..WIDTH {
                 if let Some(color) = self.grid[y as usize][x as usize] {
                     let y = y - HIDE_ROWS;
                     let cell_pos = Pos::new(x as i16, y as i16);
-                    self.draw_block(renderer, cell_pos, color)
+                    drawer.draw_block(cell_pos, color)
                 }
             }
         }
-    }
-
-    pub fn draw_block(&self, renderer: &mut Renderer, pos: Pos, color: Color) {
-        draw_block(renderer, pos, color);
     }
 }
 

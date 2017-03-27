@@ -27,17 +27,15 @@ extern crate quickcheck;
 use state::State;
 use game::WINDOW_WIDTH;
 use game::WINDOW_HEIGHT;
+use draw::Drawer;
 
 use std::cmp::max;
 
 use sdl2::Sdl;
 use sdl2::rwops::RWops;
 use sdl2::ttf;
-use sdl2::ttf::Font;
-use sdl2::render::Renderer;
 use sdl2::EventPump;
 use sdl2::video::Window;
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
@@ -51,8 +49,7 @@ const FONT_MULTIPLE: u16 = 9;
 const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIPLE;
 
 struct Context<'a> {
-    renderer: Renderer<'a>,
-    font: Font<'a, 'a>,
+    drawer: Drawer<'a>,
     event_pump: EventPump,
     states: Vec<State>,
 }
@@ -69,8 +66,7 @@ fn main() {
     let window = create_window(&sdl_context);
 
     let mut context = Context {
-        renderer: window.renderer().build().unwrap(),
-        font: font,
+        drawer: Drawer::new(window.renderer().build().unwrap(), font),
         event_pump: sdl_context.event_pump().unwrap(),
         states: Vec::new(),
     };
@@ -108,9 +104,7 @@ fn play_tetris(mut context: &mut Context) {
 }
 
 fn main_loop(context: &mut Context) {
-    context.renderer.set_viewport(None);
-    context.renderer.set_draw_color(Color::RGB(32, 48, 32));
-    context.renderer.clear();
+    context.drawer.clear();
 
     let mut events = Vec::new();
 
@@ -126,12 +120,12 @@ fn main_loop(context: &mut Context) {
 
     let state_change = {
         let mut state = context.states.last_mut().unwrap();
-        state.update(&mut context.renderer, &context.font, &events)
+        state.update(&mut context.drawer, &events)
     };
 
     state_change.apply(&mut context.states);
 
-    context.renderer.present();
+    context.drawer.present();
 }
 
 fn exit() {
