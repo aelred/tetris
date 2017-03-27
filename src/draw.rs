@@ -4,8 +4,10 @@ use game::WINDOW_WIDTH;
 
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
+use sdl2::rect::Point;
 use sdl2::render::Renderer;
 use sdl2::render::TextureQuery;
+use sdl2::render::Texture;
 use sdl2::ttf::Font;
 
 const INNER_BLOCK_SIZE: u8 = 22;
@@ -46,16 +48,7 @@ pub fn draw_text(text: &str,
                  renderer: &mut Renderer,
                  font: &Font)
                  -> Rect {
-    let surface = font.render(text).solid(Color::RGB(255, 255, 255)).unwrap();
-    let texture = renderer.create_texture_from_surface(&surface).unwrap();
-
-    let TextureQuery { width, height, .. } = texture.query();
-
-    let target = Rect::new(x, y, width * size, height * size);
-
-    renderer.copy(&texture, None, Some(target)).unwrap();
-
-    target
+    draw_text_general(|w, h| Rect::new(x, y, w, h), text, size, renderer, font)
 }
 
 pub fn draw_text_centered(text: &str,
@@ -65,24 +58,63 @@ pub fn draw_text_centered(text: &str,
                           renderer: &mut Renderer,
                           font: &Font)
                           -> Rect {
-    let surface = font.render(text).solid(Color::RGB(255, 255, 255)).unwrap();
-    let texture = renderer.create_texture_from_surface(&surface).unwrap();
+    draw_text_general(|w, h| {
+                          let mut target = center_view(w, h);
+                          target.offset(offset_x, offset_y);
+                          target
+                      },
+                      text,
+                      size,
+                      renderer,
+                      font)
+}
+
+pub fn draw_text_under(text: &str,
+                       rect: &Rect,
+                       pad: u32,
+                       size: u32,
+                       renderer: &mut Renderer,
+                       font: &Font)
+                       -> Rect {
+    draw_text_general(|w, h| {
+                          Rect::new(rect.center().x() - w as i32 / 2,
+                                    rect.bottom() + pad as i32,
+                                    w,
+                                    h)
+                      },
+                      text,
+                      size,
+                      renderer,
+                      font)
+}
+
+pub fn draw_text_general<F>(func: F,
+                            text: &str,
+                            size: u32,
+                            renderer: &mut Renderer,
+                            font: &Font)
+                            -> Rect
+    where F: Fn(u32, u32) -> Rect
+{
+    let texture = make_text(text, renderer, font);
 
     let TextureQuery { width, height, .. } = texture.query();
 
-    let target = center_view(offset_x, offset_y, width * size, height * size);
+    let target = func(width * size, height * size);
 
     renderer.copy(&texture, None, Some(target)).unwrap();
 
     target
 }
 
-fn center_view(x: i32, y: i32, width: u32, height: u32) -> Rect {
+pub fn make_text(text: &str, renderer: &mut Renderer, font: &Font) -> Texture {
+    let surface = font.render(text).solid(Color::RGB(255, 255, 255)).unwrap();
+    renderer.create_texture_from_surface(&surface).unwrap()
+}
+
+fn center_view(width: u32, height: u32) -> Rect {
     let center_x = (WINDOW_WIDTH / 2) as i32;
     let center_y = (WINDOW_HEIGHT / 2) as i32;
 
-    Rect::new(center_x + x - width as i32 / 2,
-              center_y + y - height as i32 / 2,
-              width,
-              height)
+    Rect::from_center(Point::new(center_x, center_y), width, height)
 }

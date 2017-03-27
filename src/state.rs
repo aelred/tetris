@@ -1,5 +1,6 @@
 use game::Game;
 use draw::draw_text_centered;
+use draw::draw_text_under;
 
 use sdl2::render::Renderer;
 use sdl2::ttf::Font;
@@ -11,7 +12,7 @@ pub enum State {
     Title,
     Play(Box<Game>),
     Paused,
-    GameOver,
+    GameOver { score: u32 },
 }
 
 impl State {
@@ -28,7 +29,7 @@ impl State {
             State::Title => State::title_update(renderer, font, events),
             State::Play(ref mut game) => game.update(renderer, font, events),
             State::Paused => State::pause_update(renderer, font, events),
-            State::GameOver => State::game_over_update(renderer, font, events),
+            State::GameOver { score } => State::game_over_update(score, renderer, font, events),
         }
     }
 
@@ -68,7 +69,11 @@ impl State {
         StateChange::None
     }
 
-    fn game_over_update(renderer: &mut Renderer, font: &Font, events: &[Event]) -> StateChange {
+    fn game_over_update(score: u32,
+                        renderer: &mut Renderer,
+                        font: &Font,
+                        events: &[Event])
+                        -> StateChange {
         for event in events {
             if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
                 if let Keycode::Return = keycode {
@@ -78,13 +83,10 @@ impl State {
         }
 
         let game_over_target = draw_text_centered("Game Over", 0, 0, 3, renderer, font);
+        let score_header = draw_text_under("final score", &game_over_target, 10, 1, renderer, font);
+        let score_text = draw_text_under(&score.to_string(), &score_header, 0, 3, renderer, font);
 
-        draw_text_centered("[ Press Enter ]",
-                           0,
-                           game_over_target.height() as i32,
-                           1,
-                           renderer,
-                           font);
+        draw_text_under("[ Press Enter ]", &score_text, 10, 1, renderer, font);
 
         StateChange::None
     }

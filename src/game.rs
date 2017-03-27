@@ -104,7 +104,7 @@ impl Game {
         let is_game_over = self.update_piece();
 
         if is_game_over {
-            StateChange::Replace(State::GameOver)
+            StateChange::Replace(State::GameOver { score: self.score })
         } else {
             StateChange::None
         }
