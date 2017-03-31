@@ -54,39 +54,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_text(&mut self, text: &str, x: i32, y: i32, size: u32) -> Rect {
-        self.draw_text_general(|w, h| Rect::new(x, y, w, h), text, size)
-    }
-
-    pub fn draw_text_centered(&mut self,
-                              text: &str,
-                              offset_x: i32,
-                              offset_y: i32,
-                              size: u32)
-                              -> Rect {
-        self.draw_text_general(|w, h| {
-                                   let mut target = center_view(w, h);
-                                   target.offset(offset_x, offset_y);
-                                   target
-                               },
-                               text,
-                               size)
-    }
-
-    pub fn draw_text_under(&mut self, text: &str, rect: &Rect, pad: u32, size: u32) -> Rect {
-        self.draw_text_general(|w, h| {
-                                   Rect::new(rect.center().x() - w as i32 / 2,
-                                             rect.bottom() + pad as i32,
-                                             w,
-                                             h)
-                               },
-                               text,
-                               size)
-    }
-
-    pub fn draw_text_general<F>(&mut self, func: F, text: &str, size: u32) -> Rect
-        where F: Fn(u32, u32) -> Rect
-    {
+    pub fn draw_text(&mut self, text_pos: TextPos, text: &str, size: u32) -> Rect {
         let surface = self.font
             .render(text)
             .solid(Color::RGB(255, 255, 255))
@@ -95,7 +63,7 @@ impl<'a> Drawer<'a> {
 
         let TextureQuery { width, height, .. } = texture.query();
 
-        let target = func(width * size, height * size);
+        let target = text_pos.apply(width * size, height * size);
 
         self.renderer.copy(&texture, None, Some(target)).unwrap();
 
@@ -117,9 +85,27 @@ impl<'a> Drawer<'a> {
     }
 }
 
-fn center_view(width: u32, height: u32) -> Rect {
-    let center_x = (WINDOW_WIDTH / 2) as i32;
-    let center_y = (WINDOW_HEIGHT / 2) as i32;
+pub enum TextPos {
+    At(i32, i32),
+    Centered,
+    Under(Rect, u32),
+}
 
-    Rect::from_center(Point::new(center_x, center_y), width, height)
+impl TextPos {
+    fn apply(self, width: u32, height: u32) -> Rect {
+        match self {
+            TextPos::At(x, y) => Rect::new(x, y, width, height),
+            TextPos::Centered => {
+                let center_x = (WINDOW_WIDTH / 2) as i32;
+                let center_y = (WINDOW_HEIGHT / 2) as i32;
+                Rect::from_center(Point::new(center_x, center_y), width, height)
+            }
+            TextPos::Under(rect, pad) => {
+                Rect::new(rect.center().x() - width as i32 / 2,
+                          rect.bottom() + pad as i32,
+                          width,
+                          height)
+            }
+        }
+    }
 }
