@@ -1,6 +1,5 @@
 use game::Game;
 use draw::Drawer;
-use draw::TextPos;
 
 use sdl2::event::Event;
 use sdl2::event::WindowEvent::FocusGained;
@@ -36,10 +35,13 @@ impl State {
             }
         }
 
-        let tetris_target = drawer.draw_text(TextPos::Centered, "Tetris", 4);
-
-        drawer.draw_text(TextPos::Under(tetris_target, 10), "[ Press Enter ]", 1);
-
+        drawer.text()
+            .size(4)
+            .centered()
+            .draw("Tetris")
+            .size(1)
+            .under(10)
+            .draw("[ Press Enter ]");
 
         StateChange::None
     }
@@ -51,7 +53,7 @@ impl State {
             }
         }
 
-        drawer.draw_text(TextPos::Centered, "Paused", 1);
+        drawer.text().centered().draw("Paused");
 
         StateChange::None
     }
@@ -65,11 +67,19 @@ impl State {
             }
         }
 
-        let game_over_target = drawer.draw_text(TextPos::Centered, "Game Over", 3);
-        let score_header = drawer.draw_text(TextPos::Under(game_over_target, 10), "final score", 1);
-        let score_text = drawer.draw_text(TextPos::Under(score_header, 0), &score.to_string(), 3);
-
-        drawer.draw_text(TextPos::Under(score_text, 10), "[ Press Enter ]", 1);
+        drawer.text()
+            .size(3)
+            .centered()
+            .draw("Game Over")
+            .under(10)
+            .size(1)
+            .draw("final score")
+            .under(0)
+            .size(3)
+            .draw(&score.to_string())
+            .under(10)
+            .size(1)
+            .draw("[ Press Enter ]");
 
         StateChange::None
     }

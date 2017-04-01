@@ -11,7 +11,6 @@ use tetromino;
 use tetromino::Rotation;
 use tetromino::Bag;
 use draw::Drawer;
-use draw::TextPos;
 
 use sdl2::event::Event;
 use sdl2::rect::Rect;
@@ -203,17 +202,18 @@ impl Game {
 
     fn draw_score(&self, drawer: &mut Drawer) {
         drawer.set_viewport(*SCORE_VIEW);
-        let lines_header = drawer.draw_text(TextPos::At(0, 0), "lines", 1);
-        let lines = drawer.draw_text(TextPos::At(0, lines_header.height() as i32),
-                                     &self.lines_cleared.to_string(),
-                                     2);
-        let score_header =
-            drawer.draw_text(TextPos::At(0, lines.y() + lines.height() as i32 + PAD as i32),
-                             "score",
-                             1);
-        drawer.draw_text(TextPos::At(0, score_header.y() + score_header.height() as i32),
-                         &self.score.to_string(),
-                         2);
+
+        drawer.text()
+            .draw("lines")
+            .size(2)
+            .left(0)
+            .draw(&self.lines_cleared.to_string())
+            .size(1)
+            .left(PAD)
+            .draw("score")
+            .size(2)
+            .left(0)
+            .draw(&self.score.to_string());
     }
 
     fn draw_next(&self, drawer: &mut Drawer) {

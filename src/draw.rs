@@ -54,7 +54,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_text(&mut self, text_pos: TextPos, text: &str, size: u32) -> Rect {
+    fn draw_text(&mut self, text_pos: &TextPos, text: &str, size: u32) -> Rect {
         let surface = self.font
             .render(text)
             .solid(Color::RGB(255, 255, 255))
@@ -68,6 +68,15 @@ impl<'a> Drawer<'a> {
         self.renderer.copy(&texture, None, Some(target)).unwrap();
 
         target
+    }
+
+    pub fn text<'b>(&'b mut self) -> TextDrawer<'b, 'a> {
+        TextDrawer {
+            last_rect: Rect::new(0, 0, 0, 0),
+            pos: TextPos::At(0, 0),
+            size: 1,
+            drawer: self,
+        }
     }
 
     pub fn set_viewport(&mut self, rect: Rect) {
@@ -85,15 +94,51 @@ impl<'a> Drawer<'a> {
     }
 }
 
-pub enum TextPos {
+pub struct TextDrawer<'a, 'b: 'a> {
+    last_rect: Rect,
+    pos: TextPos,
+    size: u32,
+    drawer: &'a mut Drawer<'b>,
+}
+
+impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
+    pub fn draw(mut self, text: &str) -> TextDrawer<'a, 'b> {
+        self.last_rect = self.drawer.draw_text(&self.pos, text, self.size);
+        self
+    }
+
+    pub fn size(mut self, size: u32) -> TextDrawer<'a, 'b> {
+        self.size = size;
+        self
+    }
+
+    pub fn under(mut self, pad: u32) -> TextDrawer<'a, 'b> {
+        self.pos = TextPos::Under(self.last_rect, pad);
+        self
+    }
+
+    pub fn left(mut self, pad: u32) -> TextDrawer<'a, 'b> {
+        self.pos = TextPos::Left(self.last_rect, pad);
+        self
+    }
+
+    pub fn centered(mut self) -> TextDrawer<'a, 'b> {
+        self.pos = TextPos::Centered;
+        self
+    }
+}
+
+enum TextPos {
     At(i32, i32),
     Centered,
     Under(Rect, u32),
+    Left(Rect, u32),
+    Right(Rect, u32),
 }
 
 impl TextPos {
-    fn apply(self, width: u32, height: u32) -> Rect {
-        match self {
+    fn apply(&self, width: u32, height: u32) -> Rect {
+        match *self {
             TextPos::At(x, y) => Rect::new(x, y, width, height),
             TextPos::Centered => {
                 let center_x = (WINDOW_WIDTH / 2) as i32;
@@ -102,6 +147,15 @@ impl TextPos {
             }
             TextPos::Under(rect, pad) => {
                 Rect::new(rect.center().x() - width as i32 / 2,
+                          rect.bottom() + pad as i32,
+                          width,
+                          height)
+            }
+            TextPos::Left(rect, pad) => {
+                Rect::new(rect.x(), rect.bottom() + pad as i32, width, height)
+            }
+            TextPos::Right(rect, pad) => {
+                Rect::new(rect.right() - width as i32,
                           rect.bottom() + pad as i32,
                           width,
                           height)
