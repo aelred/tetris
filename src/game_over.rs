@@ -9,14 +9,17 @@ use sdl2::keyboard::Keycode;
 
 pub struct GameOver {
     hi_scores: Vec<HiScore>,
-    score: u32,
+    score: HiScore,
 }
 
 impl GameOver {
     pub fn new(score: u32) -> Self {
         GameOver {
             hi_scores: get_hiscores(),
-            score: score,
+            score: HiScore {
+                score: score,
+                name: "".to_string(),
+            },
         }
     }
 
@@ -40,13 +43,35 @@ impl GameOver {
             .draw("final score")
             .under()
             .size(3)
-            .draw(&self.score.to_string());
+            .draw(&self.score.score.to_string());
 
-        text = draw_hiscores(&self.hi_scores, text);
+        text = self.draw_hiscores(text);
 
         text.size(1).draw("[ Press Enter ]");
 
         StateChange::None
+    }
+
+    fn draw_hiscores<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
+        let offset = 100;
+
+        let mut text = text.size(3)
+            .under()
+            .offset(0, 10)
+            .draw("High Scores");
+
+        text = text.size(2).under().offset(0, 10);
+
+        for &HiScore { ref score, ref name } in &self.hi_scores {
+            text = text.offset(-offset, 0)
+                .draw(&name)
+                .offset(offset * 2, 0)
+                .draw(&score.to_string())
+                .under()
+                .offset(-offset, 10);
+        }
+
+        text.under().offset(-offset, 10)
     }
 }
 
@@ -96,27 +121,4 @@ fn get_hiscores() -> Vec<HiScore> {
              score: 100,
              name: "EMY".to_string(),
          }]
-}
-
-fn draw_hiscores<'a, 'b>(hiscores: &Vec<HiScore>, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-
-    let offset = 100;
-
-    let mut text = text.size(3)
-        .under()
-        .offset(0, 10)
-        .draw("High Scores");
-
-    text = text.size(2).under().offset(0, 10);
-
-    for &HiScore { ref score, ref name } in hiscores {
-        text = text.offset(-offset, 0)
-            .draw(&name)
-            .offset(offset * 2, 0)
-            .draw(&score.to_string())
-            .under()
-            .offset(-offset, 10);
-    }
-
-    text.under().offset(-offset, 10)
 }
