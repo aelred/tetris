@@ -8,6 +8,7 @@ mod draw;
 mod piece;
 mod state;
 mod game;
+mod game_over;
 
 #[macro_use]
 extern crate lazy_static;

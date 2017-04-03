@@ -1,5 +1,6 @@
 use game::Game;
 use draw::Drawer;
+use game_over;
 
 use sdl2::event::Event;
 use sdl2::event::WindowEvent::FocusGained;
@@ -13,7 +14,7 @@ pub enum State {
 }
 
 impl State {
-    fn play() -> State {
+    pub fn play() -> State {
         State::Play(Box::new(Game::new()))
     }
 
@@ -22,7 +23,7 @@ impl State {
             State::Title => State::title_update(drawer, events),
             State::Play(ref mut game) => game.update(drawer, events),
             State::Paused => State::pause_update(drawer, events),
-            State::GameOver { score } => State::game_over_update(score, drawer, events),
+            State::GameOver { score } => game_over::update(score, drawer, events),
         }
     }
 
@@ -54,32 +55,6 @@ impl State {
         }
 
         drawer.text().centered().draw("Paused");
-
-        StateChange::None
-    }
-
-    fn game_over_update(score: u32, drawer: &mut Drawer, events: &[Event]) -> StateChange {
-        for event in events {
-            if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
-                if let Keycode::Return = keycode {
-                    return StateChange::Replace(State::play());
-                }
-            }
-        }
-
-        drawer.text()
-            .size(3)
-            .centered()
-            .draw("Game Over")
-            .under(10)
-            .size(1)
-            .draw("final score")
-            .under(0)
-            .size(3)
-            .draw(&score.to_string())
-            .under(10)
-            .size(1)
-            .draw("[ Press Enter ]");
 
         StateChange::None
     }

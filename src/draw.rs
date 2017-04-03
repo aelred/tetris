@@ -21,7 +21,7 @@ pub struct Drawer<'a> {
 }
 
 impl<'a> Drawer<'a> {
-    pub fn new<'b>(renderer: Renderer<'b>, font: Font<'b, 'b>) -> Drawer<'b> {
+    pub fn new(renderer: Renderer<'a>, font: Font<'a, 'a>) -> Self {
         Drawer {
             renderer: renderer,
             font: font,
@@ -72,7 +72,7 @@ impl<'a> Drawer<'a> {
 
     pub fn text<'b>(&'b mut self) -> TextDrawer<'b, 'a> {
         TextDrawer {
-            last_rect: Rect::new(0, 0, 0, 0),
+            last_rect: Rect::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT),
             pos: TextPos::At(0, 0),
             size: 1,
             drawer: self,
@@ -102,28 +102,38 @@ pub struct TextDrawer<'a, 'b: 'a> {
 }
 
 impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
-    pub fn draw(mut self, text: &str) -> TextDrawer<'a, 'b> {
+    pub fn draw(mut self, text: &str) -> Self {
         self.last_rect = self.drawer.draw_text(&self.pos, text, self.size);
         self
     }
 
-    pub fn size(mut self, size: u32) -> TextDrawer<'a, 'b> {
+    pub fn size(mut self, size: u32) -> Self {
         self.size = size;
         self
     }
 
-    pub fn under(mut self, pad: u32) -> TextDrawer<'a, 'b> {
+    pub fn top(mut self, pad: u32) -> Self {
+        self.pos = TextPos::Top(self.last_rect, pad);
+        self
+    }
+
+    pub fn under(mut self, pad: u32) -> Self {
         self.pos = TextPos::Under(self.last_rect, pad);
         self
     }
 
-    pub fn left(mut self, pad: u32) -> TextDrawer<'a, 'b> {
+    pub fn left(mut self, pad: u32) -> Self {
         self.pos = TextPos::Left(self.last_rect, pad);
         self
     }
 
-    pub fn centered(mut self) -> TextDrawer<'a, 'b> {
+    pub fn centered(mut self) -> Self {
         self.pos = TextPos::Centered;
+        self
+    }
+
+    pub fn offset(mut self, x: i32, y: i32) -> Self {
+        self.pos = TextPos::Offset(Box::new(self.pos), x, y);
         self
     }
 }
@@ -131,9 +141,10 @@ impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
 enum TextPos {
     At(i32, i32),
     Centered,
+    Top(Rect, u32),
     Under(Rect, u32),
     Left(Rect, u32),
-    Right(Rect, u32),
+    Offset(Box<TextPos>, i32, i32),
 }
 
 impl TextPos {
@@ -145,6 +156,12 @@ impl TextPos {
                 let center_y = (WINDOW_HEIGHT / 2) as i32;
                 Rect::from_center(Point::new(center_x, center_y), width, height)
             }
+            TextPos::Top(rect, pad) => {
+                Rect::new(rect.center().x() - width as i32 / 2,
+                          rect.y() + pad as i32,
+                          width,
+                          height)
+            }
             TextPos::Under(rect, pad) => {
                 Rect::new(rect.center().x() - width as i32 / 2,
                           rect.bottom() + pad as i32,
@@ -154,11 +171,10 @@ impl TextPos {
             TextPos::Left(rect, pad) => {
                 Rect::new(rect.x(), rect.bottom() + pad as i32, width, height)
             }
-            TextPos::Right(rect, pad) => {
-                Rect::new(rect.right() - width as i32,
-                          rect.bottom() + pad as i32,
-                          width,
-                          height)
+            TextPos::Offset(ref pos, x, y) => {
+                let mut rect = pos.apply(width, height);
+                rect.offset(x, y);
+                rect
             }
         }
     }
