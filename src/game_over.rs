@@ -55,23 +55,23 @@ struct HiScore {
 
 fn get_hiscores() -> Vec<HiScore> {
     vec![HiScore {
-             score: 0,
+             score: 1000,
              name: "FEL".to_string(),
          },
          HiScore {
-             score: 100,
+             score: 900,
              name: "ANG".to_string(),
          },
          HiScore {
-             score: 200,
+             score: 800,
              name: "LLY".to_string(),
          },
          HiScore {
-             score: 300,
+             score: 700,
              name: "MKO".to_string(),
          },
          HiScore {
-             score: 400,
+             score: 600,
              name: "ALX".to_string(),
          },
          HiScore {
@@ -79,19 +79,19 @@ fn get_hiscores() -> Vec<HiScore> {
              name: "JSN".to_string(),
          },
          HiScore {
-             score: 600,
+             score: 400,
              name: "SHD".to_string(),
          },
          HiScore {
-             score: 700,
+             score: 300,
              name: "CHR".to_string(),
          },
          HiScore {
-             score: 800,
+             score: 200,
              name: "SRH".to_string(),
          },
          HiScore {
-             score: 900,
+             score: 100,
              name: "EMY".to_string(),
          }]
 }
