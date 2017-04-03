@@ -112,18 +112,18 @@ impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
         self
     }
 
-    pub fn top(mut self, pad: u32) -> Self {
-        self.pos = TextPos::Top(self.last_rect, pad);
+    pub fn top(mut self) -> Self {
+        self.pos = TextPos::Top(self.last_rect);
         self
     }
 
-    pub fn under(mut self, pad: u32) -> Self {
-        self.pos = TextPos::Under(self.last_rect, pad);
+    pub fn under(mut self) -> Self {
+        self.pos = TextPos::Under(self.last_rect);
         self
     }
 
-    pub fn left(mut self, pad: u32) -> Self {
-        self.pos = TextPos::Left(self.last_rect, pad);
+    pub fn left(mut self) -> Self {
+        self.pos = TextPos::Left(self.last_rect);
         self
     }
 
@@ -141,9 +141,9 @@ impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
 enum TextPos {
     At(i32, i32),
     Centered,
-    Top(Rect, u32),
-    Under(Rect, u32),
-    Left(Rect, u32),
+    Top(Rect),
+    Under(Rect),
+    Left(Rect),
     Offset(Box<TextPos>, i32, i32),
 }
 
@@ -156,21 +156,19 @@ impl TextPos {
                 let center_y = (WINDOW_HEIGHT / 2) as i32;
                 Rect::from_center(Point::new(center_x, center_y), width, height)
             }
-            TextPos::Top(rect, pad) => {
+            TextPos::Top(rect) => {
                 Rect::new(rect.center().x() - width as i32 / 2,
-                          rect.y() + pad as i32,
+                          rect.y(),
                           width,
                           height)
             }
-            TextPos::Under(rect, pad) => {
+            TextPos::Under(rect) => {
                 Rect::new(rect.center().x() - width as i32 / 2,
-                          rect.bottom() + pad as i32,
+                          rect.bottom(),
                           width,
                           height)
             }
-            TextPos::Left(rect, pad) => {
-                Rect::new(rect.x(), rect.bottom() + pad as i32, width, height)
-            }
+            TextPos::Left(rect) => Rect::new(rect.x(), rect.bottom(), width, height),
             TextPos::Offset(ref pos, x, y) => {
                 let mut rect = pos.apply(width, height);
                 rect.offset(x, y);

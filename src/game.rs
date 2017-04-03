@@ -207,13 +207,14 @@ impl Game {
         drawer.text()
             .draw("lines")
             .size(2)
-            .left(0)
+            .left()
             .draw(&self.lines_cleared.to_string())
             .size(1)
-            .left(PAD)
+            .left()
+            .offset(0, PAD as i32)
             .draw("score")
             .size(2)
-            .left(0)
+            .left()
             .draw(&self.score.to_string());
     }
 

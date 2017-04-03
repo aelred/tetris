@@ -41,7 +41,8 @@ impl State {
             .centered()
             .draw("Tetris")
             .size(1)
-            .under(10)
+            .under()
+            .offset(0, 10)
             .draw("[ Press Enter ]");
 
         StateChange::None

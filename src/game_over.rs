@@ -31,12 +31,14 @@ impl GameOver {
 
         let mut text = drawer.text()
             .size(3)
-            .top(50)
+            .top()
+            .offset(0, 50)
             .draw("Game Over")
-            .under(10)
+            .under()
+            .offset(0, 10)
             .size(1)
             .draw("final score")
-            .under(0)
+            .under()
             .size(3)
             .draw(&self.score.to_string());
 
@@ -100,18 +102,21 @@ fn draw_hiscores<'a, 'b>(hiscores: &Vec<HiScore>, text: TextDrawer<'a, 'b>) -> T
 
     let offset = 100;
 
-    let mut text = text.size(3).under(10).draw("High Scores");
+    let mut text = text.size(3)
+        .under()
+        .offset(0, 10)
+        .draw("High Scores");
 
-    text = text.size(2).under(10);
+    text = text.size(2).under().offset(0, 10);
 
     for &HiScore { ref score, ref name } in hiscores {
         text = text.offset(-offset, 0)
             .draw(&name)
             .offset(offset * 2, 0)
             .draw(&score.to_string())
-            .under(10)
-            .offset(-offset, 0);
+            .under()
+            .offset(-offset, 10);
     }
 
-    text.under(10).offset(-offset, 0)
+    text.under().offset(-offset, 10)
 }
