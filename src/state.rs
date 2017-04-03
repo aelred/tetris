@@ -1,6 +1,6 @@
 use game::Game;
 use draw::Drawer;
-use game_over;
+use game_over::GameOver;
 
 use sdl2::event::Event;
 use sdl2::event::WindowEvent::FocusGained;
@@ -10,7 +10,7 @@ pub enum State {
     Title,
     Play(Box<Game>),
     Paused,
-    GameOver { score: u32 },
+    GameOver(GameOver),
 }
 
 impl State {
@@ -23,7 +23,7 @@ impl State {
             State::Title => State::title_update(drawer, events),
             State::Play(ref mut game) => game.update(drawer, events),
             State::Paused => State::pause_update(drawer, events),
-            State::GameOver { score } => game_over::update(score, drawer, events),
+            State::GameOver(ref game_over) => game_over.update(drawer, events),
         }
     }
 

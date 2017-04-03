@@ -7,6 +7,47 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 
+pub struct GameOver {
+    hi_scores: Vec<HiScore>,
+    score: u32,
+}
+
+impl GameOver {
+    pub fn new(score: u32) -> Self {
+        GameOver {
+            hi_scores: get_hiscores(),
+            score: score,
+        }
+    }
+
+    pub fn update(&self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
+        for event in events {
+            if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
+                if let Keycode::Return = keycode {
+                    return StateChange::Replace(State::play());
+                }
+            }
+        }
+
+        let mut text = drawer.text()
+            .size(3)
+            .top(50)
+            .draw("Game Over")
+            .under(10)
+            .size(1)
+            .draw("final score")
+            .under(0)
+            .size(3)
+            .draw(&self.score.to_string());
+
+        text = draw_hiscores(&self.hi_scores, text);
+
+        text.size(1).draw("[ Press Enter ]");
+
+        StateChange::None
+    }
+}
+
 struct HiScore {
     score: u32,
     name: String,
@@ -55,7 +96,7 @@ fn get_hiscores() -> Vec<HiScore> {
          }]
 }
 
-fn draw_hiscores<'a, 'b>(hiscores: Vec<HiScore>, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
+fn draw_hiscores<'a, 'b>(hiscores: &Vec<HiScore>, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
 
     let offset = 100;
 
@@ -63,7 +104,7 @@ fn draw_hiscores<'a, 'b>(hiscores: Vec<HiScore>, text: TextDrawer<'a, 'b>) -> Te
 
     text = text.size(2).under(10);
 
-    for HiScore { score, name } in hiscores {
+    for &HiScore { ref score, ref name } in hiscores {
         text = text.offset(-offset, 0)
             .draw(&name)
             .offset(offset * 2, 0)
@@ -73,31 +114,4 @@ fn draw_hiscores<'a, 'b>(hiscores: Vec<HiScore>, text: TextDrawer<'a, 'b>) -> Te
     }
 
     text.under(10).offset(-offset, 0)
-}
-
-pub fn update(score: u32, drawer: &mut Drawer, events: &[Event]) -> StateChange {
-    for event in events {
-        if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
-            if let Keycode::Return = keycode {
-                return StateChange::Replace(State::play());
-            }
-        }
-    }
-
-    let mut text = drawer.text()
-        .size(3)
-        .top(50)
-        .draw("Game Over")
-        .under(10)
-        .size(1)
-        .draw("final score")
-        .under(0)
-        .size(3)
-        .draw(&score.to_string());
-
-    text = draw_hiscores(get_hiscores(), text);
-
-    text.size(1).draw("[ Press Enter ]");
-
-    StateChange::None
 }

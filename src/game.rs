@@ -11,6 +11,7 @@ use tetromino;
 use tetromino::Rotation;
 use tetromino::Bag;
 use draw::Drawer;
+use game_over::GameOver;
 
 use sdl2::event::Event;
 use sdl2::rect::Rect;
@@ -97,7 +98,7 @@ impl Game {
         let is_game_over = self.update_piece();
 
         if is_game_over {
-            StateChange::Replace(State::GameOver { score: self.score })
+            StateChange::Replace(State::GameOver(GameOver::new(self.score)))
         } else {
             StateChange::None
         }
