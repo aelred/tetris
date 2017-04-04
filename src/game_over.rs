@@ -2,6 +2,7 @@ use draw::TextDrawer;
 use draw::Drawer;
 use state::State;
 use state::StateChange;
+use lib::score::Score;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -11,18 +12,15 @@ const USE_HI_SCORES: bool = false;
 
 
 pub struct GameOver {
-    hi_scores: Vec<HiScore>,
-    score: HiScore,
+    hi_scores: Vec<Score>,
+    score: Score,
 }
 
 impl GameOver {
     pub fn new(score: u32) -> Self {
         GameOver {
             hi_scores: get_hiscores(),
-            score: HiScore {
-                score: score,
-                name: "".to_string(),
-            },
+            score: Score::new(score, "".to_string()),
         }
     }
 
@@ -51,7 +49,7 @@ impl GameOver {
             .draw("final score")
             .under()
             .size(3)
-            .draw(&self.score.score.to_string());
+            .draw(&self.score.value.to_string());
 
         text = if USE_HI_SCORES {
             self.draw_hiscores(text)
@@ -74,11 +72,11 @@ impl GameOver {
 
         text = text.size(2).under().offset(0, 10);
 
-        for &HiScore { ref score, ref name } in &self.hi_scores {
+        for &Score { ref value, ref name } in &self.hi_scores {
             text = text.offset(-offset, 0)
                 .draw(&name)
                 .offset(offset * 2, 0)
-                .draw(&score.to_string())
+                .draw(&value.to_string())
                 .under()
                 .offset(-offset, 10);
         }
@@ -87,50 +85,15 @@ impl GameOver {
     }
 }
 
-struct HiScore {
-    score: u32,
-    name: String,
-}
-
-fn get_hiscores() -> Vec<HiScore> {
-    vec![HiScore {
-             score: 1000,
-             name: "FEL".to_string(),
-         },
-         HiScore {
-             score: 900,
-             name: "ANG".to_string(),
-         },
-         HiScore {
-             score: 800,
-             name: "LLY".to_string(),
-         },
-         HiScore {
-             score: 700,
-             name: "MKO".to_string(),
-         },
-         HiScore {
-             score: 600,
-             name: "ALX".to_string(),
-         },
-         HiScore {
-             score: 500,
-             name: "JSN".to_string(),
-         },
-         HiScore {
-             score: 400,
-             name: "SHD".to_string(),
-         },
-         HiScore {
-             score: 300,
-             name: "CHR".to_string(),
-         },
-         HiScore {
-             score: 200,
-             name: "SRH".to_string(),
-         },
-         HiScore {
-             score: 100,
-             name: "EMY".to_string(),
-         }]
+fn get_hiscores() -> Vec<Score> {
+    vec![Score::new(1000, "FEL".to_string()),
+         Score::new(900, "ANG".to_string()),
+         Score::new(800, "LLY".to_string()),
+         Score::new(700, "MKO".to_string()),
+         Score::new(600, "ALX".to_string()),
+         Score::new(500, "JSN".to_string()),
+         Score::new(400, "SHD".to_string()),
+         Score::new(300, "CHR".to_string()),
+         Score::new(200, "SRH".to_string()),
+         Score::new(100, "EMY".to_string())]
 }

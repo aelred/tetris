@@ -3,6 +3,9 @@ name = "tetris"
 version = "0.1.0"
 authors = ["Felix Chapman <aelred717@gmail.com>"]
 
+[dependencies.lib]
+path = "lib"
+
 [dependencies]
 rand="0.3"
 lazy_static = "0.2"

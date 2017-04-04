@@ -15,6 +15,7 @@ extern crate lazy_static;
 
 extern crate sdl2;
 extern crate rand;
+extern crate lib;
 
 #[cfg(target_os="emscripten")]
 extern crate emscripten;
