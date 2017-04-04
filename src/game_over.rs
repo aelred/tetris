@@ -7,6 +7,9 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 
+const USE_HI_SCORES: bool = false;
+
+
 pub struct GameOver {
     hi_scores: Vec<HiScore>,
     score: HiScore,
@@ -32,10 +35,15 @@ impl GameOver {
             }
         }
 
-        let mut text = drawer.text()
-            .size(3)
-            .top()
-            .offset(0, 50)
+        let mut text = drawer.text();
+
+        text = if USE_HI_SCORES {
+            text.top().offset(0, 50)
+        } else {
+            text.centered()
+        };
+
+        let mut text = text.size(3)
             .draw("Game Over")
             .under()
             .offset(0, 10)
@@ -45,7 +53,11 @@ impl GameOver {
             .size(3)
             .draw(&self.score.score.to_string());
 
-        text = self.draw_hiscores(text);
+        text = if USE_HI_SCORES {
+            self.draw_hiscores(text)
+        } else {
+            text.under().offset(0, 10)
+        };
 
         text.size(1).draw("[ Press Enter ]");
 
