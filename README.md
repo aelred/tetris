@@ -1,6 +1,10 @@
 # Tetris
 
-To compile you'll need [Rust](http://www.rust-lang.org/) and [SDL2](https://www.libsdl.org/index.php).
+Play it [here](http://tetris.ael.red/).
+
+## Build
+
+To build you'll need [Rust](http://www.rust-lang.org/) and [SDL2](https://www.libsdl.org/index.php).
 
 To install SDL2 on Ubuntu:
 ```sh
