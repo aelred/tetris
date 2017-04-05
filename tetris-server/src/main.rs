@@ -47,7 +47,7 @@ fn main() {
 }
 
 fn get_hiscores() -> Vec<Score> {
-    vec![Score::new(1000, "FEL".to_string()),
+    vec![Score::new(1001, "FEL".to_string()),
          Score::new(900, "ANG".to_string()),
          Score::new(800, "LLY".to_string()),
          Score::new(700, "MKO".to_string()),
