@@ -1,6 +1,5 @@
 extern crate lib;
 extern crate hyper;
-extern crate hyperlocal;
 extern crate rustc_serialize;
 
 use lib::score::Score;
