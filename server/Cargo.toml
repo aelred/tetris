@@ -1,7 +1,12 @@
 [package]
-name = "lib"
+name = "server"
 version = "0.1.0"
 authors = ["Felix Chapman <aelred717@gmail.com>"]
 
+[dependencies.lib]
+path = "../lib"
+
 [dependencies]
+hyper = "0.10.5"
+hyperlocal = "0.3.0"
 rustc-serialize = "0.3"
