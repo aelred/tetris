@@ -8,5 +8,4 @@ path = "../lib"
 
 [dependencies]
 hyper = "0.10.5"
-hyperlocal = "0.3.0"
 rustc-serialize = "0.3"

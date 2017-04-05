@@ -11,7 +11,6 @@ use hyper::Get;
 use hyper::server::{Server, Request, Response};
 use hyper::uri::RequestUri::AbsolutePath;
 use hyper::header::ContentType;
-use hyperlocal::UnixSocketServer;
 
 macro_rules! try_return(
     ($e:expr) => {{
