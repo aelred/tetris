@@ -8,7 +8,7 @@ use lib::score::Score;
 use rustc_serialize::json;
 
 use hyper::Get;
-use hyper::server::{Request, Response};
+use hyper::server::{Server, Request, Response};
 use hyper::uri::RequestUri::AbsolutePath;
 use hyper::header::ContentType;
 use hyperlocal::UnixSocketServer;
@@ -43,9 +43,7 @@ fn scores(req: Request, mut res: Response) {
 }
 
 fn main() {
-    let _ = std::fs::remove_file("/tmp/tetris.socket");
-    let path = "/tmp/tetris.socket";
-    let server = UnixSocketServer::new(path).unwrap();
+    let server = Server::http("localhost:4444").unwrap();
     let _ = server.handle(scores);
 }
 

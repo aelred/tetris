@@ -1,5 +1,5 @@
 [package]
-name = "server"
+name = "tetris-server"
 version = "0.1.0"
 authors = ["Felix Chapman <aelred717@gmail.com>"]
 
