@@ -6,6 +6,8 @@ use lib::score::Score;
 
 use rustc_serialize::json;
 
+use std::fs::File;
+use std::io::Write;
 use std::error::Error;
 use std::sync::RwLock;
 use std::io::Read;
@@ -16,14 +18,8 @@ use hyper::uri::RequestUri::AbsolutePath;
 use hyper::header::ContentType;
 use hyper::status::StatusCode;
 
-macro_rules! try_return(
-    ($e:expr) => {{
-        match $e {
-            Ok(v) => v,
-            Err(e) => { println!("Error: {}", e); return; }
-        }
-    }}
-);
+const TETRIS_DATA: &'static str = "/var/lib/tetris";
+const SCORES_PATH: &'static str = "/scores.json";
 
 macro_rules! print_err(
     ($e:expr) => {{
@@ -40,7 +36,7 @@ struct ScoresHandler {
 impl ScoresHandler {
     fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<(), Box<Error>> {
         let mut body = String::new();
-        try!(req.read_to_string(&mut body));
+        req.read_to_string(&mut body)?;
 
         let score: Score = match json::decode(&body) {
             Ok(s) => s,
@@ -56,15 +52,18 @@ impl ScoresHandler {
         }
 
         {
-            let mut hiscores = self.hiscores.write().unwrap();
+            let ref mut hiscores = *self.hiscores.write().unwrap();
             hiscores.push(score);
             hiscores.sort_by_key(|s| std::u32::MAX - s.value);
             hiscores.pop();
+
+            let mut file = try!(File::create(format!("{}{}", TETRIS_DATA, SCORES_PATH)));
+            file.write_all(json::encode(hiscores).unwrap().as_bytes())?;
         }
 
         *res.status_mut() = StatusCode::Created;
 
-        try!(self.send_hiscores(res));
+        self.send_hiscores(res)?;
         Ok(())
     }
 
@@ -98,6 +97,8 @@ impl Handler for ScoresHandler {
 }
 
 fn main() {
+    let _ = std::fs::create_dir(TETRIS_DATA);
+
     let server = Server::http("localhost:4444").unwrap();
 
     let handler = ScoresHandler { hiscores: RwLock::new(init_hiscores()) };
