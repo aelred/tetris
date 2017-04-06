@@ -5,7 +5,3 @@ authors = ["Felix Chapman <aelred717@gmail.com>"]
 
 [dependencies.lib]
 path = "../lib"
-
-[dependencies]
-hyper = "0.10.5"
-rustc-serialize = "0.3"

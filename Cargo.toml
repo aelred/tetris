@@ -9,6 +9,8 @@ path = "lib"
 [dependencies]
 rand="0.3"
 lazy_static = "0.2"
+hyper = "0.10.5"
+rustc-serialize = "0.3"
 
 [dev-dependencies]
 quickcheck="0.3"

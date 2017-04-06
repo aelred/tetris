@@ -3,21 +3,33 @@ use draw::Drawer;
 use state::State;
 use state::StateChange;
 use lib::score::Score;
+use std::io::Read;
+use std::error::Error;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use hyper::client::Client;
+use rustc_serialize::json;
 
 
 const USE_HI_SCORES: bool = false;
 
+const HI_SCORES_ENDPOINT: &str = "http://tetris.ael.red/scores";
+
 
 pub struct GameOver {
-    hi_scores: Vec<Score>,
+    hi_scores: Result<Vec<Score>, Box<Error>>,
     score: Score,
 }
 
 impl GameOver {
     pub fn new(score: u32) -> Self {
+        let hiscores = get_hiscores();
+
+        if let Err(e) = hiscores {
+            println!("{}", e);
+        }
+
         GameOver {
             hi_scores: get_hiscores(),
             score: Score::new(score, "".to_string()),
@@ -63,37 +75,47 @@ impl GameOver {
     }
 
     fn draw_hiscores<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-        let offset = 100;
 
-        let mut text = text.size(3)
-            .under()
-            .offset(0, 10)
-            .draw("High Scores");
+        match self.hi_scores {
+            Ok(ref hi_scores) => {
+                let offset = 100;
 
-        text = text.size(2).under().offset(0, 10);
+                let mut text = text.size(3)
+                    .under()
+                    .offset(0, 10)
+                    .draw("High Scores");
 
-        for &Score { ref value, ref name } in &self.hi_scores {
-            text = text.offset(-offset, 0)
-                .draw(&name)
-                .offset(offset * 2, 0)
-                .draw(&value.to_string())
-                .under()
-                .offset(-offset, 10);
+                text = text.size(2).under().offset(0, 10);
+
+                for &Score { ref value, ref name } in hi_scores {
+                    text = text.offset(-offset, 0)
+                        .draw(&name)
+                        .offset(offset * 2, 0)
+                        .draw(&value.to_string())
+                        .under()
+                        .offset(-offset, 10);
+                }
+
+                text.under().offset(-offset, 10)
+            }
+            Err(_) => {
+                text.size(1)
+                    .under()
+                    .offset(0, 10)
+                    .draw("[ ERROR Failed to retrieve High Scores ]")
+                    .offset(0, 20)
+            }
         }
-
-        text.under().offset(-offset, 10)
     }
 }
 
-fn get_hiscores() -> Vec<Score> {
-    vec![Score::new(1000, "FEL".to_string()),
-         Score::new(900, "ANG".to_string()),
-         Score::new(800, "LLY".to_string()),
-         Score::new(700, "MKO".to_string()),
-         Score::new(600, "ALX".to_string()),
-         Score::new(500, "JSN".to_string()),
-         Score::new(400, "SHD".to_string()),
-         Score::new(300, "CHR".to_string()),
-         Score::new(200, "SRH".to_string()),
-         Score::new(100, "EMY".to_string())]
+fn get_hiscores() -> Result<Vec<Score>, Box<Error>> {
+    let client = Client::new();
+    let mut body = String::new();
+    let mut res = try!(client.get(HI_SCORES_ENDPOINT).send());
+    try!(res.read_to_string(&mut body));
+
+    let hiscores = try!(json::decode(&body));
+
+    Ok(hiscores)
 }
