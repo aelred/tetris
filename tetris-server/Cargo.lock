@@ -59,6 +59,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "lib"
 version = "0.1.0"
 dependencies = [
+ "hyper 0.10.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.23 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
