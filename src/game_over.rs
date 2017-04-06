@@ -14,7 +14,7 @@ use rustc_serialize::json;
 
 const USE_HI_SCORES: bool = false;
 
-const HI_SCORES_ENDPOINT: &str = "http://tetris.ael.red/scores";
+const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 
 
 pub struct GameOver {
