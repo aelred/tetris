@@ -54,10 +54,10 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    fn draw_text(&mut self, text_pos: &TextPos, text: &str, size: u32) -> Rect {
+    fn draw_text(&mut self, text_pos: &TextPos, text: &str, size: u32, color: Color) -> Rect {
         let surface = self.font
             .render(text)
-            .solid(Color::RGB(255, 255, 255))
+            .solid(color)
             .unwrap();
         let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
 
@@ -75,6 +75,7 @@ impl<'a> Drawer<'a> {
             last_rect: Rect::new(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT),
             pos: TextPos::At(0, 0),
             size: 1,
+            color: Color::RGB(255, 255, 255),
             drawer: self,
         }
     }
@@ -98,12 +99,23 @@ pub struct TextDrawer<'a, 'b: 'a> {
     last_rect: Rect,
     pos: TextPos,
     size: u32,
+    color: Color,
     drawer: &'a mut Drawer<'b>,
 }
 
 impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
     pub fn draw(mut self, text: &str) -> Self {
-        self.last_rect = self.drawer.draw_text(&self.pos, text, self.size);
+        self.last_rect = self.drawer.draw_text(&self.pos, text, self.size, self.color);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+
+    pub fn reset_color(mut self) -> Self {
+        self.color = Color::RGB(255, 255, 255);
         self
     }
 

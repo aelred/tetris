@@ -23,7 +23,7 @@ impl State {
             State::Title => State::title_update(drawer, events),
             State::Play(ref mut game) => game.update(drawer, events),
             State::Paused => State::pause_update(drawer, events),
-            State::GameOver(ref game_over) => game_over.update(drawer, events),
+            State::GameOver(ref mut game_over) => game_over.update(drawer, events),
         }
     }
 

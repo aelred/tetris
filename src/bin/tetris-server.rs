@@ -57,7 +57,7 @@ impl ScoresHandler {
             }
         };
 
-        if !score.name.chars().all(char::is_alphanumeric) || score.name.chars().count() > 3 {
+        if !score.name.chars().all(char::is_alphanumeric) || score.name.len() > 3 {
             *res.status_mut() = StatusCode::BadRequest;
             return Ok(());
         }
@@ -65,7 +65,7 @@ impl ScoresHandler {
         {
             let ref mut hiscores = *self.hiscores.write().unwrap();
             hiscores.push(score);
-            hiscores.sort_by_key(|s| std::u32::MAX - s.value);
+            hiscores.sort();
             hiscores.pop();
 
             let mut file = try!(File::create(&self.hiscores_path));

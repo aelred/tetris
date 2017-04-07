@@ -18,6 +18,7 @@ extern crate lazy_static;
 extern crate sdl2;
 extern crate rand;
 extern crate rustc_serialize;
+extern crate regex;
 extern crate hyper;
 
 #[cfg(test)]
