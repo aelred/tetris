@@ -118,7 +118,7 @@ fn main() {
 }
 
 fn read_hiscores(file: &mut File) -> Vec<Score> {
-    let mut hiscores: String = String::new();
+    let mut hiscores = String::new();
     file.read_to_string(&mut hiscores).expect("Hiscores file is invalid");
     json::decode(&hiscores).expect("Hiscores file is invalid")
 }
