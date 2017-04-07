@@ -11,9 +11,9 @@ source ~/scratch/emsdk-portable/emsdk_env.sh
 git fetch --all
 git reset --hard origin/master
 
-cargo build --target asmjs-unknown-emscripten --release
+cargo build --bin tetris --target asmjs-unknown-emscripten --release
 
 cp target/asmjs-unknown-emscripten/release/tetris.js static/tetris.js
 
-cargo install --force
+cargo install --bin tetris-server --force
 sudo restart tetris
