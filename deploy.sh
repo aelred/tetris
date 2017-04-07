@@ -15,6 +15,5 @@ cargo build --target asmjs-unknown-emscripten --release
 
 cp target/asmjs-unknown-emscripten/release/tetris.js static/tetris.js
 
-cd tetris-server
 cargo install --force
 sudo restart tetris
