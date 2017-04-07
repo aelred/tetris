@@ -2,7 +2,7 @@ use draw::TextDrawer;
 use draw::Drawer;
 use state::State;
 use state::StateChange;
-use lib::score::Score;
+use score::Score;
 use std::io::Read;
 use std::error::Error;
 

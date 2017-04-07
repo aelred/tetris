@@ -1,8 +1,8 @@
-extern crate lib;
 extern crate hyper;
 extern crate rustc_serialize;
+extern crate tetris;
 
-use lib::score::Score;
+use tetris::score::Score;
 
 use rustc_serialize::json;
 

@@ -1,37 +1,16 @@
-#[macro_use]
-mod macros;
-
-mod tetromino;
-mod pos;
-mod board;
-mod draw;
-mod piece;
-mod state;
-mod game;
-mod game_over;
-
-#[macro_use]
-extern crate lazy_static;
+extern crate tetris;
 
 extern crate sdl2;
-extern crate rand;
-extern crate rustc_serialize;
-extern crate hyper;
-extern crate lib;
 
 #[cfg(target_os="emscripten")]
 extern crate emscripten;
 #[cfg(target_os="emscripten")]
 extern crate libc;
 
-#[cfg(test)]
-#[macro_use]
-extern crate quickcheck;
-
-use state::State;
-use game::WINDOW_WIDTH;
-use game::WINDOW_HEIGHT;
-use draw::Drawer;
+use tetris::state::State;
+use tetris::game::WINDOW_WIDTH;
+use tetris::game::WINDOW_HEIGHT;
+use tetris::draw::Drawer;
 
 use std::cmp::max;
 
@@ -45,7 +24,7 @@ use sdl2::keyboard::Keycode;
 
 const TICK: u64 = 33;
 
-static FONT_DATA: &'static [u8] = include_bytes!("8-BIT WONDER.TTF");
+static FONT_DATA: &'static [u8] = include_bytes!("../8-BIT WONDER.TTF");
 
 const FONT_MULTIPLE: u16 = 9;
 
