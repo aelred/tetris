@@ -15,8 +15,6 @@ use hyper::client::Client;
 use rustc_serialize::json;
 
 
-const USE_HI_SCORES: bool = true;
-
 const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 
 
@@ -107,15 +105,10 @@ impl GameOver {
             }
         }
 
-        let mut text = drawer.text();
-
-        text = if USE_HI_SCORES {
-            text.top().offset(0, 50)
-        } else {
-            text.centered()
-        };
-
-        let mut text = text.size(3)
+        let mut text = drawer.text()
+            .top()
+            .offset(0, 50)
+            .size(3)
             .draw("Game Over")
             .under()
             .offset(0, 10)
@@ -125,11 +118,7 @@ impl GameOver {
             .size(3)
             .draw(&self.score.value.to_string());
 
-        text = if USE_HI_SCORES {
-            self.draw_hiscores(text)
-        } else {
-            text.under().offset(0, 10)
-        };
+        text = self.draw_hiscores(text);
 
         if self.posting_hiscore {
             text.size(1).draw("[ Press Enter ]");
