@@ -121,9 +121,9 @@ impl GameOver {
         text = self.draw_hiscores(text);
 
         if self.posting_hiscore {
-            text.size(1).draw("[ Press Enter ]");
-        } else {
             text.size(1).draw("[ Enter Name and Press Enter ]");
+        } else {
+            text.size(1).draw("[ Press Enter ]");
         }
 
         StateChange::None
