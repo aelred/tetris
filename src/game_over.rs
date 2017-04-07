@@ -57,7 +57,7 @@ impl GameOver {
         let hiscores = get_hiscores();
 
         if let &Err(ref e) = &hiscores {
-            println!("{}", e);
+            println!("Failed to retrieve hiscores: {}", e);
         }
 
         let score = Score::new(score, "".to_string());
@@ -182,6 +182,6 @@ fn post_hiscore(score: &Score) {
     let response = client.post(HI_SCORES_ENDPOINT).body(body.as_bytes()).send();
 
     if let Err(e) = response {
-        println!("{}", e);
+        println!("Failed to post hiscores: {}", e);
     }
 }
