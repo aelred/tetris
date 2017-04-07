@@ -6,6 +6,7 @@ use lib::score::Score;
 
 use rustc_serialize::json;
 
+use std::path::PathBuf;
 use std::fs::File;
 use std::io::Write;
 use std::error::Error;
@@ -18,9 +19,6 @@ use hyper::uri::RequestUri::AbsolutePath;
 use hyper::header::ContentType;
 use hyper::status::StatusCode;
 
-const TETRIS_DATA: &'static str = "/var/lib/tetris";
-const SCORES_PATH: &'static str = "/scores.json";
-
 macro_rules! print_err(
     ($e:expr) => {{
         if let Err(e) = $e {
@@ -31,9 +29,22 @@ macro_rules! print_err(
 
 struct ScoresHandler {
     hiscores: RwLock<Vec<Score>>,
+    hiscores_path: PathBuf,
 }
 
 impl ScoresHandler {
+    fn new(hiscores_path: PathBuf) -> ScoresHandler {
+        let hiscores = match File::open(&hiscores_path) {
+            Ok(mut file) => read_hiscores(&mut file),
+            Err(_) => init_hiscores(),
+        };
+
+        ScoresHandler {
+            hiscores: RwLock::new(hiscores),
+            hiscores_path,
+        }
+    }
+
     fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<(), Box<Error>> {
         let mut body = String::new();
         req.read_to_string(&mut body)?;
@@ -57,7 +68,7 @@ impl ScoresHandler {
             hiscores.sort_by_key(|s| std::u32::MAX - s.value);
             hiscores.pop();
 
-            let mut file = try!(File::create(format!("{}{}", TETRIS_DATA, SCORES_PATH)));
+            let mut file = try!(File::create(&self.hiscores_path));
             file.write_all(json::encode(hiscores).unwrap().as_bytes())?;
         }
 
@@ -97,13 +108,19 @@ impl Handler for ScoresHandler {
 }
 
 fn main() {
-    let _ = std::fs::create_dir(TETRIS_DATA);
+    let path = hiscores_path();
 
     let server = Server::http("localhost:4444").unwrap();
 
-    let handler = ScoresHandler { hiscores: RwLock::new(init_hiscores()) };
+    let handler = ScoresHandler::new(path);
 
     server.handle(handler).unwrap();
+}
+
+fn read_hiscores(file: &mut File) -> Vec<Score> {
+    let mut hiscores: String = String::new();
+    file.read_to_string(&mut hiscores).expect("Hiscores file is invalid");
+    json::decode(&hiscores).expect("Hiscores file is invalid")
 }
 
 fn init_hiscores() -> Vec<Score> {
@@ -112,4 +129,10 @@ fn init_hiscores() -> Vec<Score> {
         hiscores.push(Score::new(0, "AEL".to_string()));
     }
     hiscores
+}
+
+fn hiscores_path() -> PathBuf {
+    let mut home = std::env::home_dir().unwrap();
+    home.push(".tetris");
+    home
 }
