@@ -41,7 +41,7 @@ impl ScoresHandler {
 
         ScoresHandler {
             hiscores: RwLock::new(hiscores),
-            hiscores_path,
+            hiscores_path: hiscores_path,
         }
     }
 
