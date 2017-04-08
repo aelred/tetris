@@ -13,6 +13,9 @@ use tetromino::Bag;
 use draw::Drawer;
 use game_over::GameOver;
 
+use rand;
+use rand::StdRng;
+use rand::SeedableRng;
 use sdl2::event::Event;
 use sdl2::rect::Rect;
 use sdl2::keyboard::Keycode;
@@ -30,6 +33,29 @@ enum Gravity {
     HardDrop,
 }
 
+#[derive(Copy, Clone)]
+pub enum Action {
+    MoveLeft,
+    MoveRight,
+    Rotate,
+    StartSoftDrop,
+    StartHardDrop,
+    StopDrop,
+}
+
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub struct Tick(u32);
+
+impl Tick {
+    fn new() -> Tick {
+        Tick(0)
+    }
+
+    fn incr(&mut self) {
+        self.0 += 1;
+    }
+}
+
 pub struct Game {
     piece: Piece,
     board: Board,
@@ -39,11 +65,19 @@ pub struct Game {
     gravity: Gravity,
     lines_cleared: u32,
     score: u32,
+    seed: [usize; 32],
+    tick: Tick,
+    history: Vec<(Tick, Action)>,
 }
 
 impl Game {
     pub fn new() -> Game {
-        let mut bag = Bag::new();
+        let seed: &[usize; 32] = &rand::random();
+        Game::with_seed(seed)
+    }
+
+    pub fn with_seed(seed: &[usize; 32]) -> Game {
+        let mut bag = Bag::new(StdRng::from_seed(seed));
         Game {
             piece: Piece::new(bag.pop()),
             board: Board::new(),
@@ -53,36 +87,60 @@ impl Game {
             gravity: Gravity::Normal,
             lines_cleared: 0,
             score: 0,
+            seed: *seed,
+            tick: Tick::new(),
+            history: Vec::new(),
         }
+    }
+
+    pub fn replay(seed: &[usize; 32], history: Vec<(Tick, Action)>) -> u32 {
+        let mut game = Game::with_seed(seed);
+
+        for (action_tick, action) in history {
+            while game.tick < action_tick {
+                let is_game_over = game.apply_step();
+                if is_game_over {
+                    return game.score;
+                }
+            }
+
+            game.apply_action(action);
+        }
+
+        game.score
     }
 
     pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
 
+        let mut actions = Vec::new();
+
         for event in events {
             match *event {
-                Event::Window { win_event, .. } => {
-                    if let FocusLost = win_event {
-                        return StateChange::Push(State::Paused);
-                    }
+                Event::Window { win_event: FocusLost, .. } => {
+                    return StateChange::Push(State::Paused);
                 }
                 Event::KeyDown { keycode: Some(keycode), .. } => {
                     match keycode {
-                        Keycode::Left => self.left(),
-                        Keycode::Right => self.right(),
-                        Keycode::Up => self.rotate(),
-                        Keycode::Down => self.gravity = Gravity::SoftDrop,
-                        Keycode::Space => self.gravity = Gravity::HardDrop,
+                        Keycode::Left => actions.push(Action::MoveLeft),
+                        Keycode::Right => actions.push(Action::MoveRight),
+                        Keycode::Up => actions.push(Action::Rotate),
+                        Keycode::Down => actions.push(Action::StartSoftDrop),
+                        Keycode::Space => actions.push(Action::StartHardDrop),
                         _ => {}
                     }
                 }
-                Event::KeyUp { keycode: Some(keycode), .. } => {
-                    if let Keycode::Down = keycode {
-                        self.gravity = Gravity::Normal;
-                    }
+                Event::KeyUp { keycode: Some(Keycode::Down), .. } => {
+                    actions.push(Action::StopDrop);
                 }
                 _ => {}
             }
         }
+
+        for action in actions {
+            self.apply_action(action);
+        }
+
+        let is_game_over = self.apply_step();
 
         drawer.set_viewport(*BOARD_BORDER_VIEW);
         self.board.draw_border(drawer);
@@ -95,13 +153,44 @@ impl Game {
 
         self.draw_score(drawer);
 
-        let is_game_over = self.update_piece();
-
         if is_game_over {
             StateChange::Replace(State::GameOver(GameOver::new(self.score)))
         } else {
             StateChange::None
         }
+    }
+
+    fn apply_action(&mut self, action: Action) {
+        self.history.push((self.tick, action));
+
+        match action {
+            Action::MoveLeft => self.left(),
+            Action::MoveRight => self.right(),
+            Action::Rotate => self.rotate(),
+            Action::StartSoftDrop => self.gravity = Gravity::SoftDrop,
+            Action::StartHardDrop => self.gravity = Gravity::HardDrop,
+            Action::StopDrop => self.gravity = Gravity::Normal,
+        }
+    }
+
+    fn apply_step(&mut self) -> bool {
+        self.tick.incr();
+
+        while self.drop_tick >= 1.0 {
+            self.drop_tick -= 1.0;
+            let is_game_over = self.drop();
+            if is_game_over {
+                return true;
+            }
+        }
+
+        self.drop_tick += match self.gravity {
+            Gravity::Normal => self.normal_gravity(),
+            Gravity::SoftDrop => SOFT_DROP_GRAVITY,
+            Gravity::HardDrop => HARD_DROP_GRAVITY,
+        };
+
+        false
     }
 
     fn normal_gravity(&self) -> f32 {
@@ -140,24 +229,6 @@ impl Game {
         if self.collides() {
             self.piece.left();
         }
-    }
-
-    fn update_piece(&mut self) -> bool {
-        while self.drop_tick >= 1.0 {
-            self.drop_tick -= 1.0;
-            let is_game_over = self.drop();
-            if is_game_over {
-                return true;
-            }
-        }
-
-        self.drop_tick += match self.gravity {
-            Gravity::Normal => self.normal_gravity(),
-            Gravity::SoftDrop => SOFT_DROP_GRAVITY,
-            Gravity::HardDrop => HARD_DROP_GRAVITY,
-        };
-
-        false
     }
 
     fn reset_lock_delay(&mut self) {

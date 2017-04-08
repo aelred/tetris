@@ -3,6 +3,8 @@ extern crate rand;
 use pos::Pos;
 use draw::Drawer;
 
+use std::fmt;
+use rand::StdRng;
 use rand::Rng;
 use sdl2::pixels::Color;
 use sdl2::pixels::Color::RGB;
@@ -13,17 +15,29 @@ const NUM_ROTATIONS: i8 = 4;
 pub const WIDTH: u8 = 4;
 pub const HEIGHT: u8 = 4;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Bag {
     tetrominoes: [&'static Tetromino; NUM_TETROMINOES],
     index: usize,
+    rng: StdRng,
+}
+
+impl fmt::Debug for Bag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        f.debug_struct("Bag")
+            .field("tetrominoes", &self.tetrominoes)
+            .field("index", &self.index)
+            .field("rng", &"<rng>")
+            .finish()
+    }
 }
 
 impl Bag {
-    pub fn new() -> Bag {
+    pub fn new(mut rng: StdRng) -> Bag {
         Bag {
-            tetrominoes: Bag::random_sequence(),
+            tetrominoes: Bag::random_sequence(&mut rng),
             index: 0,
+            rng: rng,
         }
     }
 
@@ -37,15 +51,14 @@ impl Bag {
         self.index += 1;
 
         if self.index >= NUM_TETROMINOES {
-            self.tetrominoes = Bag::random_sequence();
+            self.tetrominoes = Bag::random_sequence(&mut self.rng);
             self.index = 0;
         }
 
         next
     }
 
-    fn random_sequence() -> [&'static Tetromino; NUM_TETROMINOES] {
-        let mut rng = rand::thread_rng();
+    fn random_sequence<R: Rng>(rng: &mut R) -> [&'static Tetromino; NUM_TETROMINOES] {
         let mut sequence = TETROMINOES;
         rng.shuffle(&mut sequence);
         sequence
@@ -250,11 +263,15 @@ mod tests {
     use quickcheck::Arbitrary;
     use quickcheck::Gen;
 
+    lazy_static! {
+        static ref RNG: StdRng = StdRng::new().unwrap();
+    }
+
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {
             let size = g.size() as u32;
             if g.gen_weighted_bool(size) {
-                Bag::new()
+                Bag::new(*RNG)
             } else {
                 let mut bag = Bag::arbitrary(g);
                 bag.pop();
