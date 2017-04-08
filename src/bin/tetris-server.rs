@@ -51,13 +51,15 @@ impl ScoresHandler {
 
         let score: Score = match json::decode(&body) {
             Ok(s) => s,
-            Err(_) => {
+            Err(e) => {
+                println!("Bad request: {} - {}", &body, e);
                 *res.status_mut() = StatusCode::BadRequest;
                 return Ok(());
             }
         };
 
         if !score.name.chars().all(char::is_alphanumeric) || score.name.len() > 3 {
+            println!("Bad request: name does not match format");
             *res.status_mut() = StatusCode::BadRequest;
             return Ok(());
         }
