@@ -107,7 +107,13 @@ impl Game {
             game.apply_action(action);
         }
 
-        game.score
+        // after actions stopped, the game will have continued until a game over
+        loop {
+            let is_game_over = game.apply_step();
+            if is_game_over {
+                return game.score;
+            }
+        }
     }
 
     pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
