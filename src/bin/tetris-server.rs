@@ -16,7 +16,7 @@ use std::io::Read;
 use hyper::{Get, Post};
 use hyper::server::{Server, Handler, Request, Response};
 use hyper::uri::RequestUri::AbsolutePath;
-use hyper::header::ContentType;
+use hyper::header::{ContentType, AccessControlAllowOrigin};
 use hyper::status::StatusCode;
 
 macro_rules! print_err(
@@ -89,6 +89,8 @@ impl ScoresHandler {
 
 impl Handler for ScoresHandler {
     fn handle(&self, mut req: Request, mut res: Response) {
+        res.headers_mut().set(AccessControlAllowOrigin::Any);
+
         if let AbsolutePath(path) = req.uri.clone() {
             match (&req.method, &path[..]) {
                 (&Get, "/scores") => {
