@@ -21,6 +21,9 @@ extern crate rustc_serialize;
 extern crate regex;
 extern crate hyper;
 
+#[cfg(target_os="emscripten")]
+extern crate emscripten;
+
 #[cfg(test)]
 #[macro_use]
 extern crate quickcheck;

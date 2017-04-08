@@ -4,14 +4,12 @@ use state::State;
 use state::StateChange;
 use score::Score;
 use score::OFFSET;
-use std::io::Read;
 use std::error::Error;
 
 use regex::Regex;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use hyper::client::Client;
 use rustc_serialize::json;
 
 
@@ -166,22 +164,69 @@ impl GameOver {
 }
 
 fn get_hiscores() -> Result<Vec<Score>, Box<Error>> {
-    let client = Client::new();
-    let mut body = String::new();
-    let mut res = try!(client.get(HI_SCORES_ENDPOINT).send());
-    try!(res.read_to_string(&mut body));
-
+    let body = try!(get_raw_hiscores());
     let hiscores = try!(json::decode(&body));
-
     Ok(hiscores)
 }
 
 fn post_hiscore(score: &Score) {
-    let client = Client::new();
     let body = json::encode(score).unwrap();
-    let response = client.post(HI_SCORES_ENDPOINT).body(body.as_bytes()).send();
+    let response = post_raw_hiscores(body);
 
     if let Err(e) = response {
         println!("Failed to post hiscores: {}", e);
     }
+}
+
+#[cfg(not(target_os="emscripten"))]
+fn get_raw_hiscores() -> Result<String, Box<Error>> {
+    use hyper::client::Client;
+    use std::io::Read;
+
+    let client = Client::new();
+    let mut body = String::new();
+    let mut res = try!(client.get(HI_SCORES_ENDPOINT).send());
+    try!(res.read_to_string(&mut body));
+    Ok(body)
+}
+
+#[cfg(target_os="emscripten")]
+fn get_raw_hiscores() -> Result<String, Box<Error>> {
+    use emscripten::em;
+
+    let script = format!(r#"(function() {{
+        var req = new XMLHttpRequest();
+        req.open("GET", "{}", false);
+        req.send(null);
+        return req.responseText;
+    }}())"#,
+                         HI_SCORES_ENDPOINT);
+
+    Ok(em::run_script_string(&script))
+}
+
+#[cfg(not(target_os="emscripten"))]
+fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
+    use hyper::client::Client;
+
+    let client = Client::new();
+    let body = json::encode(&score).unwrap();
+    try!(client.post(HI_SCORES_ENDPOINT).body(body.as_bytes()).send());
+    Ok(())
+}
+
+#[cfg(target_os="emscripten")]
+fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
+    use emscripten::em;
+
+    let script = format!(r#"(function() {{
+        var req = new XMLHttpRequest();
+        req.open("POST", "{}", false);
+        req.send(JSON.stringify({}));
+    }}())"#,
+                         HI_SCORES_ENDPOINT,
+                         score);
+
+    em::run_script(&script);
+    Ok(())
 }
