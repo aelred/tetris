@@ -56,68 +56,21 @@ impl Tick {
     }
 }
 
-pub struct Game {
-    piece: Piece,
-    board: Board,
-    bag: Bag,
-    drop_tick: f32,
-    lock_delay: bool,
-    gravity: Gravity,
-    lines_cleared: u32,
-    score: u32,
-    seed: [usize; 32],
-    tick: Tick,
-    history: Vec<(Tick, Action)>,
+pub struct GamePlay {
+    game: Game,
+    history: History,
 }
 
-impl Game {
-    pub fn new() -> Game {
-        let seed: &[usize; 32] = &rand::random();
-        Game::with_seed(seed)
-    }
-
-    pub fn with_seed(seed: &[usize; 32]) -> Game {
-        let mut bag = Bag::new(StdRng::from_seed(seed));
-        Game {
-            piece: Piece::new(bag.pop()),
-            board: Board::new(),
-            bag: bag,
-            drop_tick: 0.0,
-            lock_delay: false,
-            gravity: Gravity::Normal,
-            lines_cleared: 0,
-            score: 0,
-            seed: *seed,
-            tick: Tick::new(),
-            history: Vec::new(),
-        }
-    }
-
-    pub fn replay(seed: &[usize; 32], history: Vec<(Tick, Action)>) -> u32 {
-        let mut game = Game::with_seed(seed);
-
-        for (action_tick, action) in history {
-            while game.tick < action_tick {
-                let is_game_over = game.apply_step();
-                if is_game_over {
-                    return game.score;
-                }
-            }
-
-            game.apply_action(action);
-        }
-
-        // after actions stopped, the game will have continued until a game over
-        loop {
-            let is_game_over = game.apply_step();
-            if is_game_over {
-                return game.score;
-            }
+impl GamePlay {
+    pub fn new() -> GamePlay {
+        let seed = rand::random();
+        GamePlay {
+            game: Game::new(&seed),
+            history: History::new(seed),
         }
     }
 
     pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
-
         let mut actions = Vec::new();
 
         for event in events {
@@ -143,31 +96,110 @@ impl Game {
         }
 
         for action in actions {
-            self.apply_action(action);
+            self.history.push(self.game.tick, action);
+            self.game.apply_action(action);
         }
 
-        let is_game_over = self.apply_step();
+        let is_game_over = self.game.apply_step();
 
         drawer.set_viewport(*BOARD_BORDER_VIEW);
-        self.board.draw_border(drawer);
+        self.game.board.draw_border(drawer);
 
         drawer.set_viewport(*BOARD_VIEW);
-        self.board.draw(drawer);
-        self.piece.draw(drawer);
+        self.game.board.draw(drawer);
+        self.game.piece.draw(drawer);
 
         self.draw_next(drawer);
 
         self.draw_score(drawer);
 
         if is_game_over {
-            StateChange::Replace(State::GameOver(GameOver::new(self.score)))
+            StateChange::Replace(State::GameOver(GameOver::new(self.game.score)))
         } else {
             StateChange::None
         }
     }
 
+    fn draw_score(&self, drawer: &mut Drawer) {
+        drawer.set_viewport(*SCORE_VIEW);
+
+        drawer.text()
+            .draw("lines")
+            .size(2)
+            .left()
+            .draw(&self.game.lines_cleared.to_string())
+            .size(1)
+            .left()
+            .offset(0, PAD as i32)
+            .draw("score")
+            .size(2)
+            .left()
+            .draw(&self.game.score.to_string());
+    }
+
+    fn draw_next(&self, drawer: &mut Drawer) {
+        drawer.set_viewport(*PREVIEW_VIEW);
+
+        drawer.draw_border(Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
+        self.game
+            .bag
+            .peek()
+            .draw(drawer, Rotation::default(), Pos::new(1, 1));
+    }
+}
+
+pub struct Game {
+    piece: Piece,
+    board: Board,
+    bag: Bag,
+    drop_tick: f32,
+    lock_delay: bool,
+    gravity: Gravity,
+    lines_cleared: u32,
+    score: u32,
+    tick: Tick,
+}
+
+impl Game {
+    pub fn new(seed: &[usize; 32]) -> Game {
+        let mut bag = Bag::new(StdRng::from_seed(seed));
+        Game {
+            piece: Piece::new(bag.pop()),
+            board: Board::new(),
+            bag: bag,
+            drop_tick: 0.0,
+            lock_delay: false,
+            gravity: Gravity::Normal,
+            lines_cleared: 0,
+            score: 0,
+            tick: Tick::new(),
+        }
+    }
+
+    pub fn replay(history: History) -> u32 {
+        let mut game = Game::new(&history.seed);
+
+        for (action_tick, action) in history.actions {
+            while game.tick < action_tick {
+                let is_game_over = game.apply_step();
+                if is_game_over {
+                    return game.score;
+                }
+            }
+
+            game.apply_action(action);
+        }
+
+        // after actions stopped, the game will have continued until a game over
+        loop {
+            let is_game_over = game.apply_step();
+            if is_game_over {
+                return game.score;
+            }
+        }
+    }
+
     fn apply_action(&mut self, action: Action) {
-        self.history.push((self.tick, action));
 
         match action {
             Action::MoveLeft => self.left(),
@@ -278,30 +310,6 @@ impl Game {
         is_game_over
     }
 
-    fn draw_score(&self, drawer: &mut Drawer) {
-        drawer.set_viewport(*SCORE_VIEW);
-
-        drawer.text()
-            .draw("lines")
-            .size(2)
-            .left()
-            .draw(&self.lines_cleared.to_string())
-            .size(1)
-            .left()
-            .offset(0, PAD as i32)
-            .draw("score")
-            .size(2)
-            .left()
-            .draw(&self.score.to_string());
-    }
-
-    fn draw_next(&self, drawer: &mut Drawer) {
-        drawer.set_viewport(*PREVIEW_VIEW);
-
-        drawer.draw_border(Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
-        self.bag.peek().draw(drawer, Rotation::default(), Pos::new(1, 1));
-    }
-
     fn collides(&self) -> bool {
         let mut collides = false;
 
@@ -314,6 +322,25 @@ impl Game {
         collides
     }
 }
+
+pub struct History {
+    seed: [usize; 32],
+    actions: Vec<(Tick, Action)>,
+}
+
+impl History {
+    fn new(seed: [usize; 32]) -> Self {
+        History {
+            seed: seed,
+            actions: Vec::new(),
+        }
+    }
+
+    fn push(&mut self, tick: Tick, action: Action) {
+        self.actions.push((tick, action));
+    }
+}
+
 
 
 lazy_static! {

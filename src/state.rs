@@ -1,4 +1,4 @@
-use game::Game;
+use game::GamePlay;
 use draw::Drawer;
 use game_over::GameOver;
 
@@ -8,14 +8,14 @@ use sdl2::keyboard::Keycode;
 
 pub enum State {
     Title,
-    Play(Box<Game>),
+    Play(Box<GamePlay>),
     Paused,
     GameOver(GameOver),
 }
 
 impl State {
     pub fn play() -> State {
-        State::Play(Box::new(Game::new()))
+        State::Play(Box::new(GamePlay::new()))
     }
 
     pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
