@@ -2,20 +2,16 @@ use draw::TextDrawer;
 use draw::Drawer;
 use state::State;
 use state::StateChange;
-use score::Score;
-use score::ScoreMessage;
 use score::OFFSET;
 use game::History;
-use std::error::Error;
+use rest;
+use score::Score;
+use score::ScoreMessage;
 
 use regex::Regex;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use rustc_serialize::json;
-
-
-const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 
 
 pub struct GameOver {
@@ -55,7 +51,7 @@ impl HighScores {
 
 impl GameOver {
     pub fn new(score: u32, history: History) -> Self {
-        let hiscores = get_hiscores();
+        let hiscores = rest::get_hiscores();
 
         if let &Err(ref e) = &hiscores {
             println!("Failed to retrieve hiscores: {}", e);
@@ -92,7 +88,7 @@ impl GameOver {
                             if self.posting_hiscore {
                                 let message = ScoreMessage::new(self.score.clone(),
                                                                 self.history.clone());
-                                post_hiscore(&message);
+                                rest::post_hiscore(&message);
                             }
                             return StateChange::Replace(State::play());
                         }
@@ -167,71 +163,4 @@ impl GameOver {
             }
         }
     }
-}
-
-fn get_hiscores() -> Result<Vec<Score>, Box<Error>> {
-    let body = try!(get_raw_hiscores());
-    let hiscores = try!(json::decode(&body));
-    Ok(hiscores)
-}
-
-fn post_hiscore(score: &ScoreMessage) {
-    let body = json::encode(score).unwrap();
-    let response = post_raw_hiscores(body);
-
-    if let Err(e) = response {
-        println!("Failed to post hiscores: {}", e);
-    }
-}
-
-#[cfg(not(target_os="emscripten"))]
-fn get_raw_hiscores() -> Result<String, Box<Error>> {
-    use hyper::client::Client;
-    use std::io::Read;
-
-    let client = Client::new();
-    let mut body = String::new();
-    let mut res = try!(client.get(HI_SCORES_ENDPOINT).send());
-    try!(res.read_to_string(&mut body));
-    Ok(body)
-}
-
-#[cfg(target_os="emscripten")]
-fn get_raw_hiscores() -> Result<String, Box<Error>> {
-    use emscripten::em;
-
-    let script = format!(r#"(function() {{
-        var req = new XMLHttpRequest();
-        req.open("GET", "{}", false);
-        req.send(null);
-        return req.responseText;
-    }}())"#,
-                         HI_SCORES_ENDPOINT);
-
-    Ok(em::run_script_string(&script))
-}
-
-#[cfg(not(target_os="emscripten"))]
-fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
-    use hyper::client::Client;
-
-    let client = Client::new();
-    try!(client.post(HI_SCORES_ENDPOINT).body(score.as_bytes()).send());
-    Ok(())
-}
-
-#[cfg(target_os="emscripten")]
-fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
-    use emscripten::em;
-
-    let script = format!(r#"(function() {{
-        var req = new XMLHttpRequest();
-        req.open("POST", "{}", false);
-        req.send(JSON.stringify({}));
-    }}())"#,
-                         HI_SCORES_ENDPOINT,
-                         score);
-
-    em::run_script(&script);
-    Ok(())
 }
