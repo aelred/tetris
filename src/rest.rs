@@ -3,73 +3,94 @@ use std::error::Error;
 use score::Score;
 use score::ScoreMessage;
 
+#[cfg(not(target_os="emscripten"))]
+use hyper;
+
 
 const HI_SCORES_ENDPOINT: &'static str = "http://localhost:4444/scores";
 
 
-pub fn get_hiscores() -> Result<Vec<Score>, Box<Error>> {
-    let body = try!(get_raw_hiscores());
-    let hiscores = try!(json::decode(&body));
-    Ok(hiscores)
-}
+impl Client {
+    pub fn get_hiscores(&mut self) -> Result<Vec<Score>, Box<Error>> {
+        let body = try!(self.get_raw_hiscores());
+        let hiscores = try!(json::decode(&body));
+        Ok(hiscores)
+    }
 
-pub fn post_hiscore(score: &ScoreMessage) {
-    let body = json::encode(score).unwrap();
-    let response = post_raw_hiscores(body);
+    pub fn post_hiscore(&mut self, score: &ScoreMessage) {
+        let body = json::encode(score).unwrap();
+        let response = self.post_raw_hiscores(body);
 
-    if let Err(e) = response {
-        println!("Failed to post hiscores: {}", e);
+        if let Err(e) = response {
+            println!("Failed to post hiscores: {}", e);
+        }
     }
 }
 
 #[cfg(not(target_os="emscripten"))]
-fn get_raw_hiscores() -> Result<String, Box<Error>> {
-    use hyper::client::Client;
-    use std::io::Read;
-
-    let client = Client::new();
-    let mut body = String::new();
-    let mut res = try!(client.get(HI_SCORES_ENDPOINT).send());
-    try!(res.read_to_string(&mut body));
-    Ok(body)
-}
-
-#[cfg(target_os="emscripten")]
-fn get_raw_hiscores() -> Result<String, Box<Error>> {
-    use emscripten::em;
-
-    let script = format!(r#"(function() {{
-        var req = new XMLHttpRequest();
-        req.open("GET", "{}", false);
-        req.send(null);
-        return req.responseText;
-    }}())"#,
-                         HI_SCORES_ENDPOINT);
-
-    Ok(em::run_script_string(&script))
+pub struct Client {
+    hyper_client: hyper::client::Client,
 }
 
 #[cfg(not(target_os="emscripten"))]
-fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
-    use hyper::client::Client;
+impl Client {
+    pub fn new() -> Self {
+        Client { hyper_client: hyper::client::Client::new() }
+    }
 
-    let client = Client::new();
-    try!(client.post(HI_SCORES_ENDPOINT).body(score.as_bytes()).send());
-    Ok(())
+    fn get_raw_hiscores(&mut self) -> Result<String, Box<Error>> {
+        use std::io::Read;
+
+        let mut body = String::new();
+        let mut res = try!(self.hyper_client.get(HI_SCORES_ENDPOINT).send());
+        try!(res.read_to_string(&mut body));
+        Ok(body)
+    }
+
+    fn post_raw_hiscores(&mut self, score: String) -> Result<(), Box<Error>> {
+        try!(self.hyper_client
+                 .post(HI_SCORES_ENDPOINT)
+                 .body(score.as_bytes())
+                 .send());
+        Ok(())
+    }
 }
 
 #[cfg(target_os="emscripten")]
-fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
-    use emscripten::em;
+pub struct Client;
 
-    let script = format!(r#"(function() {{
-        var req = new XMLHttpRequest();
-        req.open("POST", "{}", false);
-        req.send(JSON.stringify({}));
-    }}())"#,
-                         HI_SCORES_ENDPOINT,
-                         score);
+#[cfg(target_os="emscripten")]
+impl Client {
+    pub fn new() -> Self {
+        Client
+    }
 
-    em::run_script(&script);
-    Ok(())
+    fn get_raw_hiscores(&self) -> Result<String, Box<Error>> {
+        use emscripten::em;
+
+        let script = format!(r#"(function() {{
+            var req = new XMLHttpRequest();
+            req.open("GET", "{}", false);
+            req.send(null);
+            return req.responseText;
+        }}())"#,
+                             HI_SCORES_ENDPOINT);
+
+        Ok(em::run_script_string(&script))
+    }
+
+    fn post_raw_hiscores(&self, score: String) -> Result<(), Box<Error>> {
+        use emscripten::em;
+
+        let script = format!(r#"(function() {{
+            var req = new XMLHttpRequest();
+            req.open("POST", "{}", false);
+            req.send(JSON.stringify({}));
+        }}())"#,
+                             HI_SCORES_ENDPOINT,
+                             score);
+
+        em::run_script(&script);
+        Ok(())
+    }
 }

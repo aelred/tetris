@@ -11,6 +11,7 @@ use tetris::state::State;
 use tetris::game::WINDOW_WIDTH;
 use tetris::game::WINDOW_HEIGHT;
 use tetris::draw::Drawer;
+use tetris::rest::Client;
 
 use std::cmp::max;
 
@@ -35,6 +36,7 @@ struct Context<'a> {
     drawer: Drawer<'a>,
     event_pump: EventPump,
     states: Vec<State>,
+    client: Client,
 }
 
 fn main() {
@@ -52,6 +54,7 @@ fn main() {
         drawer: Drawer::new(window.renderer().build().unwrap(), font),
         event_pump: sdl_context.event_pump().unwrap(),
         states: Vec::new(),
+        client: Client::new(),
     };
 
     context.states.push(State::Title);
@@ -103,7 +106,7 @@ fn main_loop(context: &mut Context) {
 
     let state_change = {
         let mut state = context.states.last_mut().unwrap();
-        state.update(&mut context.drawer, &events)
+        state.update(&mut context.drawer, &events, &mut context.client)
     };
 
     state_change.apply(&mut context.states);

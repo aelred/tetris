@@ -11,6 +11,7 @@ use tetromino;
 use tetromino::Rotation;
 use tetromino::Bag;
 use draw::Drawer;
+use rest::Client;
 use game_over::GameOver;
 
 use rand;
@@ -70,7 +71,11 @@ impl GamePlay {
         }
     }
 
-    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
+    pub fn update(&mut self,
+                  drawer: &mut Drawer,
+                  events: &[Event],
+                  client: &mut Client)
+                  -> StateChange {
         let mut actions = Vec::new();
 
         for event in events {
@@ -114,8 +119,8 @@ impl GamePlay {
         self.draw_score(drawer);
 
         if is_game_over {
-            StateChange::Replace(State::GameOver(GameOver::new(self.game.score,
-                                                               self.history.clone())))
+            let game_over = GameOver::new(self.game.score, self.history.clone(), client);
+            StateChange::Replace(State::GameOver(game_over))
         } else {
             StateChange::None
         }
