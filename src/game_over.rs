@@ -177,7 +177,6 @@ fn get_hiscores() -> Result<Vec<Score>, Box<Error>> {
 
 fn post_hiscore(score: &ScoreMessage) {
     let body = json::encode(score).unwrap();
-    println!("{}", body);
     let response = post_raw_hiscores(body);
 
     if let Err(e) = response {
@@ -217,8 +216,7 @@ fn post_raw_hiscores(score: String) -> Result<(), Box<Error>> {
     use hyper::client::Client;
 
     let client = Client::new();
-    let body = json::encode(&score).unwrap();
-    try!(client.post(HI_SCORES_ENDPOINT).body(body.as_bytes()).send());
+    try!(client.post(HI_SCORES_ENDPOINT).body(score.as_bytes()).send());
     Ok(())
 }
 
