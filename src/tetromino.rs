@@ -270,13 +270,11 @@ mod tests {
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {
             let size = g.size() as u32;
-            if g.gen_weighted_bool(size) {
-                Bag::new(*RNG)
-            } else {
-                let mut bag = Bag::arbitrary(g);
+            let mut bag = Bag::new(*RNG);
+            for _ in 0..size {
                 bag.pop();
-                bag
             }
+            bag
         }
     }
 
