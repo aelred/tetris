@@ -33,7 +33,7 @@ enum Gravity {
     HardDrop,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, RustcDecodable, RustcEncodable)]
 pub enum Action {
     MoveLeft,
     MoveRight,
@@ -43,7 +43,7 @@ pub enum Action {
     StopDrop,
 }
 
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(RustcDecodable, RustcEncodable, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Tick(u32);
 
 impl Tick {
@@ -114,7 +114,8 @@ impl GamePlay {
         self.draw_score(drawer);
 
         if is_game_over {
-            StateChange::Replace(State::GameOver(GameOver::new(self.game.score)))
+            StateChange::Replace(State::GameOver(GameOver::new(self.game.score,
+                                                               self.history.clone())))
         } else {
             StateChange::None
         }
@@ -300,6 +301,7 @@ impl Game {
     }
 }
 
+#[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct History {
     seed: [usize; 32],
     actions: Vec<(Tick, Action)>,

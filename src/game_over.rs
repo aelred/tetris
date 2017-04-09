@@ -3,7 +3,9 @@ use draw::Drawer;
 use state::State;
 use state::StateChange;
 use score::Score;
+use score::ScoreMessage;
 use score::OFFSET;
+use game::History;
 use std::error::Error;
 
 use regex::Regex;
@@ -19,6 +21,7 @@ const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 pub struct GameOver {
     hiscores: Option<HighScores>,
     score: Score,
+    history: History,
     posting_hiscore: bool,
 }
 
@@ -51,7 +54,7 @@ impl HighScores {
 }
 
 impl GameOver {
-    pub fn new(score: u32) -> Self {
+    pub fn new(score: u32, history: History) -> Self {
         let hiscores = get_hiscores();
 
         if let &Err(ref e) = &hiscores {
@@ -70,6 +73,7 @@ impl GameOver {
         GameOver {
             hiscores: hiscores,
             score: score,
+            history: history,
             posting_hiscore: posting_hiscore,
         }
     }
@@ -86,7 +90,9 @@ impl GameOver {
                     Keycode::Return => {
                         if !self.posting_hiscore || !self.score.name.is_empty() {
                             if self.posting_hiscore {
-                                post_hiscore(&self.score);
+                                let message = ScoreMessage::new(self.score.clone(),
+                                                                self.history.clone());
+                                post_hiscore(&message);
                             }
                             return StateChange::Replace(State::play());
                         }
@@ -169,8 +175,9 @@ fn get_hiscores() -> Result<Vec<Score>, Box<Error>> {
     Ok(hiscores)
 }
 
-fn post_hiscore(score: &Score) {
+fn post_hiscore(score: &ScoreMessage) {
     let body = json::encode(score).unwrap();
+    println!("{}", body);
     let response = post_raw_hiscores(body);
 
     if let Err(e) = response {

@@ -1,4 +1,5 @@
 use draw::TextDrawer;
+use game::History;
 use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
@@ -42,5 +43,48 @@ impl Ord for Score {
 impl PartialOrd for Score {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+#[derive(RustcDecodable, RustcEncodable)]
+pub struct ScoreMessage {
+    score: Score,
+    history: History,
+}
+
+impl ScoreMessage {
+    pub fn new(score: Score, history: History) -> Self {
+        ScoreMessage {
+            score: score,
+            history: history,
+        }
+    }
+
+    pub fn score(self) -> Result<Score, String> {
+        if self.score.name.is_empty() {
+            return Err("Name should not be empty".to_string());
+        }
+
+        if self.score.name.len() > 3 {
+            return Err(format!("Name must be at most 3 characters, but was {}",
+                               self.score.name.len()));
+        }
+
+        if !self.score
+                .name
+                .chars()
+                .all(char::is_alphanumeric) {
+            return Err(format!("Name must contain only alphanumeric characters, but was {}",
+                               self.score.name));
+        }
+
+        let expected_score = self.history.replay();
+        if expected_score != self.score.value {
+            return Err(format!("Score does not match game history: History suggests {} but was {}",
+                               expected_score,
+                               self.score.value));
+        }
+
+        Ok(self.score)
     }
 }

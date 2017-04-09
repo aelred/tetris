@@ -3,6 +3,7 @@ extern crate rustc_serialize;
 extern crate tetris;
 
 use tetris::score::Score;
+use tetris::score::ScoreMessage;
 
 use rustc_serialize::json;
 
@@ -45,24 +46,25 @@ impl ScoresHandler {
         }
     }
 
+    fn decode_score_message(body: &str) -> Result<Score, Box<Error>> {
+        let message: ScoreMessage = try!(json::decode(body));
+        let score = try!(message.score());
+        Ok(score)
+    }
+
     fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<(), Box<Error>> {
         let mut body = String::new();
         req.read_to_string(&mut body)?;
 
-        let score: Score = match json::decode(&body) {
+        let score: Score = match ScoresHandler::decode_score_message(&body) {
             Ok(s) => s,
             Err(e) => {
                 println!("Bad request: {} - {}", &body, e);
                 *res.status_mut() = StatusCode::BadRequest;
+                res.send(e.to_string().as_bytes())?;
                 return Ok(());
             }
         };
-
-        if !score.name.chars().all(char::is_alphanumeric) || score.name.len() > 3 {
-            println!("Bad request: name does not match format");
-            *res.status_mut() = StatusCode::BadRequest;
-            return Ok(());
-        }
 
         {
             let ref mut hiscores = *self.hiscores.write().unwrap();
