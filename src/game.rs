@@ -176,29 +176,6 @@ impl Game {
         }
     }
 
-    pub fn replay(history: History) -> u32 {
-        let mut game = Game::new(&history.seed);
-
-        for (action_tick, action) in history.actions {
-            while game.tick < action_tick {
-                let is_game_over = game.apply_step();
-                if is_game_over {
-                    return game.score;
-                }
-            }
-
-            game.apply_action(action);
-        }
-
-        // after actions stopped, the game will have continued until a game over
-        loop {
-            let is_game_over = game.apply_step();
-            if is_game_over {
-                return game.score;
-            }
-        }
-    }
-
     fn apply_action(&mut self, action: Action) {
 
         match action {
@@ -339,9 +316,30 @@ impl History {
     fn push(&mut self, tick: Tick, action: Action) {
         self.actions.push((tick, action));
     }
+
+    pub fn replay(&self) -> u32 {
+        let mut game = Game::new(&self.seed);
+
+        for &(action_tick, action) in &self.actions {
+            while game.tick < action_tick {
+                let is_game_over = game.apply_step();
+                if is_game_over {
+                    return game.score;
+                }
+            }
+
+            game.apply_action(action);
+        }
+
+        // after actions stopped, the game will have continued until a game over
+        loop {
+            let is_game_over = game.apply_step();
+            if is_game_over {
+                return game.score;
+            }
+        }
+    }
 }
-
-
 
 lazy_static! {
     static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
