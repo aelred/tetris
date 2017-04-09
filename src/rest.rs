@@ -7,7 +7,7 @@ use score::ScoreMessage;
 use hyper;
 
 
-const HI_SCORES_ENDPOINT: &'static str = "http://localhost:4444/scores";
+const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 
 
 impl Client {
