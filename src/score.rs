@@ -4,6 +4,8 @@ use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
 
+pub const VERIFY_SCORES: bool = false;
+
 #[derive(RustcDecodable, RustcEncodable, Eq, PartialEq, Clone)]
 pub struct Score {
     pub value: u32,
@@ -78,11 +80,14 @@ impl ScoreMessage {
                                self.score.name));
         }
 
-        let expected_score = self.history.replay();
-        if expected_score != self.score.value {
-            return Err(format!("Score does not match game history: History suggests {} but was {}",
-                               expected_score,
-                               self.score.value));
+        if VERIFY_SCORES {
+            let expected_score = self.history.replay();
+            if expected_score != self.score.value {
+                return Err(format!("Score does not match game history: History suggests {} but was {}",
+                                   expected_score,
+                                   self.score.value));
+
+            }
         }
 
         Ok(self.score)
