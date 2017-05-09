@@ -263,14 +263,10 @@ mod tests {
     use quickcheck::Arbitrary;
     use quickcheck::Gen;
 
-    lazy_static! {
-        static ref RNG: StdRng = StdRng::new().unwrap();
-    }
-
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {
             let size = g.size() as u32;
-            let mut bag = Bag::new(*RNG);
+            let mut bag = Bag::new(rand::random());
             for _ in 0..size {
                 bag.pop();
             }
