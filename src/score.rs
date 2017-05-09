@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
 
-pub const VERIFY_SCORES: bool = true;
+pub const VERIFY_SCORES: bool = false;
 
 #[derive(RustcDecodable, RustcEncodable, Eq, PartialEq, Clone)]
 pub struct Score {
