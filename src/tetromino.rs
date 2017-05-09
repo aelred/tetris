@@ -4,7 +4,7 @@ use pos::Pos;
 use draw::Drawer;
 
 use std::fmt;
-use rand::StdRng;
+use rand::XorShiftRng;
 use rand::Rng;
 use sdl2::pixels::Color;
 use sdl2::pixels::Color::RGB;
@@ -19,7 +19,7 @@ pub const HEIGHT: u8 = 4;
 pub struct Bag {
     tetrominoes: [&'static Tetromino; NUM_TETROMINOES],
     index: usize,
-    rng: StdRng,
+    rng: XorShiftRng,
 }
 
 impl fmt::Debug for Bag {
@@ -33,7 +33,7 @@ impl fmt::Debug for Bag {
 }
 
 impl Bag {
-    pub fn new(mut rng: StdRng) -> Bag {
+    pub fn new(mut rng: XorShiftRng) -> Bag {
         Bag {
             tetrominoes: Bag::random_sequence(&mut rng),
             index: 0,

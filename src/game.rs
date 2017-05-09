@@ -15,7 +15,7 @@ use rest::Client;
 use game_over::GameOver;
 
 use rand;
-use rand::StdRng;
+use rand::XorShiftRng;
 use rand::SeedableRng;
 use sdl2::event::Event;
 use sdl2::rect::Rect;
@@ -66,7 +66,7 @@ impl GamePlay {
     pub fn new() -> GamePlay {
         let seed = rand::random();
         GamePlay {
-            game: Game::new(&seed),
+            game: Game::new(seed),
             history: History::new(seed),
         }
     }
@@ -129,7 +129,8 @@ impl GamePlay {
     fn draw_score(&self, drawer: &mut Drawer) {
         drawer.set_viewport(*SCORE_VIEW);
 
-        drawer.text()
+        drawer
+            .text()
             .draw("lines")
             .size(2)
             .left()
@@ -167,8 +168,8 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(seed: &[usize; 32]) -> Game {
-        let mut bag = Bag::new(StdRng::from_seed(seed));
+    pub fn new(seed: [u32; 4]) -> Game {
+        let mut bag = Bag::new(XorShiftRng::from_seed(seed));
         Game {
             piece: Piece::new(bag.pop()),
             board: Board::new(),
@@ -276,8 +277,11 @@ impl Game {
     }
 
     fn lock(&mut self) -> bool {
-        let FillResult { mut is_game_over, lines_cleared } =
-            self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
+        let FillResult {
+            mut is_game_over,
+            lines_cleared,
+        } = self.board
+            .fill(self.piece.blocks(), self.piece.tetromino.color);
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;
@@ -308,12 +312,12 @@ impl Game {
 
 #[derive(Clone, RustcDecodable, RustcEncodable)]
 pub struct History {
-    seed: [usize; 32],
+    seed: [u32; 4],
     actions: Vec<(Tick, Action)>,
 }
 
 impl History {
-    fn new(seed: [usize; 32]) -> Self {
+    fn new(seed: [u32; 4]) -> Self {
         History {
             seed: seed,
             actions: Vec::new(),
@@ -325,7 +329,7 @@ impl History {
     }
 
     pub fn replay(&self) -> u32 {
-        let mut game = Game::new(&self.seed);
+        let mut game = Game::new(self.seed);
 
         for &(action_tick, action) in &self.actions {
             while game.tick < action_tick {
