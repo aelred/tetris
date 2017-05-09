@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
 
-pub const VERIFY_SCORES: bool = false;
+pub const VERIFY_SCORES: bool = true;
 
 #[derive(RustcDecodable, RustcEncodable, Eq, PartialEq, Clone)]
 pub struct Score {
@@ -72,10 +72,7 @@ impl ScoreMessage {
                                self.score.name.len()));
         }
 
-        if !self.score
-                .name
-                .chars()
-                .all(char::is_alphanumeric) {
+        if !self.score.name.chars().all(char::is_alphanumeric) {
             return Err(format!("Name must contain only alphanumeric characters, but was {}",
                                self.score.name));
         }
