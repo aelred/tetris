@@ -46,7 +46,9 @@ fn main() {
 
     let font_data = RWops::from_bytes(FONT_DATA).unwrap();
     let font_size = max(FONT_SIZE, FONT_MULTIPLE);
-    let font = ttf_context.load_font_from_rwops(font_data, font_size).unwrap();
+    let font = ttf_context
+        .load_font_from_rwops(font_data, font_size)
+        .unwrap();
 
     let window = create_window(&sdl_context);
 
@@ -54,7 +56,7 @@ fn main() {
         drawer: Drawer::new(window.renderer().build().unwrap(), font),
         event_pump: sdl_context.event_pump().unwrap(),
         states: Vec::new(),
-        client: Client::new(),
+        client: Client::default(),
     };
 
     context.states.push(State::Title);
@@ -121,7 +123,8 @@ fn exit() {
 fn create_window(sdl_context: &Sdl) -> Window {
     let video_subsystem = sdl_context.video().unwrap();
 
-    video_subsystem.window("Tetris", WINDOW_WIDTH, WINDOW_HEIGHT)
+    video_subsystem
+        .window("Tetris", WINDOW_WIDTH, WINDOW_HEIGHT)
         .position_centered()
         .opengl()
         .build()

@@ -33,11 +33,14 @@ pub struct Client {
 }
 
 #[cfg(not(target_os="emscripten"))]
-impl Client {
-    pub fn new() -> Self {
+impl Default for Client {
+    fn default() -> Self {
         Client { hyper_client: hyper::client::Client::new() }
     }
+}
 
+#[cfg(not(target_os="emscripten"))]
+impl Client {
     fn get_raw_hiscores(&mut self) -> Result<String, Box<Error>> {
         use std::io::Read;
 
@@ -60,11 +63,14 @@ impl Client {
 pub struct Client;
 
 #[cfg(target_os="emscripten")]
-impl Client {
-    pub fn new() -> Self {
+impl Default for Client {
+    fn default() -> Self {
         Client
     }
+}
 
+#[cfg(target_os="emscripten")]
+impl Client {
     fn get_raw_hiscores(&self) -> Result<String, Box<Error>> {
         use emscripten::em;
 

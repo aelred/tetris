@@ -62,15 +62,17 @@ pub struct GamePlay {
     history: History,
 }
 
-impl GamePlay {
-    pub fn new() -> GamePlay {
+impl Default for GamePlay {
+    fn default() -> Self {
         let seed = rand::random();
         GamePlay {
             game: Game::new(seed),
             history: History::new(seed),
         }
     }
+}
 
+impl GamePlay {
     pub fn update(&mut self,
                   drawer: &mut Drawer,
                   events: &[Event],

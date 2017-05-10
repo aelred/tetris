@@ -16,7 +16,7 @@ pub enum State {
 
 impl State {
     pub fn play() -> State {
-        State::Play(Box::new(GamePlay::new()))
+        State::Play(Box::new(GamePlay::default()))
     }
 
     pub fn update(&mut self,
@@ -41,7 +41,8 @@ impl State {
             }
         }
 
-        drawer.text()
+        drawer
+            .text()
             .size(4)
             .centered()
             .draw("Tetris")

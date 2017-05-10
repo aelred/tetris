@@ -67,7 +67,7 @@ impl ScoresHandler {
         };
 
         {
-            let ref mut hiscores = *self.hiscores.write().unwrap();
+            let hiscores = &mut (*self.hiscores.write().unwrap());
             hiscores.push(score);
             hiscores.sort();
             hiscores.pop();
@@ -83,7 +83,7 @@ impl ScoresHandler {
     }
 
     fn send_hiscores(&self, mut res: Response) -> std::io::Result<()> {
-        let ref hiscores = *self.hiscores.read().unwrap();
+        let hiscores = &(*self.hiscores.read().unwrap());
 
         res.headers_mut().set(ContentType::json());
         let body = json::encode(hiscores).unwrap();
@@ -125,7 +125,8 @@ fn main() {
 
 fn read_hiscores(file: &mut File) -> Vec<Score> {
     let mut hiscores = String::new();
-    file.read_to_string(&mut hiscores).expect("Hiscores file is invalid");
+    file.read_to_string(&mut hiscores)
+        .expect("Hiscores file is invalid");
     json::decode(&hiscores).expect("Hiscores file is invalid")
 }
 
