@@ -143,6 +143,6 @@ const TETRIS_CONF: &'static str = ".tetris";
 fn hiscores_path() -> PathBuf {
     let mut home = std::env::home_dir().unwrap();
     home.push(TETRIS_CONF);
-    home.push("hiscores");
+    home.push("hiscores.json");
     home
 }
