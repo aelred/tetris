@@ -112,9 +112,11 @@ mod tests {
 
     #[test]
     fn correctly_recognise_a_valid_game() {
-        let body = include_str!("../resources/valid-game.json");
-        let message: ScoreMessage = json::decode(&body).unwrap();
-        assert_eq!(message.score().unwrap(),
-                   Score::new(1700, "AEL".to_string()));
+        if (VERIFY_SCORES) {
+            let body = include_str!("../resources/valid-game.json");
+            let message: ScoreMessage = json::decode(&body).unwrap();
+            assert_eq!(message.score().unwrap(),
+                       Score::new(1700, "AEL".to_string()));
+        }
     }
 }
