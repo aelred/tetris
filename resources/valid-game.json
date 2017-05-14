@@ -1,0 +1,562 @@
+{
+    "history": {
+        "actions": [
+            [
+                {
+                    "_field0": 103
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 112
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 119
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 129
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 148
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 163
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 211
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 225
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 251
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 310
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 329
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 355
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 367
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 407
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 425
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 440
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 503
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 513
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 523
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 552
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 665
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 678
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 690
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 697
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 705
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 718
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 775
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 784
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 792
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 805
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 871
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 881
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 901
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 918
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 930
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 986
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 994
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1001
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1012
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1026
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1117
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1149
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1164
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1187
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1222
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 1230
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 1239
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1247
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 1258
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1362
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1369
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1376
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1379
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 1394
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1484
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1495
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1503
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1511
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1529
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1639
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1677
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1696
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1757
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1767
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1778
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1795
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 1907
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1917
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 1928
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 1946
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2035
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2049
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 2059
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2093
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2124
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2213
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 2234
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2307
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2325
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2363
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2377
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2444
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2464
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 2476
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2541
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2569
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 2580
+                },
+                "StartHardDrop"
+            ],
+            [
+                {
+                    "_field0": 2625
+                },
+                "Rotate"
+            ],
+            [
+                {
+                    "_field0": 2630
+                },
+                "MoveRight"
+            ],
+            [
+                {
+                    "_field0": 2644
+                },
+                "MoveLeft"
+            ],
+            [
+                {
+                    "_field0": 2652
+                },
+                "StartHardDrop"
+            ]
+        ],
+        "seed": [
+            967710452,
+            2860053983,
+            1413916830,
+            2354723339
+        ]
+    },
+    "score": {
+        "name": "AEL",
+        "value": 1700
+    }
+}

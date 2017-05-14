@@ -7,7 +7,7 @@ pub const OFFSET: i32 = 100;
 
 pub const VERIFY_SCORES: bool = false;
 
-#[derive(RustcDecodable, RustcEncodable, Eq, PartialEq, Clone)]
+#[derive(RustcDecodable, RustcEncodable, Eq, PartialEq, Clone, Debug)]
 pub struct Score {
     pub value: u32,
     pub name: String,
@@ -98,5 +98,23 @@ impl ScoreMessage {
                               expected_score,
                               self.score.value);
         Err(From::from(message))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::path::PathBuf;
+    use std::fs::File;
+    use rustc_serialize::json;
+    use std::io::Read;
+
+    #[test]
+    fn correctly_recognise_a_valid_game() {
+        let body = include_str!("../resources/valid-game.json");
+        let message: ScoreMessage = json::decode(&body).unwrap();
+        assert_eq!(message.score().unwrap(),
+                   Score::new(1700, "AEL".to_string()));
     }
 }
