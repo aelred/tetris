@@ -1,5 +1,6 @@
 use draw::TextDrawer;
 use game::History;
+use err::Result;
 use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
@@ -62,27 +63,33 @@ impl ScoreMessage {
         }
     }
 
-    pub fn score(self) -> Result<Score, String> {
+    pub fn score(self) -> Result<Score> {
         if self.score.name.is_empty() {
-            return Err("Name should not be empty".to_string());
+            return Err(From::from("Name should not be empty"));
         }
 
         if self.score.name.len() > 3 {
-            return Err(format!("Name must be at most 3 characters, but was {}",
-                               self.score.name.len()));
+            let message = format!("Name must be at most 3 characters, but was {}",
+                                  self.score.name.len());
+            return Err(From::from(message));
         }
 
-        if !self.score.name.chars().all(char::is_alphanumeric) {
-            return Err(format!("Name must contain only alphanumeric characters, but was {}",
-                               self.score.name));
+        if !self.score
+                .name
+                .chars()
+                .all(char::is_alphanumeric) {
+            let message = format!("Name must contain only alphanumeric characters, but was {}",
+                                  self.score.name);
+            return Err(From::from(message));
         }
 
         if VERIFY_SCORES {
             let expected_score = self.history.replay();
             if expected_score != self.score.value {
-                return Err(format!("Score does not match game history: History suggests {} but was {}",
-                                   expected_score,
-                                   self.score.value));
+                let message = format!("Score does not match game history: History suggests {} but was {}",
+                                      expected_score,
+                                      self.score.value);
+                return Err(From::from(message));
 
             }
         }

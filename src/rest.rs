@@ -1,6 +1,6 @@
 use rustc_serialize::json;
-use std::error::Error;
 use score::Score;
+use err::Result;
 use score::ScoreMessage;
 
 #[cfg(not(target_os="emscripten"))]
@@ -11,7 +11,7 @@ const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 
 
 impl Client {
-    pub fn get_hiscores(&mut self) -> Result<Vec<Score>, Box<Error>> {
+    pub fn get_hiscores(&mut self) -> Result<Vec<Score>> {
         let body = try!(self.get_raw_hiscores());
         let hiscores = try!(json::decode(&body));
         Ok(hiscores)
@@ -41,7 +41,7 @@ impl Default for Client {
 
 #[cfg(not(target_os="emscripten"))]
 impl Client {
-    fn get_raw_hiscores(&mut self) -> Result<String, Box<Error>> {
+    fn get_raw_hiscores(&mut self) -> Result<String> {
         use std::io::Read;
 
         let mut body = String::new();
@@ -50,7 +50,7 @@ impl Client {
         Ok(body)
     }
 
-    fn post_raw_hiscores(&mut self, score: String) -> Result<(), Box<Error>> {
+    fn post_raw_hiscores(&mut self, score: String) -> Result<()> {
         try!(self.hyper_client
                  .post(HI_SCORES_ENDPOINT)
                  .body(score.as_bytes())
@@ -71,7 +71,7 @@ impl Default for Client {
 
 #[cfg(target_os="emscripten")]
 impl Client {
-    fn get_raw_hiscores(&self) -> Result<String, Box<Error>> {
+    fn get_raw_hiscores(&self) -> Result<String> {
         use emscripten::em;
 
         let script = format!(r#"(function() {{
@@ -85,7 +85,7 @@ impl Client {
         Ok(em::run_script_string(&script))
     }
 
-    fn post_raw_hiscores(&self, score: String) -> Result<(), Box<Error>> {
+    fn post_raw_hiscores(&self, score: String) -> Result<()> {
         use emscripten::em;
 
         let script = format!(r#"(function() {{

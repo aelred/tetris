@@ -131,8 +131,7 @@ impl GamePlay {
     fn draw_score(&self, drawer: &mut Drawer) {
         drawer.set_viewport(*SCORE_VIEW);
 
-        drawer
-            .text()
+        drawer.text()
             .draw("lines")
             .size(2)
             .left()
@@ -279,11 +278,8 @@ impl Game {
     }
 
     fn lock(&mut self) -> bool {
-        let FillResult {
-            mut is_game_over,
-            lines_cleared,
-        } = self.board
-            .fill(self.piece.blocks(), self.piece.tetromino.color);
+        let FillResult { mut is_game_over, lines_cleared } =
+            self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;

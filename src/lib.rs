@@ -12,6 +12,7 @@ mod pos;
 mod board;
 mod piece;
 mod game_over;
+mod err;
 
 #[macro_use]
 extern crate lazy_static;
