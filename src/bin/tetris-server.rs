@@ -13,6 +13,7 @@ use std::io::Write;
 use std::error::Error;
 use std::sync::RwLock;
 use std::io::Read;
+use std::fs::DirBuilder;
 
 use hyper::{Get, Post};
 use hyper::server::{Server, Handler, Request, Response};
@@ -141,8 +142,11 @@ fn init_hiscores() -> Vec<Score> {
 const TETRIS_CONF: &'static str = ".tetris";
 
 fn hiscores_path() -> PathBuf {
-    let mut home = std::env::home_dir().unwrap();
-    home.push(TETRIS_CONF);
-    home.push("hiscores.json");
-    home
+    let mut path = std::env::home_dir().unwrap();
+    path.push(TETRIS_CONF);
+
+    let _ = DirBuilder::new().create(&path);
+
+    path.push("hiscores.json");
+    path
 }
