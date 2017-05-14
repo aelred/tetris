@@ -109,7 +109,8 @@ impl GameOver {
             }
         }
 
-        let mut text = drawer.text()
+        let mut text = drawer
+            .text()
             .top()
             .offset(0, 50)
             .size(3)
@@ -136,11 +137,11 @@ impl GameOver {
     fn draw_hiscores<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
 
         match self.hiscores {
-            Some(HighScores { ref higher_scores, ref lower_scores }) => {
-                let mut text = text.size(3)
-                    .under()
-                    .offset(0, 10)
-                    .draw("High Scores");
+            Some(HighScores {
+                     ref higher_scores,
+                     ref lower_scores,
+                 }) => {
+                let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
 
                 text = text.size(2).under().offset(0, 10);
 
@@ -149,7 +150,9 @@ impl GameOver {
                 }
 
                 if self.posting_hiscore {
-                    text = self.score.draw(text.color(Color::RGB(255, 255, 100))).reset_color();
+                    text = self.score
+                        .draw(text.color(Color::RGB(255, 255, 100)))
+                        .reset_color();
                 }
 
                 for score in lower_scores {

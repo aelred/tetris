@@ -48,9 +48,10 @@ impl Piece {
     }
 
     pub fn draw(&self, drawer: &mut Drawer) {
-        self.tetromino.draw(drawer,
-                            self.rot,
-                            self.pos + Pos::new(0, -(HIDE_ROWS as i16)));
+        self.tetromino
+            .draw(drawer,
+                  self.rot,
+                  self.pos + Pos::new(0, -(HIDE_ROWS as i16)));
     }
 
     pub fn blocks(&self) -> Vec<Pos> {

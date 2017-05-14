@@ -131,14 +131,15 @@ impl GamePlay {
     fn draw_score(&self, drawer: &mut Drawer) {
         drawer.set_viewport(*SCORE_VIEW);
 
-        drawer.text()
+        drawer
+            .text()
             .draw("lines")
             .size(2)
             .left()
             .draw(&self.game.lines_cleared.to_string())
             .size(1)
             .left()
-            .offset(0, PAD as i32)
+            .offset(0, PAD)
             .draw("score")
             .size(2)
             .left()
@@ -278,8 +279,11 @@ impl Game {
     }
 
     fn lock(&mut self) -> bool {
-        let FillResult { mut is_game_over, lines_cleared } =
-            self.board.fill(self.piece.blocks(), self.piece.tetromino.color);
+        let FillResult {
+            mut is_game_over,
+            lines_cleared,
+        } = self.board
+            .fill(self.piece.blocks(), self.piece.tetromino.color);
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;
@@ -363,7 +367,7 @@ lazy_static! {
 
     static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 
-    static ref SCORE_VIEW: Rect = Rect::new(PREVIEW_X + BOARD_BORDER as i32 + PAD as i32, PAD as i32, PREVIEW_WIDTH, BOARD_HEIGHT);
+    static ref SCORE_VIEW: Rect = Rect::new(SCORE_X, PAD, PREVIEW_WIDTH, BOARD_HEIGHT);
 }
 
 const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
@@ -377,7 +381,9 @@ const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
 const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
 const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 
-const PAD: u32 = BLOCK_SIZE as u32;
+const SCORE_X: i32 = PREVIEW_X + BOARD_BORDER as i32 + PAD;
+
+const PAD: i32 = BLOCK_SIZE as i32;
 
 pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
 pub const WINDOW_HEIGHT: u32 = TOTAL_BOARD_HEIGHT;

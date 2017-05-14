@@ -41,7 +41,8 @@ impl State {
             }
         }
 
-        drawer.text()
+        drawer
+            .text()
             .size(4)
             .centered()
             .draw("Tetris")

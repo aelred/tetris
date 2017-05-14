@@ -132,6 +132,15 @@ mod tests {
         }
     }
 
+    #[derive(Clone, Debug)]
+    struct MyColor(Color);
+
+    impl Arbitrary for MyColor {
+        fn arbitrary<G: Gen>(g: &mut G) -> MyColor {
+            MyColor(Color::RGB(g.gen(), g.gen(), g.gen()))
+        }
+    }
+
     fn in_bounds(pos: Pos) -> bool {
         !out_bounds(pos)
     }
@@ -143,23 +152,23 @@ mod tests {
             then!(!Board::new().touches(pos))
         }
 
-        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, r: u8, g: u8, b: u8) -> TestResult {
+        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: MyColor) -> TestResult {
             when!(in_bounds(pos));
-            let color = Color::RGB(r, g, b);
             let mut board = board;
-            board.fill_pos(pos, color);
+            board.fill_pos(pos, col.0);
             then!(board.touches(pos))
         }
 
-        fn after_filling_a_space_no_other_space_changes(board: Board, pos1: Pos, pos2: Pos, r: u8, g: u8, b: u8) -> TestResult {
+        fn after_filling_a_space_no_other_space_changes(
+            board: Board, pos1: Pos, pos2: Pos, col: MyColor) -> TestResult {
+
             when!(pos1 != pos2);
             when!(in_bounds(pos1));
 
-            let color = Color::RGB(r, g, b);
             let mut board = board;
 
             let touches_before = board.touches(pos2);
-            board.fill_pos(pos1, color);
+            board.fill_pos(pos1, col.0);
             let touches_after = board.touches(pos2);
             then!(touches_before == touches_after)
         }
@@ -171,7 +180,9 @@ mod tests {
             then!(!board.touches(Pos::new(x, 0)))
         }
 
-        fn after_clearing_a_row_nothing_under_it_is_changed(board: Board, y: u8, under: Pos) -> TestResult {
+        fn after_clearing_a_row_nothing_under_it_is_changed(
+            board: Board, y: u8, under: Pos) -> TestResult {
+
             when!(in_bounds(under));
             when!(under.y() > y as i16);
 
@@ -183,7 +194,9 @@ mod tests {
             then!(before == after)
         }
 
-        fn after_clearing_a_row_everything_above_it_shifts_down(board: Board, y: u8, above: Pos) -> TestResult {
+        fn after_clearing_a_row_everything_above_it_shifts_down(
+            board: Board, y: u8, above: Pos) -> TestResult {
+
             when!(y < HEIGHT);
             when!(!out_bounds(above));
             when!(above.y() < y as i16);

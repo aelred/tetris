@@ -33,11 +33,11 @@ impl<'a> Drawer<'a> {
         let y = pos.y() as i16;
 
         self.renderer.set_draw_color(col);
-        let _ =
-            self.renderer.fill_rect(Rect::new(x as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
-                                              y as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
-                                              BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
-                                              BLOCK_SIZE as u32 - BLOCK_BORDER as u32));
+        let _ = self.renderer
+            .fill_rect(Rect::new(x as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
+                                 y as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
+                                 BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
+                                 BLOCK_SIZE as u32 - BLOCK_BORDER as u32));
     }
 
     pub fn draw_border(&mut self, size: Pos) {
@@ -55,10 +55,7 @@ impl<'a> Drawer<'a> {
     }
 
     fn draw_text(&mut self, text_pos: &TextPos, text: &str, size: u32, color: Color) -> Rect {
-        let surface = self.font
-            .render(text)
-            .solid(color)
-            .unwrap();
+        let surface = self.font.render(text).solid(color).unwrap();
         let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
 
         let TextureQuery { width, height, .. } = texture.query();
@@ -105,7 +102,8 @@ pub struct TextDrawer<'a, 'b: 'a> {
 
 impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
     pub fn draw(mut self, text: &str) -> Self {
-        self.last_rect = self.drawer.draw_text(&self.pos, text, self.size, self.color);
+        self.last_rect = self.drawer
+            .draw_text(&self.pos, text, self.size, self.color);
         self
     }
 

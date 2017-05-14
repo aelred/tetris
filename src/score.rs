@@ -74,26 +74,29 @@ impl ScoreMessage {
             return Err(From::from(message));
         }
 
-        if !self.score
-                .name
-                .chars()
-                .all(char::is_alphanumeric) {
+        if !self.score.name.chars().all(char::is_alphanumeric) {
             let message = format!("Name must contain only alphanumeric characters, but was {}",
                                   self.score.name);
             return Err(From::from(message));
         }
 
         if VERIFY_SCORES {
-            let expected_score = self.history.replay();
-            if expected_score != self.score.value {
-                let message = format!("Score does not match game history: History suggests {} but was {}",
-                                      expected_score,
-                                      self.score.value);
-                return Err(From::from(message));
-
-            }
+            self.verify_score()?;
         }
 
         Ok(self.score)
+    }
+
+    fn verify_score(&self) -> Result<()> {
+        let expected_score = self.history.replay();
+
+        if expected_score == self.score.value {
+            return Ok(());
+        }
+
+        let message = format!("Score does not match game history: History suggests {} but was {}",
+                              expected_score,
+                              self.score.value);
+        Err(From::from(message))
     }
 }
