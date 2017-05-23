@@ -8,13 +8,9 @@ addons:
 language: rust
 
 rust:
-- nightly
 - beta
 - stable
 
-matrix:
-  allow_failures:
-  - rust: nightly
 jobs:
   include:
     - stage: deploy
