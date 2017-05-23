@@ -15,7 +15,7 @@ jobs:
   include:
     - stage: deploy
       rust: stable
-      script: deploy/travis-deploy.sh
+      script: ./deploy/travis-deploy.sh
 
 dist: trusty
 
