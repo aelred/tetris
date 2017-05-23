@@ -22,6 +22,7 @@ jobs:
       script: deploy/travis-deploy.sh
 
 dist: trusty
+sudo: false
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_c494ad7d7799_key -iv $encrypted_c494ad7d7799_iv -in deploy/deploy_key.enc -out deploy_key -d
