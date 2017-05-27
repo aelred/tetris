@@ -9,17 +9,11 @@ lazy_static = "0.2"
 hyper = "0.10.5"
 rustc-serialize = "0.3"
 regex="0.2"
+sdl2 = {version="0.29", default-features=false, features=["ttf"]}
 
 [dev-dependencies]
 quickcheck="0.3"
 
-[dependencies.sdl2]
-version="0.29"
-default-features=false
-features = ["ttf"]
-
 [target.asmjs-unknown-emscripten.dependencies]
 libc = "0.2.16"
-
-[target.asmjs-unknown-emscripten.dependencies.emscripten]
-git = "https://github.com/lucklove/emscripten.git"
+emscripten = {git = "https://github.com/lucklove/emscripten.git"}
