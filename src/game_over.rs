@@ -74,11 +74,12 @@ impl GameOver {
         }
     }
 
-    pub fn update(&mut self,
-                  drawer: &mut Drawer,
-                  events: &[Event],
-                  client: &mut Client)
-                  -> StateChange {
+    pub fn update(
+        &mut self,
+        drawer: &mut Drawer,
+        events: &[Event],
+        client: &mut Client,
+    ) -> StateChange {
 
         lazy_static! {
             static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
@@ -90,8 +91,8 @@ impl GameOver {
                     Keycode::Return => {
                         if !self.posting_hiscore || !self.score.name.is_empty() {
                             if self.posting_hiscore {
-                                let message = ScoreMessage::new(self.score.clone(),
-                                                                self.history.clone());
+                                let message =
+                                    ScoreMessage::new(self.score.clone(), self.history.clone());
                                 client.post_hiscore(&message);
                             }
                             return StateChange::Replace(State::play());

@@ -2,9 +2,9 @@ extern crate tetris;
 
 extern crate sdl2;
 
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 extern crate emscripten;
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 extern crate libc;
 
 use tetris::state::State;
@@ -64,7 +64,7 @@ fn main() {
     play_tetris(&mut context);
 }
 
-#[cfg(not(target_os="emscripten"))]
+#[cfg(not(target_os = "emscripten"))]
 fn play_tetris(mut context: &mut Context) {
     use std::thread::sleep;
     use std::time::Duration;
@@ -75,7 +75,7 @@ fn play_tetris(mut context: &mut Context) {
     }
 }
 
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 fn play_tetris(mut context: &mut Context) {
     use emscripten::em;
     use std::mem::transmute;
@@ -85,10 +85,12 @@ fn play_tetris(mut context: &mut Context) {
         main_loop(context);
     }
 
-    em::set_main_loop_arg(em_loop,
-                          unsafe { transmute::<&mut Context, *mut libc::c_void>(&mut context) },
-                          (1000 / TICK) as i32,
-                          true);
+    em::set_main_loop_arg(
+        em_loop,
+        unsafe { transmute::<&mut Context, *mut libc::c_void>(&mut context) },
+        (1000 / TICK) as i32,
+        true,
+    );
 }
 
 fn main_loop(context: &mut Context) {

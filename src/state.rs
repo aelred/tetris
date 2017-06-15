@@ -19,11 +19,12 @@ impl State {
         State::Play(Box::new(GamePlay::default()))
     }
 
-    pub fn update(&mut self,
-                  drawer: &mut Drawer,
-                  events: &[Event],
-                  client: &mut Client)
-                  -> StateChange {
+    pub fn update(
+        &mut self,
+        drawer: &mut Drawer,
+        events: &[Event],
+        client: &mut Client,
+    ) -> StateChange {
         match *self {
             State::Title => State::title_update(drawer, events),
             State::Play(ref mut game) => game.update(drawer, events, client),

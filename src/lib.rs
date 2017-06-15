@@ -22,10 +22,10 @@ extern crate rand;
 extern crate rustc_serialize;
 extern crate regex;
 
-#[cfg(not(target_os="emscripten"))]
+#[cfg(not(target_os = "emscripten"))]
 extern crate hyper;
 
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 extern crate emscripten;
 
 #[cfg(test)]

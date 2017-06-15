@@ -73,11 +73,12 @@ impl Default for GamePlay {
 }
 
 impl GamePlay {
-    pub fn update(&mut self,
-                  drawer: &mut Drawer,
-                  events: &[Event],
-                  client: &mut Client)
-                  -> StateChange {
+    pub fn update(
+        &mut self,
+        drawer: &mut Drawer,
+        events: &[Event],
+        client: &mut Client,
+    ) -> StateChange {
         let mut actions = Vec::new();
 
         for event in events {
@@ -150,10 +151,11 @@ impl GamePlay {
         drawer.set_viewport(*PREVIEW_VIEW);
 
         drawer.draw_border(Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
-        self.game
-            .bag
-            .peek()
-            .draw(drawer, Rotation::default(), Pos::new(1, 1));
+        self.game.bag.peek().draw(
+            drawer,
+            Rotation::default(),
+            Pos::new(1, 1),
+        );
     }
 }
 
@@ -282,8 +284,10 @@ impl Game {
         let FillResult {
             mut is_game_over,
             lines_cleared,
-        } = self.board
-            .fill(self.piece.blocks(), self.piece.tetromino.color);
+        } = self.board.fill(
+            self.piece.blocks(),
+            self.piece.tetromino.color,
+        );
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;
@@ -377,7 +381,7 @@ const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
 const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
-                       (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
+    (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
 const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
 const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 

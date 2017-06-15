@@ -33,11 +33,12 @@ impl<'a> Drawer<'a> {
         let y = pos.y() as i16;
 
         self.renderer.set_draw_color(col);
-        let _ = self.renderer
-            .fill_rect(Rect::new(x as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
-                                 y as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
-                                 BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
-                                 BLOCK_SIZE as u32 - BLOCK_BORDER as u32));
+        let _ = self.renderer.fill_rect(Rect::new(
+            x as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
+            y as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
+            BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
+            BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
+        ));
     }
 
     pub fn draw_border(&mut self, size: Pos) {
@@ -102,8 +103,12 @@ pub struct TextDrawer<'a, 'b: 'a> {
 
 impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
     pub fn draw(mut self, text: &str) -> Self {
-        self.last_rect = self.drawer
-            .draw_text(&self.pos, text, self.size, self.color);
+        self.last_rect = self.drawer.draw_text(
+            &self.pos,
+            text,
+            self.size,
+            self.color,
+        );
         self
     }
 
@@ -167,16 +172,20 @@ impl TextPos {
                 Rect::from_center(Point::new(center_x, center_y), width, height)
             }
             TextPos::Top(rect) => {
-                Rect::new(rect.center().x() - width as i32 / 2,
-                          rect.y(),
-                          width,
-                          height)
+                Rect::new(
+                    rect.center().x() - width as i32 / 2,
+                    rect.y(),
+                    width,
+                    height,
+                )
             }
             TextPos::Under(rect) => {
-                Rect::new(rect.center().x() - width as i32 / 2,
-                          rect.bottom(),
-                          width,
-                          height)
+                Rect::new(
+                    rect.center().x() - width as i32 / 2,
+                    rect.bottom(),
+                    width,
+                    height,
+                )
             }
             TextPos::Left(rect) => Rect::new(rect.x(), rect.bottom(), width, height),
             TextPos::Offset(ref pos, x, y) => {

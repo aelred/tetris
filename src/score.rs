@@ -69,14 +69,18 @@ impl ScoreMessage {
         }
 
         if self.score.name.len() > 3 {
-            let message = format!("Name must be at most 3 characters, but was {}",
-                                  self.score.name.len());
+            let message = format!(
+                "Name must be at most 3 characters, but was {}",
+                self.score.name.len()
+            );
             return Err(From::from(message));
         }
 
         if !self.score.name.chars().all(char::is_alphanumeric) {
-            let message = format!("Name must contain only alphanumeric characters, but was {}",
-                                  self.score.name);
+            let message = format!(
+                "Name must contain only alphanumeric characters, but was {}",
+                self.score.name
+            );
             return Err(From::from(message));
         }
 
@@ -94,9 +98,11 @@ impl ScoreMessage {
             return Ok(());
         }
 
-        let message = format!("Score does not match game history: History suggests {} but was {}",
-                              expected_score,
-                              self.score.value);
+        let message = format!(
+            "Score does not match game history: History suggests {} but was {}",
+            expected_score,
+            self.score.value
+        );
         Err(From::from(message))
     }
 }
@@ -115,8 +121,10 @@ mod tests {
         if (VERIFY_SCORES) {
             let body = include_str!("../resources/valid-game.json");
             let message: ScoreMessage = json::decode(&body).unwrap();
-            assert_eq!(message.score().unwrap(),
-                       Score::new(1700, "AEL".to_string()));
+            assert_eq!(
+                message.score().unwrap(),
+                Score::new(1700, "AEL".to_string())
+            );
         }
     }
 }

@@ -3,7 +3,7 @@ use score::Score;
 use err::Result;
 use score::ScoreMessage;
 
-#[cfg(not(target_os="emscripten"))]
+#[cfg(not(target_os = "emscripten"))]
 use hyper;
 
 
@@ -27,19 +27,19 @@ impl Client {
     }
 }
 
-#[cfg(not(target_os="emscripten"))]
+#[cfg(not(target_os = "emscripten"))]
 pub struct Client {
     hyper_client: hyper::client::Client,
 }
 
-#[cfg(not(target_os="emscripten"))]
+#[cfg(not(target_os = "emscripten"))]
 impl Default for Client {
     fn default() -> Self {
         Client { hyper_client: hyper::client::Client::new() }
     }
 }
 
-#[cfg(not(target_os="emscripten"))]
+#[cfg(not(target_os = "emscripten"))]
 impl Client {
     fn get_raw_hiscores(&mut self) -> Result<String> {
         use std::io::Read;
@@ -51,36 +51,40 @@ impl Client {
     }
 
     fn post_raw_hiscores(&mut self, score: String) -> Result<()> {
-        try!(self.hyper_client
-                 .post(HI_SCORES_ENDPOINT)
-                 .body(score.as_bytes())
-                 .send());
+        try!(
+            self.hyper_client
+                .post(HI_SCORES_ENDPOINT)
+                .body(score.as_bytes())
+                .send()
+        );
         Ok(())
     }
 }
 
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 pub struct Client;
 
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 impl Default for Client {
     fn default() -> Self {
         Client
     }
 }
 
-#[cfg(target_os="emscripten")]
+#[cfg(target_os = "emscripten")]
 impl Client {
     fn get_raw_hiscores(&self) -> Result<String> {
         use emscripten::em;
 
-        let script = format!(r#"(function() {{
+        let script = format!(
+            r#"(function() {{
             var req = new XMLHttpRequest();
             req.open("GET", "{}", false);
             req.send(null);
             return req.responseText;
         }}())"#,
-                             HI_SCORES_ENDPOINT);
+            HI_SCORES_ENDPOINT
+        );
 
         Ok(em::run_script_string(&script))
     }
@@ -88,13 +92,15 @@ impl Client {
     fn post_raw_hiscores(&self, score: String) -> Result<()> {
         use emscripten::em;
 
-        let script = format!(r#"(function() {{
+        let script = format!(
+            r#"(function() {{
             var req = new XMLHttpRequest();
             req.open("POST", "{}", false);
             req.send(JSON.stringify({}));
         }}())"#,
-                             HI_SCORES_ENDPOINT,
-                             score);
+            HI_SCORES_ENDPOINT,
+            score
+        );
 
         em::run_script(&script);
         Ok(())
