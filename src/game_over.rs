@@ -86,27 +86,36 @@ impl GameOver {
         }
 
         for event in events {
-            if let Event::KeyDown { keycode: Some(keycode), .. } = *event {
-                match keycode {
-                    Keycode::Return => {
-                        if !self.posting_hiscore || !self.score.name.is_empty() {
-                            if self.posting_hiscore {
-                                let message =
-                                    ScoreMessage::new(self.score.clone(), self.history.clone());
-                                client.post_hiscore(&message);
+            match *event {
+                Event::KeyDown { keycode: Some(keycode), .. } => {
+                    match keycode {
+                        Keycode::Return => {
+                            if !self.posting_hiscore || !self.score.name.is_empty() {
+                                if self.posting_hiscore {
+                                    let message =
+                                        ScoreMessage::new(self.score.clone(), self.history.clone());
+                                    client.post_hiscore(&message);
+                                }
+                                return StateChange::Replace(State::play());
                             }
-                            return StateChange::Replace(State::play());
                         }
+                        Keycode::Backspace => {
+                            self.score.name.pop();
+                        }
+                        k if ALPHANUMERIC.is_match(&k.name()) => {
+                            self.score.name.push_str(&k.name());
+                            self.score.name.truncate(3);
+                        }
+                        _ => {}
                     }
-                    Keycode::Backspace => {
-                        self.score.name.pop();
-                    }
-                    k if ALPHANUMERIC.is_match(&k.name()) => {
-                        self.score.name.push_str(&k.name());
-                        self.score.name.truncate(3);
-                    }
-                    _ => {}
                 }
+                Event::FingerUp { .. } => {
+                    // TODO: Find a way to submit high-scores with touch
+                    if !self.posting_hiscore {
+                        return StateChange::Replace(State::play());
+                    }
+                }
+                _ => {}
             }
         }
 

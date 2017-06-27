@@ -28,6 +28,9 @@ const GRAVITY_INCREASE: f32 = 0.02;
 const SOFT_DROP_GRAVITY: f32 = 1.0;
 const HARD_DROP_GRAVITY: f32 = 20.0;
 
+// the minimum velocity before movement is registered, in % of screen per ms
+const FINGER_SENSITIVITY: f32 = 0.0001;
+
 enum Gravity {
     Normal,
     SoftDrop,
@@ -57,9 +60,25 @@ impl Tick {
     }
 }
 
+pub struct FingerPress {
+    x: f32,
+    y: f32,
+    timestamp: u32,
+}
+
+impl FingerPress {
+    fn velocity(self, other: &FingerPress) -> (f32, f32) {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        let dt = (self.timestamp - other.timestamp) as f32;
+        return (dx / dt, dy / dt);
+    }
+}
+
 pub struct GamePlay {
     game: Game,
     history: History,
+    last_finger_press: Option<FingerPress>,
 }
 
 impl Default for GamePlay {
@@ -68,6 +87,7 @@ impl Default for GamePlay {
         GamePlay {
             game: Game::new(seed),
             history: History::new(seed),
+            last_finger_press: None,
         }
     }
 }
@@ -98,6 +118,26 @@ impl GamePlay {
                 }
                 Event::KeyUp { keycode: Some(Keycode::Down), .. } => {
                     actions.push(Action::StopDrop);
+                }
+                Event::FingerDown { x, y, timestamp, .. } => {
+                    self.last_finger_press = Some(FingerPress { x, y, timestamp });
+                }
+                Event::FingerUp { x, y, timestamp, .. } => {
+                    if let Some(ref last_finger_press) = self.last_finger_press {
+                        let finger_press = FingerPress { x, y, timestamp };
+                        let (vx, vy) = finger_press.velocity(last_finger_press);
+                        let action = if vx < -FINGER_SENSITIVITY {
+                            Action::MoveLeft
+                        } else if vx > FINGER_SENSITIVITY {
+                            Action::MoveRight
+                        } else if vy > FINGER_SENSITIVITY {
+                            Action::StartHardDrop
+                        } else {
+                            Action::Rotate
+                        };
+                        actions.push(action);
+                    }
+                    self.last_finger_press = None;
                 }
                 _ => {}
             }
