@@ -28,8 +28,8 @@ const GRAVITY_INCREASE: f32 = 0.02;
 const SOFT_DROP_GRAVITY: f32 = 1.0;
 const HARD_DROP_GRAVITY: f32 = 20.0;
 
-// the minimum velocity before movement is registered, in % of screen per ms
-const FINGER_SENSITIVITY: f32 = 0.0001;
+// the minimum velocity before movement is registered, in % of screen width per ms
+const FINGER_SENSITIVITY: f32 = 0.0002;
 
 enum Gravity {
     Normal,
@@ -69,7 +69,7 @@ pub struct FingerPress {
 impl FingerPress {
     fn velocity(self, other: &FingerPress) -> (f32, f32) {
         let dx = self.x - other.x;
-        let dy = self.y - other.y;
+        let dy = (self.y - other.y) * WINDOW_RATIO;
         let dt = (self.timestamp - other.timestamp) as f32;
         return (dx / dt, dy / dt);
     }
@@ -431,3 +431,4 @@ const PAD: i32 = BLOCK_SIZE as i32;
 
 pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
 pub const WINDOW_HEIGHT: u32 = TOTAL_BOARD_HEIGHT;
+pub const WINDOW_RATIO: f32 = WINDOW_HEIGHT as f32 / WINDOW_WIDTH as f32;

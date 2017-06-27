@@ -8,7 +8,7 @@ pub struct Pos {
 
 impl Pos {
     pub fn new(x: i16, y: i16) -> Pos {
-        Pos { x: x, y: y }
+        Pos { x, y }
     }
 
     pub fn x(self) -> i16 {
