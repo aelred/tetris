@@ -6,13 +6,13 @@ pub mod state;
 pub mod draw;
 pub mod score;
 pub mod rest;
+pub mod err;
 
 mod tetromino;
 mod pos;
 mod board;
 mod piece;
 mod game_over;
-mod err;
 
 #[macro_use]
 extern crate lazy_static;

@@ -71,7 +71,7 @@ impl FingerPress {
         let dx = self.x - other.x;
         let dy = (self.y - other.y) * WINDOW_RATIO;
         let dt = (self.timestamp - other.timestamp) as f32;
-        return (dx / dt, dy / dt);
+        (dx / dt, dy / dt)
     }
 }
 

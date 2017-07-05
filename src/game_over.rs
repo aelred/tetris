@@ -29,8 +29,7 @@ struct HighScores {
 impl HighScores {
     fn new(hiscores: Vec<Score>, user_score: &Score) -> Self {
         let index = match hiscores.binary_search(user_score) {
-            Ok(i) => i,
-            Err(i) => i,
+            Ok(i) | Err(i) => i,
         };
 
         let (higher_scores, lower_scores) = hiscores.split_at(index);
@@ -45,7 +44,7 @@ impl HighScores {
     }
 
     fn has_hiscore(&self) -> bool {
-        self.lower_scores.len() != 0
+        self.lower_scores.is_empty()
     }
 }
 
@@ -53,7 +52,7 @@ impl GameOver {
     pub fn new(score: u32, history: History, client: &mut Client) -> Self {
         let hiscores = client.get_hiscores();
 
-        if let &Err(ref e) = &hiscores {
+        if let Err(ref e) = hiscores {
             println!("Failed to retrieve hiscores: {}", e);
         }
 

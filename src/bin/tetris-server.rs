@@ -4,13 +4,13 @@ extern crate tetris;
 
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
+use tetris::err::Result;
 
 use rustc_serialize::json;
 
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::Write;
-use std::error::Error;
 use std::sync::RwLock;
 use std::io::Read;
 use std::fs::DirBuilder;
@@ -47,13 +47,13 @@ impl ScoresHandler {
         }
     }
 
-    fn decode_score_message(body: &str) -> Result<Score, Box<Error>> {
+    fn decode_score_message(body: &str) -> Result<Score> {
         let message: ScoreMessage = try!(json::decode(body));
         let score = try!(message.score());
         Ok(score)
     }
 
-    fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<(), Box<Error>> {
+    fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<()> {
         let mut body = String::new();
         req.read_to_string(&mut body)?;
 

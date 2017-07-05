@@ -111,14 +111,11 @@ impl ScoreMessage {
 mod tests {
     use super::*;
 
-    use std::path::PathBuf;
-    use std::fs::File;
     use rustc_serialize::json;
-    use std::io::Read;
 
     #[test]
     fn correctly_recognise_a_valid_game() {
-        if (VERIFY_SCORES) {
+        if VERIFY_SCORES {
             let body = include_str!("../resources/valid-game.json");
             let message: ScoreMessage = json::decode(&body).unwrap();
             assert_eq!(

@@ -36,9 +36,7 @@ impl State {
     fn title_update(drawer: &mut Drawer, events: &[Event]) -> StateChange {
         for event in events {
             match *event {
-                Event::KeyDown { keycode: Some(Keycode::Return), .. } => {
-                    return StateChange::Push(State::play());
-                }
+                Event::KeyDown { keycode: Some(Keycode::Return), .. } |
                 Event::FingerUp { .. } => {
                     return StateChange::Push(State::play());
                 }
