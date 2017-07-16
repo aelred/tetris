@@ -1,7 +1,7 @@
-use rustc_serialize::json;
 use score::Score;
 use err::Result;
 use score::ScoreMessage;
+use serde_json;
 
 #[cfg(not(target_os = "emscripten"))]
 use hyper;
@@ -13,12 +13,12 @@ const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 impl Client {
     pub fn get_hiscores(&mut self) -> Result<Vec<Score>> {
         let body = try!(self.get_raw_hiscores());
-        let hiscores = try!(json::decode(&body));
+        let hiscores = try!(serde_json::from_str(&body));
         Ok(hiscores)
     }
 
     pub fn post_hiscore(&mut self, score: &ScoreMessage) {
-        let body = json::encode(score).unwrap();
+        let body = serde_json::to_string(score).unwrap();
         let response = self.post_raw_hiscores(body);
 
         if let Err(e) = response {

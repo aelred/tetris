@@ -7,7 +7,7 @@ pub const OFFSET: i32 = 100;
 
 pub const VERIFY_SCORES: bool = false;
 
-#[derive(RustcDecodable, RustcEncodable, Eq, PartialEq, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Score {
     pub value: u32,
     pub name: String,
@@ -49,7 +49,7 @@ impl PartialOrd for Score {
     }
 }
 
-#[derive(RustcDecodable, RustcEncodable)]
+#[derive(Serialize, Deserialize)]
 pub struct ScoreMessage {
     score: Score,
     history: History,
@@ -111,13 +111,13 @@ impl ScoreMessage {
 mod tests {
     use super::*;
 
-    use rustc_serialize::json;
+    use serde_json;
 
     #[test]
     fn correctly_recognise_a_valid_game() {
         if VERIFY_SCORES {
             let body = include_str!("../resources/valid-game.json");
-            let message: ScoreMessage = json::decode(&body).unwrap();
+            let message: ScoreMessage = serde_json::from_str(&body).unwrap();
             assert_eq!(
                 message.score().unwrap(),
                 Score::new(1700, "AEL".to_string())

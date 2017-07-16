@@ -1,12 +1,10 @@
 extern crate hyper;
-extern crate rustc_serialize;
+extern crate serde_json;
 extern crate tetris;
 
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
 use tetris::err::Result;
-
-use rustc_serialize::json;
 
 use std::path::PathBuf;
 use std::fs::File;
@@ -48,7 +46,7 @@ impl ScoresHandler {
     }
 
     fn decode_score_message(body: &str) -> Result<Score> {
-        let message: ScoreMessage = try!(json::decode(body));
+        let message: ScoreMessage = try!(serde_json::from_str(body));
         let score = try!(message.score());
         Ok(score)
     }
@@ -74,7 +72,9 @@ impl ScoresHandler {
             hiscores.pop();
 
             let mut file = try!(File::create(&self.hiscores_path));
-            file.write_all(json::encode(hiscores).unwrap().as_bytes())?;
+            file.write_all(
+                serde_json::to_string(hiscores).unwrap().as_bytes(),
+            )?;
         }
 
         *res.status_mut() = StatusCode::Created;
@@ -87,7 +87,7 @@ impl ScoresHandler {
         let hiscores = &(*self.hiscores.read().unwrap());
 
         res.headers_mut().set(ContentType::json());
-        let body = json::encode(hiscores).unwrap();
+        let body = serde_json::to_string(hiscores).unwrap();
         res.send(body.as_bytes())
     }
 }
@@ -129,7 +129,7 @@ fn read_hiscores(file: &mut File) -> Vec<Score> {
     file.read_to_string(&mut hiscores).expect(
         "Hiscores file is invalid",
     );
-    json::decode(&hiscores).expect("Hiscores file is invalid")
+    serde_json::from_str(&hiscores).expect("Hiscores file is invalid")
 }
 
 fn init_hiscores() -> Vec<Score> {

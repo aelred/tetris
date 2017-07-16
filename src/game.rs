@@ -37,7 +37,7 @@ enum Gravity {
     HardDrop,
 }
 
-#[derive(Copy, Clone, RustcDecodable, RustcEncodable)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum Action {
     MoveLeft,
     MoveRight,
@@ -47,7 +47,7 @@ pub enum Action {
     StopDrop,
 }
 
-#[derive(RustcDecodable, RustcEncodable, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq)]
 pub struct Tick(u32);
 
 impl Tick {
@@ -356,7 +356,7 @@ impl Game {
     }
 }
 
-#[derive(Clone, RustcDecodable, RustcEncodable)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct History {
     seed: [u32; 4],
     actions: Vec<(Tick, Action)>,

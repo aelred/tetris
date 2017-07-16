@@ -19,8 +19,12 @@ extern crate lazy_static;
 
 extern crate sdl2;
 extern crate rand;
-extern crate rustc_serialize;
+extern crate serde;
+extern crate serde_json;
 extern crate regex;
+
+#[macro_use]
+extern crate serde_derive;
 
 #[cfg(not(target_os = "emscripten"))]
 extern crate hyper;
