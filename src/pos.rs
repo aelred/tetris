@@ -70,8 +70,8 @@ mod tests {
         fn arbitrary<G: Gen>(g: &mut G) -> Pos {
             // We don't need to worry about positions that might overflow
             Pos {
-                x: g.gen_range(0, 30),
-                y: g.gen_range(0, 30),
+                x: g.gen_range(-30, 30),
+                y: g.gen_range(-30, 30),
             }
         }
     }

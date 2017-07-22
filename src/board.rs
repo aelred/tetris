@@ -1,7 +1,6 @@
 use pos::Pos;
 use draw::Drawer;
-
-use sdl2::pixels::Color;
+use tetromino::TetColor;
 
 pub const WIDTH: u8 = 10;
 pub const HEIGHT: u8 = 24;
@@ -10,7 +9,7 @@ pub const HIDE_ROWS: u8 = 4;
 
 #[derive(Clone, Debug)]
 pub struct Board {
-    grid: [[Option<Color>; WIDTH as usize]; HEIGHT as usize],
+    grid: [[Option<TetColor>; WIDTH as usize]; HEIGHT as usize],
 }
 
 pub struct FillResult {
@@ -27,7 +26,7 @@ impl Board {
         out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
 
-    pub fn fill(&mut self, cells: Vec<Pos>, color: Color) -> FillResult {
+    pub fn fill(&mut self, cells: Vec<Pos>, color: TetColor) -> FillResult {
         let mut is_game_over = true;
 
         for cell in cells {
@@ -43,7 +42,7 @@ impl Board {
         }
     }
 
-    fn fill_pos(&mut self, pos: Pos, color: Color) {
+    fn fill_pos(&mut self, pos: Pos, color: TetColor) {
         assert!(!out_bounds(pos));
         self.grid[pos.y() as usize][pos.x() as usize] = Some(color);
     }
@@ -107,37 +106,21 @@ mod tests {
     use quickcheck::{Arbitrary, Gen, TestResult};
     use std::mem;
     use std::ptr;
-    use sdl2::pixels::Color;
 
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<Color>; WIDTH as usize]; HEIGHT as usize] =
-                    mem::uninitialized();
+                let mut array: [[Option<TetColor>; WIDTH as usize];
+                                   HEIGHT as usize] = mem::uninitialized();
 
                 for row in array.iter_mut() {
                     for cell in row.iter_mut() {
-                        let color = if g.gen() {
-                            Some(Color::RGB(g.gen(), g.gen(), g.gen()))
-                        } else {
-                            None
-                        };
-
-                        ptr::write(cell, color);
+                        ptr::write(cell, Option::arbitrary(g));
                     }
                 }
 
                 Board { grid: array }
             }
-        }
-    }
-
-    #[derive(Clone, Debug)]
-    struct MyColor(Color);
-
-    impl Arbitrary for MyColor {
-        fn arbitrary<G: Gen>(g: &mut G) -> MyColor {
-            MyColor(Color::RGB(g.gen(), g.gen(), g.gen()))
         }
     }
 
@@ -152,15 +135,15 @@ mod tests {
             then!(!Board::new().touches(pos))
         }
 
-        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: MyColor) -> TestResult {
+        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: TetColor) -> TestResult {
             when!(in_bounds(pos));
             let mut board = board;
-            board.fill_pos(pos, col.0);
+            board.fill_pos(pos, col);
             then!(board.touches(pos))
         }
 
         fn after_filling_a_space_no_other_space_changes(
-            board: Board, pos1: Pos, pos2: Pos, col: MyColor) -> TestResult {
+            board: Board, pos1: Pos, pos2: Pos, col: TetColor) -> TestResult {
 
             when!(pos1 != pos2);
             when!(in_bounds(pos1));
@@ -168,7 +151,7 @@ mod tests {
             let mut board = board;
 
             let touches_before = board.touches(pos2);
-            board.fill_pos(pos1, col.0);
+            board.fill_pos(pos1, col);
             let touches_after = board.touches(pos2);
             then!(touches_before == touches_after)
         }

@@ -1,8 +1,10 @@
 use pos::Pos;
 use game::WINDOW_HEIGHT;
 use game::WINDOW_WIDTH;
+use tetromino::TetColor;
 
 use sdl2::pixels::Color;
+use sdl2::pixels::Color::RGB;
 use sdl2::rect::Rect;
 use sdl2::rect::Point;
 use sdl2::render::Renderer;
@@ -20,6 +22,20 @@ pub struct Drawer<'a> {
     font: Font<'a, 'a>,
 }
 
+impl Into<Color> for TetColor {
+    fn into(self) -> Color {
+        match self {
+            TetColor::O => RGB(255, 255, 0),
+            TetColor::I => RGB(0, 255, 255),
+            TetColor::J => RGB(0, 0, 255),
+            TetColor::L => RGB(255, 165, 0),
+            TetColor::S => RGB(0, 255, 0),
+            TetColor::T => RGB(255, 0, 255),
+            TetColor::Z => RGB(255, 0, 0),
+        }
+    }
+}
+
 impl<'a> Drawer<'a> {
     pub fn new(renderer: Renderer<'a>, font: Font<'a, 'a>) -> Self {
         Drawer {
@@ -28,11 +44,11 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_block(&mut self, pos: Pos, col: Color) {
+    pub fn draw_block<T: Into<Color>>(&mut self, pos: Pos, col: T) {
         let x = pos.x() as i16;
         let y = pos.y() as i16;
 
-        self.renderer.set_draw_color(col);
+        self.renderer.set_draw_color(col.into());
         let _ = self.renderer.fill_rect(Rect::new(
             x as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
             y as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,

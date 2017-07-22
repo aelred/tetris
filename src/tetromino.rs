@@ -6,8 +6,6 @@ use draw::Drawer;
 use std::fmt;
 use rand::XorShiftRng;
 use rand::Rng;
-use sdl2::pixels::Color;
-use sdl2::pixels::Color::RGB;
 
 const NUM_TETROMINOES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -86,10 +84,21 @@ impl Default for Rotation {
     }
 }
 
+#[derive(PartialEq, Clone, Debug, Copy)]
+pub enum TetColor {
+    O,
+    I,
+    J,
+    L,
+    S,
+    T,
+    Z,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tetromino {
     rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS as usize],
-    pub color: Color,
+    pub color: TetColor,
 }
 
 impl Tetromino {
@@ -144,7 +153,7 @@ static O_TET: Tetromino = Tetromino {
             [false, false, false, false],
         ],
     ],
-    color: RGB(255, 255, 0),
+    color: TetColor::O,
 };
 
 static I_TET: Tetromino = Tetromino {
@@ -174,7 +183,7 @@ static I_TET: Tetromino = Tetromino {
             [false, true, false, false],
         ],
     ],
-    color: RGB(0, 255, 255),
+    color: TetColor::I,
 };
 
 static J_TET: Tetromino = Tetromino {
@@ -204,7 +213,7 @@ static J_TET: Tetromino = Tetromino {
             [true, true, false, false],
         ],
     ],
-    color: RGB(0, 0, 255),
+    color: TetColor::J,
 };
 
 static L_TET: Tetromino = Tetromino {
@@ -234,7 +243,7 @@ static L_TET: Tetromino = Tetromino {
             [false, true, false, false],
         ],
     ],
-    color: RGB(255, 165, 0),
+    color: TetColor::L,
 };
 
 static S_TET: Tetromino = Tetromino {
@@ -264,7 +273,7 @@ static S_TET: Tetromino = Tetromino {
             [false, false, false, false],
         ],
     ],
-    color: RGB(0, 255, 0),
+    color: TetColor::S,
 };
 
 static T_TET: Tetromino = Tetromino {
@@ -294,7 +303,7 @@ static T_TET: Tetromino = Tetromino {
             [false, true, false, false],
         ],
     ],
-    color: RGB(255, 0, 255),
+    color: TetColor::T,
 };
 
 static Z_TET: Tetromino = Tetromino {
@@ -324,7 +333,7 @@ static Z_TET: Tetromino = Tetromino {
             [false, false, false, false],
         ],
     ],
-    color: RGB(255, 0, 0),
+    color: TetColor::Z,
 };
 
 #[cfg(test)]
@@ -359,6 +368,22 @@ mod tests {
     impl Arbitrary for &'static Tetromino {
         fn arbitrary<G: Gen>(g: &mut G) -> &'static Tetromino {
             g.choose(&TETROMINOES).unwrap()
+        }
+    }
+
+    impl Arbitrary for TetColor {
+        fn arbitrary<G: Gen>(g: &mut G) -> TetColor {
+            *g.choose(
+                &[
+                    TetColor::O,
+                    TetColor::I,
+                    TetColor::J,
+                    TetColor::L,
+                    TetColor::S,
+                    TetColor::T,
+                    TetColor::Z,
+                ],
+            ).unwrap()
         }
     }
 
