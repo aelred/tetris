@@ -4,7 +4,7 @@ use state::State;
 use state::StateChange;
 use score::OFFSET;
 use game::History;
-use rest::Client;
+use rest;
 use score::Score;
 use score::ScoreMessage;
 
@@ -49,8 +49,8 @@ impl HighScores {
 }
 
 impl GameOver {
-    pub fn new(score: u32, history: History, client: &mut Client) -> Self {
-        let hiscores = client.get_hiscores();
+    pub fn new(score: u32, history: History) -> Self {
+        let hiscores = rest::get_hiscores();
 
         if let Err(ref e) = hiscores {
             println!("Failed to retrieve hiscores: {}", e);
@@ -73,13 +73,7 @@ impl GameOver {
         }
     }
 
-    pub fn update(
-        &mut self,
-        drawer: &mut Drawer,
-        events: &[Event],
-        client: &mut Client,
-    ) -> StateChange {
-
+    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
         lazy_static! {
             static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
         }
@@ -93,7 +87,7 @@ impl GameOver {
                                 if self.posting_hiscore {
                                     let message =
                                         ScoreMessage::new(self.score.clone(), self.history.clone());
-                                    client.post_hiscore(&message);
+                                    rest::post_hiscore(&message);
                                 }
                                 return StateChange::Replace(State::play());
                             }

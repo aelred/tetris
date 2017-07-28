@@ -9,26 +9,28 @@ use hyper;
 
 const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
 
+lazy_static! {
+    static ref CLIENT: Client = Client::default();
+}
 
-impl Client {
-    pub fn get_hiscores(&mut self) -> Result<Vec<Score>> {
-        let body = try!(self.get_raw_hiscores());
-        let hiscores = try!(serde_json::from_str(&body));
-        Ok(hiscores)
-    }
 
-    pub fn post_hiscore(&mut self, score: &ScoreMessage) {
-        let body = serde_json::to_string(score).unwrap();
-        let response = self.post_raw_hiscores(body);
+pub fn get_hiscores() -> Result<Vec<Score>> {
+    let body = try!(CLIENT.get_raw_hiscores());
+    let hiscores = try!(serde_json::from_str(&body));
+    Ok(hiscores)
+}
 
-        if let Err(e) = response {
-            println!("Failed to post hiscores: {}", e);
-        }
+pub fn post_hiscore(score: &ScoreMessage) {
+    let body = serde_json::to_string(score).unwrap();
+    let response = CLIENT.post_raw_hiscores(body);
+
+    if let Err(e) = response {
+        println!("Failed to post hiscores: {}", e);
     }
 }
 
 #[cfg(not(target_os = "emscripten"))]
-pub struct Client {
+struct Client {
     hyper_client: hyper::client::Client,
 }
 
@@ -41,7 +43,7 @@ impl Default for Client {
 
 #[cfg(not(target_os = "emscripten"))]
 impl Client {
-    fn get_raw_hiscores(&mut self) -> Result<String> {
+    fn get_raw_hiscores(&self) -> Result<String> {
         use std::io::Read;
 
         let mut body = String::new();
@@ -50,7 +52,7 @@ impl Client {
         Ok(body)
     }
 
-    fn post_raw_hiscores(&mut self, score: String) -> Result<()> {
+    fn post_raw_hiscores(&self, score: String) -> Result<()> {
         try!(
             self.hyper_client
                 .post(HI_SCORES_ENDPOINT)
@@ -62,7 +64,7 @@ impl Client {
 }
 
 #[cfg(target_os = "emscripten")]
-pub struct Client;
+struct Client;
 
 #[cfg(target_os = "emscripten")]
 impl Default for Client {
