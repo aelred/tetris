@@ -5,13 +5,26 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   </head>
   <body style="background-color: #203020;">
-    <canvas id="canvas" style="padding: 0; margin: auto; display: block; image-rendering: pixelated; height: 95vh;"></canvas>
+    <canvas id="canvas" style="padding: 0; margin: auto; display: block; image-rendering: pixelated;"></canvas>
     <script type='text/javascript'>
+      var canvas = document.getElementById('canvas'),
+              context = canvas.getContext('2d');
+
       var Module = {
         canvas: (function() {
-          return document.getElementById('canvas');
+          return canvas;
         })(),
       };
+
+      function resizeCanvas() {
+              canvas.width = window.innerWidth;
+              canvas.height = window.innerHeight;
+      }
+
+      // resize the canvas to fill browser window dynamically
+      window.addEventListener('resize', resizeCanvas, false);
+
+      resizeCanvas();
     </script>
     <script async type="text/javascript" src="tetris.js"></script>
   </body>
