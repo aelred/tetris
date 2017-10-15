@@ -81,14 +81,17 @@ pub struct Rotation(i8);
 
 impl Rotation {
     pub fn clockwise(&self) -> Rotation {
-        let new = self.0 + 1;
-        Rotation(((new % NUM_ROTATIONS) + NUM_ROTATIONS) % NUM_ROTATIONS)
+        Rotation(modulo(self.0 + 1, NUM_ROTATIONS))
     }
 
     pub fn anticlockwise(&self) -> Rotation {
-        let new = self.0 - 1;
-        Rotation(((new % NUM_ROTATIONS) + NUM_ROTATIONS) % NUM_ROTATIONS)
+        Rotation(modulo(self.0 - 1, NUM_ROTATIONS))
     }
+}
+
+/// Calculates modulo. This is distinct from `%`, which calculates the remainder.
+fn modulo(x: i8, y: i8) -> i8 {
+    ((x % y) + y) % y
 }
 
 impl Default for Rotation {
