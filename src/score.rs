@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
 
-pub const VERIFY_SCORES: bool = false;
+pub const VERIFY_SCORES: bool = true;
 
 pub const SCORE_ENDPOINT: &'static str = "/scores";
 
