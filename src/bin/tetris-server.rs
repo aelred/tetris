@@ -2,6 +2,9 @@ extern crate hyper;
 extern crate serde_json;
 extern crate tetris;
 
+#[macro_use]
+extern crate clap;
+
 use tetris::score::SCORE_ENDPOINT;
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
@@ -13,6 +16,8 @@ use std::io::Write;
 use std::sync::RwLock;
 use std::io::Read;
 use std::fs::DirBuilder;
+
+use clap::{App, Arg};
 
 use hyper::{Get, Post};
 use hyper::server::{Server, Handler, Request, Response};
@@ -116,9 +121,29 @@ impl Handler for ScoresHandler {
 }
 
 fn main() {
+    let port_arg = "PORT";
+
+    let matches = App::new("tetris-server")
+        .version(crate_version!())
+        .author(crate_authors!())
+        .about(crate_description!())
+        .arg(
+            Arg::with_name(port_arg)
+                .short("p")
+                .long("port")
+                .default_value("4444")
+                .help("Set the port to use"),
+        )
+        .get_matches();
+
+    let port = value_t!(matches, "PORT", u16).unwrap_or_else(|e| e.exit());
+
     let path = hiscores_path();
 
-    let server = Server::http("localhost:4444").unwrap();
+    let ip_address = std::net::Ipv4Addr::new(127, 0, 0, 1);
+    let socket_address = std::net::SocketAddrV4::new(ip_address, port);
+
+    let server = Server::http(socket_address).unwrap();
 
     let handler = ScoresHandler::new(path);
 
