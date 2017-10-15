@@ -24,7 +24,7 @@ use sdl2::keyboard::Keycode;
 
 const TICK: u64 = 33;
 
-static FONT_DATA: &'static [u8] = include_bytes!("../8-BIT WONDER.TTF");
+static FONT_DATA: &'static [u8] = include_bytes!("../../resources/8-BIT WONDER.TTF");
 
 const FONT_MULTIPLE: u16 = 9;
 
