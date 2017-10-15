@@ -1,2 +1,3 @@
 [target.asmjs-unknown-emscripten]
-linker="./emcc-sdl"
+linker = "./emcc-sdl"
+runner = "node"
