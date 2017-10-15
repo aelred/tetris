@@ -3,3 +3,6 @@ target
 *.swp
 static/tetris.js
 *.bk
+.idea
+.vscode
+tetris.iml
