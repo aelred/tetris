@@ -456,7 +456,7 @@ mod tests {
             false
         }
 
-        fn bag_always_returns_the_same_result_with_the_same_seed(x: u32, y: u32, z: u32, w: u32) -> bool {
+        fn bag_always_gives_same_pieces_with_the_same_seed(x: u32, y: u32, z: u32, w: u32) -> bool {
             use rand::SeedableRng;
 
             let seed = [x, y, z, w];
