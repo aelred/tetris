@@ -2,6 +2,7 @@ extern crate hyper;
 extern crate serde_json;
 extern crate tetris;
 
+use tetris::score::SCORE_ENDPOINT;
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
 use tetris::err::Result;
@@ -98,10 +99,10 @@ impl Handler for ScoresHandler {
 
         if let AbsolutePath(path) = req.uri.clone() {
             match (&req.method, &path[..]) {
-                (&Get, "/scores") => {
+                (&Get, SCORE_ENDPOINT) => {
                     print_err!(self.send_hiscores(res));
                 }
-                (&Post, "/scores") => {
+                (&Post, SCORE_ENDPOINT) => {
                     print_err!(self.add_hiscore(&mut req, res));
                 }
                 _ => {

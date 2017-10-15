@@ -1,16 +1,17 @@
-use score::Score;
+extern crate url;
+
+use score::{Score, SCORE_ENDPOINT};
 use err::Result;
 use score::ScoreMessage;
 use serde_json;
+use url::Url;
 
 #[cfg(not(target_os = "emscripten"))]
 use hyper;
 
 
-const HI_SCORES_ENDPOINT: &'static str = "http://tetris.ael.red/scores";
-
 lazy_static! {
-    static ref CLIENT: Client = Client::default();
+    static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());
 }
 
 
@@ -29,32 +30,40 @@ pub fn post_hiscore(score: &ScoreMessage) {
     }
 }
 
-#[cfg(not(target_os = "emscripten"))]
-struct Client {
-    hyper_client: hyper::client::Client,
-}
-
-#[cfg(not(target_os = "emscripten"))]
-impl Default for Client {
-    fn default() -> Self {
-        Client { hyper_client: hyper::client::Client::new() }
+impl Client {
+    fn scores_endpoint(&self) -> Url {
+        self.url.join(SCORE_ENDPOINT).unwrap()
     }
 }
 
 #[cfg(not(target_os = "emscripten"))]
+struct Client {
+    url: Url,
+    hyper_client: hyper::client::Client,
+}
+
+#[cfg(not(target_os = "emscripten"))]
 impl Client {
+    fn new(url: Url) -> Self {
+        Client {
+            url,
+            hyper_client: hyper::client::Client::new(),
+        }
+    }
+
     fn get_raw_hiscores(&self) -> Result<String> {
         use std::io::Read;
 
+        println!("{}", self.scores_endpoint());
         let mut body = String::new();
-        let mut res = self.hyper_client.get(HI_SCORES_ENDPOINT).send()?;
+        let mut res = self.hyper_client.get(self.scores_endpoint()).send()?;
         res.read_to_string(&mut body)?;
         Ok(body)
     }
 
     fn post_raw_hiscores(&self, score: String) -> Result<()> {
         self.hyper_client
-            .post(HI_SCORES_ENDPOINT)
+            .post(self.scores_endpoint())
             .body(score.as_bytes())
             .send()?;
         Ok(())
@@ -62,17 +71,16 @@ impl Client {
 }
 
 #[cfg(target_os = "emscripten")]
-struct Client;
-
-#[cfg(target_os = "emscripten")]
-impl Default for Client {
-    fn default() -> Self {
-        Client
-    }
+struct Client {
+    url: Url,
 }
 
 #[cfg(target_os = "emscripten")]
 impl Client {
+    fn new(url: Url) -> Self {
+        Client { url }
+    }
+
     fn get_raw_hiscores(&self) -> Result<String> {
         use emscripten::em;
 
@@ -83,7 +91,7 @@ impl Client {
             req.send(null);
             return req.responseText;
         }}())"#,
-            HI_SCORES_ENDPOINT
+            self.scores_endpoint()
         );
 
         Ok(em::run_script_string(&script))
@@ -98,7 +106,7 @@ impl Client {
             req.open("POST", "{}", false);
             req.send(JSON.stringify({}));
         }}())"#,
-            HI_SCORES_ENDPOINT,
+            self.scores_endpoint(),
             score
         );
 

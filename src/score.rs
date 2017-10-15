@@ -7,6 +7,8 @@ pub const OFFSET: i32 = 100;
 
 pub const VERIFY_SCORES: bool = false;
 
+pub const SCORE_ENDPOINT: &'static str = "/scores";
+
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Score {
     pub value: u32,
