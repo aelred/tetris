@@ -5,8 +5,6 @@ use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
 
-pub const VERIFY_SCORES: bool = true;
-
 pub const SCORE_ENDPOINT: &'static str = "/scores";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
@@ -80,9 +78,7 @@ impl ScoreMessage {
             return Err(From::from(message));
         }
 
-        if VERIFY_SCORES {
-            self.verify_score()?;
-        }
+        self.verify_score()?;
 
         Ok(self.score)
     }
@@ -111,13 +107,11 @@ mod tests {
 
     #[test]
     fn correctly_recognise_a_valid_game() {
-        if VERIFY_SCORES {
-            let body = include_str!("../resources/valid-game.json");
-            let message: ScoreMessage = serde_json::from_str(&body).unwrap();
-            assert_eq!(
-                message.score().unwrap(),
-                Score::new(1700, "AEL".to_string())
-            );
-        }
+        let body = include_str!("../resources/valid-game.json");
+        let message: ScoreMessage = serde_json::from_str(&body).unwrap();
+        assert_eq!(
+            message.score().unwrap(),
+            Score::new(1700, "AEL".to_string())
+        );
     }
 }
