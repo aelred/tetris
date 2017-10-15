@@ -39,7 +39,7 @@ impl HighScores {
 
         HighScores {
             higher_scores: higher_scores.to_vec(),
-            lower_scores: lower_scores,
+            lower_scores,
         }
     }
 
@@ -66,10 +66,10 @@ impl GameOver {
         };
 
         GameOver {
-            hiscores: hiscores,
-            score: score,
-            history: history,
-            posting_hiscore: posting_hiscore,
+            hiscores,
+            score,
+            history,
+            posting_hiscore,
         }
     }
 
@@ -138,7 +138,6 @@ impl GameOver {
     }
 
     fn draw_hiscores<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-
         match self.hiscores {
             Some(HighScores {
                      ref higher_scores,

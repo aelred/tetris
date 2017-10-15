@@ -15,8 +15,8 @@ lazy_static! {
 
 
 pub fn get_hiscores() -> Result<Vec<Score>> {
-    let body = try!(CLIENT.get_raw_hiscores());
-    let hiscores = try!(serde_json::from_str(&body));
+    let body = CLIENT.get_raw_hiscores()?;
+    let hiscores = serde_json::from_str(&body)?;
     Ok(hiscores)
 }
 
@@ -47,18 +47,16 @@ impl Client {
         use std::io::Read;
 
         let mut body = String::new();
-        let mut res = try!(self.hyper_client.get(HI_SCORES_ENDPOINT).send());
-        try!(res.read_to_string(&mut body));
+        let mut res = self.hyper_client.get(HI_SCORES_ENDPOINT).send()?;
+        res.read_to_string(&mut body)?;
         Ok(body)
     }
 
     fn post_raw_hiscores(&self, score: String) -> Result<()> {
-        try!(
-            self.hyper_client
-                .post(HI_SCORES_ENDPOINT)
-                .body(score.as_bytes())
-                .send()
-        );
+        self.hyper_client
+            .post(HI_SCORES_ENDPOINT)
+            .body(score.as_bytes())
+            .send()?;
         Ok(())
     }
 }

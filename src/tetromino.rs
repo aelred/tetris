@@ -35,7 +35,7 @@ impl Bag {
         Bag {
             tetrominoes: Bag::random_sequence(&mut rng),
             index: 0,
-            rng: rng,
+            rng,
         }
     }
 

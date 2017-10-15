@@ -37,7 +37,7 @@ impl Board {
         }
 
         FillResult {
-            is_game_over: is_game_over,
+            is_game_over,
             lines_cleared: self.check_clear(),
         }
     }

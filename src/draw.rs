@@ -38,10 +38,7 @@ impl Into<Color> for TetColor {
 
 impl<'a> Drawer<'a> {
     pub fn new(renderer: Renderer<'a>, font: Font<'a, 'a>) -> Self {
-        Drawer {
-            renderer: renderer,
-            font: font,
-        }
+        Drawer { renderer, font }
     }
 
     pub fn draw_block<T: Into<Color>>(&mut self, pos: Pos, col: T) {

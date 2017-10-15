@@ -62,7 +62,7 @@ fn main() {
 }
 
 #[cfg(not(target_os = "emscripten"))]
-fn play_tetris(mut context: &mut Context) {
+fn play_tetris(context: &mut Context) {
     use std::thread::sleep;
     use std::time::Duration;
 

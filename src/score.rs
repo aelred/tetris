@@ -15,10 +15,7 @@ pub struct Score {
 
 impl Score {
     pub fn new(value: u32, name: String) -> Self {
-        Score {
-            value: value,
-            name: name,
-        }
+        Score { value, name }
     }
 
     pub fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
@@ -57,10 +54,7 @@ pub struct ScoreMessage {
 
 impl ScoreMessage {
     pub fn new(score: Score, history: History) -> Self {
-        ScoreMessage {
-            score: score,
-            history: history,
-        }
+        ScoreMessage { score, history }
     }
 
     pub fn score(self) -> Result<Score> {

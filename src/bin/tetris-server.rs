@@ -19,7 +19,7 @@ use hyper::uri::RequestUri::AbsolutePath;
 use hyper::header::{ContentType, AccessControlAllowOrigin};
 use hyper::status::StatusCode;
 
-macro_rules! print_err(
+macro_rules! print_err (
     ($e:expr) => {{
         if let Err(e) = $e {
             println!("{}", e);
@@ -41,13 +41,13 @@ impl ScoresHandler {
 
         ScoresHandler {
             hiscores: RwLock::new(hiscores),
-            hiscores_path: hiscores_path,
+            hiscores_path,
         }
     }
 
     fn decode_score_message(body: &str) -> Result<Score> {
-        let message: ScoreMessage = try!(serde_json::from_str(body));
-        let score = try!(message.score());
+        let message: ScoreMessage = serde_json::from_str(body)?;
+        let score = message.score()?;
         Ok(score)
     }
 
@@ -71,7 +71,7 @@ impl ScoresHandler {
             hiscores.sort();
             hiscores.pop();
 
-            let mut file = try!(File::create(&self.hiscores_path));
+            let mut file = File::create(&self.hiscores_path)?;
             file.write_all(
                 serde_json::to_string(hiscores).unwrap().as_bytes(),
             )?;

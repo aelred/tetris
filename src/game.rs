@@ -211,7 +211,7 @@ impl Game {
         Game {
             piece: Piece::new(bag.pop()),
             board: Board::new(),
-            bag: bag,
+            bag,
             drop_tick: 0.0,
             lock_delay: false,
             gravity: Gravity::Normal,
@@ -359,7 +359,7 @@ pub struct History {
 impl History {
     fn new(seed: [u32; 4]) -> Self {
         History {
-            seed: seed,
+            seed,
             actions: Vec::new(),
         }
     }

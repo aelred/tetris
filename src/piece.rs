@@ -17,7 +17,7 @@ pub struct Piece {
 impl Piece {
     pub fn new(tetromino: &'static Tetromino) -> Piece {
         Piece {
-            tetromino: tetromino,
+            tetromino,
             rot: Rotation::default(),
             pos: *INITIAL_POS,
         }
