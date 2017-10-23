@@ -1,3 +1,6 @@
+[target.wasm32-unknown-emscripten]
+linker="./emcc-sdl"
+
 [target.asmjs-unknown-emscripten]
-linker = "./emcc-sdl"
+linker="./emcc-sdl"
 runner = "node"

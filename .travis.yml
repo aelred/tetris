@@ -4,6 +4,7 @@ addons:
     packages:
     - libsdl2-dev
     - libsdl2-ttf-dev
+  sauce_conect: true
 
 language: rust
 
@@ -13,14 +14,29 @@ rust:
 
 jobs:
   include:
-    - stage: deploy
-      rust: stable
-      script: ./deploy/travis-deploy.sh
+  - stage: deploy
+    rust: stable
+    script: "./deploy/travis-deploy.sh"
 
 dist: trusty
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_c494ad7d7799_key -iv $encrypted_c494ad7d7799_iv -in deploy/deploy_key.enc -out deploy_key -d
+- openssl aes-256-cbc -K $encrypted_c494ad7d7799_key -iv $encrypted_c494ad7d7799_iv -in deploy/deploy_key.enc -out deploy_key -d
+
+install:
+- npm install -g wargo
+- "(cd ~; curl -sSL https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz |
+  tar -xz)"
+- sudo mv /usr/bin/cmake /usr/bin/cmake.old
+- sudo ln -s ~/cmake-3.5.2-Linux-x86_64/bin/cmake /usr/bin/cmake
+
+script:
+- cargo test
+- wargo test
 
 cache:
   cargo: true
+
+env:
+  global:
+    secure: r/0TE6YFKVmSVRphm+JHntjGZWQhoa+T+ALMGzcU6iNHzD1WQm1+JZGwT+x2gUzb52nJKgtm9rv5GHs0Brv+2P9+fEWTdqwJrgl7NV7/3aQz5QgXIO3gab6uRSFWkIhBFZo9RXjM4AcmUdW/Ow7xd4IJDwoxus9inCKDM2f3XU5amdTGW9zVoAdX5sa8tp5lNrIYK57h8EuxIC7AWS+AT6P9DmcWRNSuytnSfqu6TfxwVPTv7Wt0DXt7m7r/dPzh3PEFrkqeYViRjWDFNJ3AhdeEpjUFlfxnuN+iiTvimMXHctLwc3S/tB1KutO8cklCpIVL43qXUAJr4xQl0r3uRRdB3ldAoZdHE/2b4ykx4g4WLkZE1XSPwAQ5qV6iW5cUaaK77mUBuWjG5UUt+cCliUnCnR2Li0Ok72VDAdarShPe7ShRsCOt035JjoJqwDaYA4z3pNjuGjBxN7cEQBg9ZF9cpNNfXCXIPwt57u50COTxV4i+nDVot3N+q8nP5ympoTVvu8aK7ou8XvA5TFc0k9q7rR82VKXYyUDyhJ0dVA4FSGuuyGjGKZB0QG6INqjbId4rRlX2gjzIee8AGRiKWkaOQCyi1PzTqdqJnxHpCI1ZRevZByfsP/Xhi/XxDYQbU7zfuM4wharFFozuZFnb4fiP2o+DuDsZJngszn9U+tI=
