@@ -78,9 +78,14 @@ impl ScoreMessage {
             return Err(From::from(message));
         }
 
-        self.verify_score()?;
+        // TODO: add back this verification step
+//        self.verify_score()?;
+//
+//        Ok(self.score);
 
-        Ok(self.score)
+        // Due to a bug in verifying the score, we just ignore the score the user sends and use
+        // the one from the replay
+        Ok(Score::new(self.history.replay(), self.score.name))
     }
 
     fn verify_score(&self) -> Result<()> {
