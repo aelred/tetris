@@ -46,7 +46,7 @@ impl PartialOrd for Score {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ScoreMessage {
     score: Score,
     history: History,
@@ -79,7 +79,12 @@ impl ScoreMessage {
         }
 
         // TODO: add back this verification step
-//        self.verify_score()?;
+        match self.verify_score() {
+            Ok(_) => {},
+            Err(e) => {
+                println!("{:?}", e)
+            }
+        };
 //
 //        Ok(self.score);
 
@@ -96,7 +101,8 @@ impl ScoreMessage {
         }
 
         let message = format!(
-            "Score does not match game history: History suggests {} but was {}",
+            "Score does not match game history {:?}:\n History suggests {} but was {}",
+            self,
             expected_score,
             self.score.value
         );

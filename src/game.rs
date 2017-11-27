@@ -36,7 +36,7 @@ enum Gravity {
     HardDrop,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub enum Action {
     MoveLeft,
     MoveRight,
@@ -46,7 +46,7 @@ pub enum Action {
     StopDrop,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq, Debug)]
 pub struct Tick(u32);
 
 impl Tick {
@@ -350,7 +350,7 @@ impl Game {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct History {
     seed: [u32; 4],
     actions: Vec<(Tick, Action)>,
