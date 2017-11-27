@@ -1,4 +1,4 @@
 #!/bin/bash
-cargo build --bin tetris --target asmjs-unknown-emscripten --release
-cp target/asmjs-unknown-emscripten/release/tetris.js static/tetris.js
-
+wargo build --bin tetris --release
+cp target/wasm32-unknown-emscripten/release/tetris.js static/tetris.js
+cp target/wasm32-unknown-emscripten/release/deps/tetris-*.wasm static/

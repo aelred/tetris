@@ -18,6 +18,6 @@ sdl2 = {version="0.29", default-features=false, features=["ttf"]}
 [dev-dependencies]
 quickcheck = "0.3"
 
-[target.asmjs-unknown-emscripten.dependencies]
+[target.'cfg(target_os = "emscripten")'.dependencies]
 libc = "0.2.16"
 emscripten = {git = "https://github.com/lucklove/emscripten.git"}
