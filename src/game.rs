@@ -23,11 +23,11 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::WindowEvent::FocusLost;
 
 const INITIAL_GRAVITY: u32 = 4;
-const GRAVITY_UNIT: u32 = 100;
+const GRAVITY_UNITS_PER_BLOCK: u32 = 100;
 const LEVELS_BETWEEN_GRAVITY_INCREASE: u32 = 10;
 const GRAVITY_INCREASE: u32 = 2;
-const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNIT;
-const HARD_DROP_GRAVITY: u32 = GRAVITY_UNIT * 20;
+const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_BLOCK;
+const HARD_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_BLOCK * 20;
 
 // the minimum velocity before movement is registered, in % of screen width per ms
 const FINGER_SENSITIVITY: f32 = 0.0002;
@@ -238,8 +238,8 @@ impl Game {
     fn apply_step(&mut self) -> bool {
         self.tick.incr();
 
-        while self.drop_tick >= GRAVITY_UNIT {
-            self.drop_tick -= GRAVITY_UNIT;
+        while self.drop_tick >= GRAVITY_UNITS_PER_BLOCK {
+            self.drop_tick -= GRAVITY_UNITS_PER_BLOCK;
             let is_game_over = self.drop();
             if is_game_over {
                 return true;
