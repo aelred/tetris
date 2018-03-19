@@ -268,13 +268,13 @@ impl Game {
         self.piece.rotate_clockwise();
         self.reset_lock_delay();
 
-        let failed_rotate = self.collides() && !self.try_wall_kick();
+        let successful_rotation = !self.collides() || self.try_wall_kick();
 
-        if failed_rotate {
+        if !successful_rotation {
             self.piece.rotate_anticlockwise();
         }
 
-        !failed_rotate
+        successful_rotation
     }
 
     fn try_move_left(&mut self) -> bool {
