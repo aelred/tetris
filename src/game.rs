@@ -224,9 +224,9 @@ impl Game {
     fn apply_action(&mut self, action: Action) {
 
         match action {
-            Action::MoveLeft => self.left(),
-            Action::MoveRight => self.right(),
-            Action::Rotate => self.rotate(),
+            Action::MoveLeft => {self.try_move_left();},
+            Action::MoveRight => {self.try_move_right();},
+            Action::Rotate => {self.try_rotate();},
             Action::StartSoftDrop => self.gravity = Gravity::SoftDrop,
             Action::StartHardDrop => self.gravity = Gravity::HardDrop,
             Action::StopDrop => self.gravity = Gravity::Normal,
@@ -264,31 +264,43 @@ impl Game {
         }
     }
 
-    fn rotate(&mut self) {
+    fn try_rotate(&mut self) -> bool {
         self.piece.rotate_clockwise();
         self.reset_lock_delay();
 
-        if self.collides() {
+        let failed_rotate = self.collides() && !self.try_wall_kick();
+
+        if failed_rotate {
             self.piece.rotate_anticlockwise();
         }
+
+        !failed_rotate
     }
 
-    fn left(&mut self) {
+    fn try_move_left(&mut self) -> bool {
         self.piece.left();
         self.reset_lock_delay();
 
-        if self.collides() {
+        let collides = self.collides();
+
+        if collides {
             self.piece.right();
         }
+
+        !collides
     }
 
-    fn right(&mut self) {
+    fn try_move_right(&mut self) -> bool {
         self.piece.right();
         self.reset_lock_delay();
 
-        if self.collides() {
+        let collides = self.collides();
+
+        if collides {
             self.piece.left();
         }
+
+        !collides
     }
 
     fn reset_lock_delay(&mut self) {
@@ -347,6 +359,13 @@ impl Game {
         }
 
         collides
+    }
+
+    /// Perform a naive wall-kick (not SRS):
+    /// 1. Try one space to the right
+    /// 2. Try one space to the left
+    fn try_wall_kick(&mut self) -> bool {
+        return self.try_move_right() || self.try_move_left()
     }
 }
 
