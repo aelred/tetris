@@ -12,6 +12,7 @@ use tetromino::Rotation;
 use tetromino::Bag;
 use draw::Drawer;
 use game_over::GameOver;
+use std::cmp;
 
 use rand;
 use rand::XorShiftRng;
@@ -21,11 +22,12 @@ use sdl2::rect::Rect;
 use sdl2::keyboard::Keycode;
 use sdl2::event::WindowEvent::FocusLost;
 
-const INITIAL_GRAVITY: f32 = 0.04;
+const INITIAL_GRAVITY: u32 = 4;
+const GRAVITY_UNIT: u32 = 100;
 const LEVELS_BETWEEN_GRAVITY_INCREASE: u32 = 10;
-const GRAVITY_INCREASE: f32 = 0.02;
-const SOFT_DROP_GRAVITY: f32 = 1.0;
-const HARD_DROP_GRAVITY: f32 = 20.0;
+const GRAVITY_INCREASE: u32 = 2;
+const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNIT;
+const HARD_DROP_GRAVITY: u32 = GRAVITY_UNIT * 20;
 
 // the minimum velocity before movement is registered, in % of screen width per ms
 const FINGER_SENSITIVITY: f32 = 0.0002;
@@ -197,7 +199,7 @@ pub struct Game {
     piece: Piece,
     board: Board,
     bag: Bag,
-    drop_tick: f32,
+    drop_tick: u32,
     lock_delay: bool,
     gravity: Gravity,
     lines_cleared: u32,
@@ -212,7 +214,7 @@ impl Game {
             piece: Piece::new(bag.pop()),
             board: Board::new(),
             bag,
-            drop_tick: 0.0,
+            drop_tick: 0,
             lock_delay: false,
             gravity: Gravity::Normal,
             lines_cleared: 0,
@@ -236,8 +238,8 @@ impl Game {
     fn apply_step(&mut self) -> bool {
         self.tick.incr();
 
-        while self.drop_tick >= 1.0 {
-            self.drop_tick -= 1.0;
+        while self.drop_tick >= GRAVITY_UNIT {
+            self.drop_tick -= GRAVITY_UNIT;
             let is_game_over = self.drop();
             if is_game_over {
                 return true;
@@ -253,15 +255,11 @@ impl Game {
         false
     }
 
-    fn normal_gravity(&self) -> f32 {
+    fn normal_gravity(&self) -> u32 {
         let level = self.lines_cleared / LEVELS_BETWEEN_GRAVITY_INCREASE;
 
-        let g = INITIAL_GRAVITY + GRAVITY_INCREASE * level as f32;
-        if g < SOFT_DROP_GRAVITY {
-            g
-        } else {
-            SOFT_DROP_GRAVITY
-        }
+        let g = INITIAL_GRAVITY + GRAVITY_INCREASE * level;
+        cmp::min(g, SOFT_DROP_GRAVITY)
     }
 
     fn try_rotate(&mut self) -> bool {
@@ -305,7 +303,7 @@ impl Game {
 
     fn reset_lock_delay(&mut self) {
         if self.lock_delay {
-            self.drop_tick = 0.0;
+            self.drop_tick = 0;
         }
     }
 
@@ -337,7 +335,7 @@ impl Game {
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;
-        self.drop_tick = 0.0;
+        self.drop_tick = 0;
         self.lock_delay = false;
         self.lines_cleared += lines_cleared;
         self.score += lines_cleared * lines_cleared * 100;
