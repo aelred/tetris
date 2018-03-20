@@ -185,7 +185,7 @@ mod tests {
 
     #[test]
     fn when_there_are_no_high_scores_then_this_is_a_new_highscore() {
-        let high_scores = HighScores::new(vec![], &Score::new(100, "AEL".to_owned()));
+        let high_scores = HighScores::new(&vec![], &Score::new(100, "AEL".to_owned()));
 
         assert!(high_scores.has_hiscore());
     }
@@ -193,7 +193,7 @@ mod tests {
     #[test]
     fn when_there_is_a_lower_highscore_then_this_is_a_new_highscore() {
         let high_scores = HighScores::new(
-            vec![
+            &vec![
                 Score::new(1000, "ALC".to_owned()),
                 Score::new(500, "BOB".to_owned()),
                 Score::new(400, "CHR".to_owned()),
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn when_there_is_a_lower_highscore_then_the_lowest_score_is_removed() {
         let high_scores = HighScores::new(
-            vec![
+            &vec![
                 Score::new(1000, "ALC".to_owned()),
                 Score::new(500, "BOB".to_owned()),
                 Score::new(400, "CHR".to_owned()),
@@ -227,7 +227,7 @@ mod tests {
     #[test]
     fn when_this_is_the_highest_score_then_there_is_a_new_highscore() {
         let high_scores = HighScores::new(
-            vec![
+            &vec![
                 Score::new(1000, "ALC".to_owned()),
                 Score::new(500, "BOB".to_owned()),
             ],
@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn when_all_high_scores_are_larger_then_this_is_not_a_highscore() {
         let high_scores = HighScores::new(
-            vec![
+            &vec![
                 Score::new(1000, "ALC".to_owned()),
                 Score::new(500, "BOB".to_owned()),
             ],
