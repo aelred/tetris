@@ -30,7 +30,7 @@ impl Board {
         let mut is_game_over = true;
 
         for cell in cells {
-            if cell.y() > HIDE_ROWS as i16 {
+            if cell.y() > i16::from(HIDE_ROWS) {
                 is_game_over = false;
             }
             self.fill_pos(cell, color);
@@ -80,7 +80,7 @@ impl Board {
     }
 
     pub fn draw_border(&self, drawer: &mut Drawer) {
-        drawer.draw_border(Pos::new(WIDTH as i16, (HEIGHT - HIDE_ROWS) as i16));
+        drawer.draw_border(Pos::new(i16::from(WIDTH), i16::from(HEIGHT - HIDE_ROWS)));
     }
 
     pub fn draw(&self, drawer: &mut Drawer) {
@@ -88,7 +88,7 @@ impl Board {
             for x in 0..WIDTH {
                 if let Some(color) = self.grid[y as usize][x as usize] {
                     let y = y - HIDE_ROWS;
-                    let cell_pos = Pos::new(x as i16, y as i16);
+                    let cell_pos = Pos::new(i16::from(x), i16::from(y));
                     drawer.draw_block(cell_pos, color)
                 }
             }
@@ -97,7 +97,7 @@ impl Board {
 }
 
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() < 0 || pos.y() < 0 || pos.x() >= WIDTH as i16 || pos.y() >= HEIGHT as i16
+    pos.x() < 0 || pos.y() < 0 || pos.x() >= i16::from(WIDTH) || pos.y() >= i16::from(HEIGHT)
 }
 
 #[cfg(test)]

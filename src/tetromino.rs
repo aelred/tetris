@@ -124,7 +124,7 @@ impl Tetromino {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.rotations[rot.0 as usize][y as usize][x as usize] {
-                    blocks.push(Pos::new(x as i16, y as i16));
+                    blocks.push(Pos::new(i16::from(x), i16::from(y)));
                 };
             }
         }

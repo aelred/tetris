@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;
 
-pub const SCORE_ENDPOINT: &'static str = "/scores";
+pub const SCORE_ENDPOINT: &str = "/scores";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Score {
@@ -80,13 +80,11 @@ impl ScoreMessage {
 
         // TODO: add back this verification step
         match self.verify_score() {
-            Ok(_) => {},
-            Err(e) => {
-                println!("{:?}", e)
-            }
+            Ok(_) => {}
+            Err(e) => println!("{:?}", e),
         };
-//
-//        Ok(self.score);
+        //
+        //        Ok(self.score);
 
         // Due to a bug in verifying the score, we just ignore the score the user sends and use
         // the one from the replay

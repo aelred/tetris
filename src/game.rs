@@ -186,7 +186,10 @@ impl GamePlay {
     fn draw_next(&self, drawer: &mut Drawer) {
         drawer.set_viewport(*PREVIEW_VIEW);
 
-        drawer.draw_border(Pos::new(tetromino::WIDTH as i16, tetromino::HEIGHT as i16));
+        drawer.draw_border(Pos::new(
+            i16::from(tetromino::WIDTH),
+            i16::from(tetromino::HEIGHT),
+        ));
         self.game.bag.peek().draw(
             drawer,
             Rotation::default(),
@@ -226,9 +229,15 @@ impl Game {
     fn apply_action(&mut self, action: Action) {
 
         match action {
-            Action::MoveLeft => {self.try_move_left();},
-            Action::MoveRight => {self.try_move_right();},
-            Action::Rotate => {self.try_rotate();},
+            Action::MoveLeft => {
+                self.try_move_left();
+            }
+            Action::MoveRight => {
+                self.try_move_right();
+            }
+            Action::Rotate => {
+                self.try_rotate();
+            }
             Action::StartSoftDrop => self.gravity = Gravity::SoftDrop,
             Action::StartHardDrop => self.gravity = Gravity::HardDrop,
             Action::StopDrop => self.gravity = Gravity::Normal,
@@ -363,7 +372,7 @@ impl Game {
     /// 1. Try one space to the right
     /// 2. Try one space to the left
     fn try_wall_kick(&mut self) -> bool {
-        return self.try_move_right() || self.try_move_left()
+        self.try_move_right() || self.try_move_left()
     }
 }
 

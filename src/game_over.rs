@@ -27,7 +27,7 @@ struct HighScores {
 }
 
 impl HighScores {
-    fn new(hiscores: Vec<Score>, user_score: &Score) -> Self {
+    fn new(hiscores: &[Score], user_score: &Score) -> Self {
         let index = match hiscores.binary_search(user_score) {
             Ok(i) | Err(i) => i,
         };
@@ -47,7 +47,7 @@ impl HighScores {
     }
 
     fn has_hiscore(&self) -> bool {
-        return self.has_hiscore;
+        self.has_hiscore
     }
 }
 
@@ -61,7 +61,7 @@ impl GameOver {
 
         let score = Score::new(score, "".to_string());
 
-        let hiscores = hiscores.ok().map(|h| HighScores::new(h, &score));
+        let hiscores = hiscores.ok().map(|h| HighScores::new(&h, &score));
 
         GameOver {
             hiscores,

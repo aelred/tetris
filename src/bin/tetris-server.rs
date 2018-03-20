@@ -166,7 +166,7 @@ fn init_hiscores() -> Vec<Score> {
     hiscores
 }
 
-const TETRIS_CONF: &'static str = ".tetris";
+const TETRIS_CONF: &str = ".tetris";
 
 fn hiscores_path() -> PathBuf {
     let mut path = std::env::home_dir().unwrap();

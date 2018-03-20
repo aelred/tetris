@@ -51,7 +51,7 @@ impl Piece {
         self.tetromino.draw(
             drawer,
             self.rot,
-            self.pos + Pos::new(0, -(HIDE_ROWS as i16)),
+            self.pos + Pos::new(0, -i16::from(HIDE_ROWS)),
         );
     }
 

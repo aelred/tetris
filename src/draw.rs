@@ -47,10 +47,12 @@ impl<'a> Drawer<'a> {
 
         self.renderer.set_draw_color(col.into());
         let _ = self.renderer.fill_rect(Rect::new(
-            x as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
-            y as i32 * BLOCK_SIZE as i32 + BLOCK_BORDER as i32,
-            BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
-            BLOCK_SIZE as u32 - BLOCK_BORDER as u32,
+            i32::from(x) * i32::from(BLOCK_SIZE) +
+                i32::from(BLOCK_BORDER),
+            i32::from(y) * i32::from(BLOCK_SIZE) +
+                i32::from(BLOCK_BORDER),
+            u32::from(BLOCK_SIZE) - u32::from(BLOCK_BORDER),
+            u32::from(BLOCK_SIZE) - u32::from(BLOCK_BORDER),
         ));
     }
 
