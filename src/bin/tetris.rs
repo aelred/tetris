@@ -21,6 +21,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use tetris::draw::WINDOW_HEIGHT;
 use tetris::draw::WINDOW_WIDTH;
+use tetris::state::StateChange;
 
 const TICK: u64 = 33;
 
@@ -105,14 +106,18 @@ fn main_loop(context: &mut Context) {
         events.push(event);
     }
 
-    let state_change = {
-        let mut state = context.states.last_mut().unwrap();
-        state.update(&mut context.drawer, &events)
-    };
+    let state_change = tick(context, &events);
 
     state_change.apply(&mut context.states);
 
     context.drawer.present();
+}
+
+fn tick(context: &mut Context, events: &[Event]) -> StateChange {
+    let state = context.states.last_mut().unwrap();
+    let state_change = state.update(&events);
+    context.drawer.draw_state(state);
+    state_change
 }
 
 fn exit() {

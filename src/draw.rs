@@ -22,6 +22,7 @@ use game::Game;
 use board;
 use piece::Piece;
 use score::Score;
+use state::State;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -51,6 +52,31 @@ impl Into<Color> for TetColor {
 impl<'a> Drawer<'a> {
     pub fn new(renderer: Renderer<'a>, font: Font<'a, 'a>) -> Self {
         Drawer { renderer, font }
+    }
+
+    pub fn draw_state(&mut self, state: &State) {
+        match *state {
+            State::Title => self.title_draw(),
+            State::Play(ref game) => self.draw_game(&game.game),
+            State::Paused => self.pause_draw(),
+            State::GameOver(ref game_over) => self.draw_game_over(game_over),
+        }
+    }
+
+    fn title_draw(&mut self) {
+        self
+            .text()
+            .size(4)
+            .centered()
+            .draw("Tetris")
+            .size(1)
+            .under()
+            .offset(0, 10)
+            .draw("[ Press Enter ]");
+    }
+
+    fn pause_draw(&mut self) {
+        self.text().centered().draw("Paused");
     }
 
     pub fn draw_block<T: Into<Color>>(&mut self, pos: Pos, col: T) {
@@ -91,7 +117,14 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_board(&mut self, board: &Board) {
+    pub fn draw_game(&mut self, game: &Game) {
+        self.draw_board(&game.board);
+        self.draw_piece(&game.piece);
+        self.draw_next(game.bag.peek());
+        self.draw_game_score(&game);
+    }
+
+    fn draw_board(&mut self, board: &Board) {
         self.set_viewport(*BOARD_BORDER_VIEW);
         self.draw_border(Pos::new(i16::from(WIDTH), i16::from(HEIGHT - HIDE_ROWS)));
 
@@ -108,7 +141,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_next(&mut self, next: &Tetromino) {
+    fn draw_next(&mut self, next: &Tetromino) {
         self.set_viewport(*PREVIEW_VIEW);
 
         self.draw_border(Pos::new(
@@ -118,7 +151,7 @@ impl<'a> Drawer<'a> {
         self.draw_tetromino(next, Rotation::default(), Pos::new(1, 1));
     }
 
-    pub fn draw_game_score(&mut self, game: &Game) {
+    fn draw_game_score(&mut self, game: &Game) {
         self.set_viewport(*SCORE_VIEW);
 
         self.text()
@@ -135,7 +168,7 @@ impl<'a> Drawer<'a> {
             .draw(&game.score.to_string());
     }
 
-    pub fn draw_piece(&mut self, piece: &Piece) {
+    fn draw_piece(&mut self, piece: &Piece) {
         self.draw_tetromino(
             piece.tetromino,
             piece.rot,

@@ -1,5 +1,4 @@
 use game::GamePlay;
-use draw::Drawer;
 use game_over::GameOver;
 
 use sdl2::event::Event;
@@ -18,16 +17,16 @@ impl State {
         State::Play(Box::new(GamePlay::default()))
     }
 
-    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
+    pub fn update(&mut self, events: &[Event]) -> StateChange {
         match *self {
-            State::Title => State::title_update(drawer, events),
-            State::Play(ref mut game) => game.update(drawer, events),
-            State::Paused => State::pause_update(drawer, events),
-            State::GameOver(ref mut game_over) => game_over.update(drawer, events),
+            State::Title => State::title_update(events),
+            State::Play(ref mut game) => game.update(events),
+            State::Paused => State::pause_update(events),
+            State::GameOver(ref mut game_over) => game_over.update(events),
         }
     }
 
-    fn title_update(drawer: &mut Drawer, events: &[Event]) -> StateChange {
+    fn title_update(events: &[Event]) -> StateChange {
         for event in events {
             match *event {
                 Event::KeyDown { keycode: Some(Keycode::Return), .. } |
@@ -38,27 +37,15 @@ impl State {
             }
         }
 
-        drawer
-            .text()
-            .size(4)
-            .centered()
-            .draw("Tetris")
-            .size(1)
-            .under()
-            .offset(0, 10)
-            .draw("[ Press Enter ]");
-
         StateChange::None
     }
 
-    fn pause_update(drawer: &mut Drawer, events: &[Event]) -> StateChange {
+    fn pause_update(events: &[Event]) -> StateChange {
         for event in events {
             if let Event::Window { win_event: FocusGained, .. } = *event {
                 return StateChange::Pop;
             }
         }
-
-        drawer.text().centered().draw("Paused");
 
         StateChange::None
     }

@@ -4,7 +4,6 @@ use piece::Piece;
 use state::State;
 use state::StateChange;
 use tetromino::Bag;
-use draw::Drawer;
 use game_over::GameOver;
 use std::cmp;
 
@@ -71,7 +70,7 @@ impl FingerPress {
 }
 
 pub struct GamePlay {
-    game: Game,
+    pub game: Game,
     history: History,
     last_finger_press: Option<FingerPress>,
 }
@@ -88,7 +87,7 @@ impl Default for GamePlay {
 }
 
 impl GamePlay {
-    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
+    pub fn update(&mut self, events: &[Event]) -> StateChange {
         let mut actions = Vec::new();
 
         for event in events {
@@ -140,14 +139,6 @@ impl GamePlay {
 
         let is_game_over = self.game.apply_step();
 
-        drawer.draw_board(&self.game.board);
-
-        drawer.draw_piece(&self.game.piece);
-
-        drawer.draw_next(self.game.bag.peek());
-
-        drawer.draw_game_score(&self.game);
-
         if is_game_over {
             let game_over = GameOver::new(self.game.score, self.history.clone());
             StateChange::Replace(State::GameOver(game_over))
@@ -158,8 +149,8 @@ impl GamePlay {
 }
 
 pub struct Game {
-    piece: Piece,
-    board: Board,
+    pub piece: Piece,
+    pub board: Board,
     pub bag: Bag,
     drop_tick: u32,
     lock_delay: bool,

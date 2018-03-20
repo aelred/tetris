@@ -1,4 +1,3 @@
-use draw::Drawer;
 use state::State;
 use state::StateChange;
 use game::History;
@@ -74,7 +73,7 @@ impl GameOver {
         )
     }
 
-    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
+    pub fn update(&mut self, events: &[Event]) -> StateChange {
         lazy_static! {
             static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
         }
@@ -112,8 +111,6 @@ impl GameOver {
                 _ => {}
             }
         }
-
-        drawer.draw_game_over(self);
 
         StateChange::None
     }
