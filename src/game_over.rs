@@ -1,29 +1,26 @@
-use draw::TextDrawer;
 use draw::Drawer;
 use state::State;
 use state::StateChange;
-use score::OFFSET;
 use game::History;
 use rest;
 use score::Score;
 use score::ScoreMessage;
 
 use regex::Regex;
-use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 
 pub struct GameOver {
-    hiscores: Option<HighScores>,
-    score: Score,
+    pub hiscores: Option<HighScores>,
+    pub score: Score,
     history: History,
 }
 
-struct HighScores {
-    higher_scores: Vec<Score>,
-    lower_scores: Vec<Score>,
-    has_hiscore: bool,
+pub struct HighScores {
+    pub higher_scores: Vec<Score>,
+    pub lower_scores: Vec<Score>,
+    pub has_hiscore: bool,
 }
 
 impl HighScores {
@@ -70,7 +67,7 @@ impl GameOver {
         }
     }
 
-    fn posting_hiscore(&self) -> bool {
+    pub fn posting_hiscore(&self) -> bool {
         self.hiscores.as_ref().map_or(
             false,
             HighScores::has_hiscore,
@@ -116,66 +113,9 @@ impl GameOver {
             }
         }
 
-        let mut text = drawer
-            .text()
-            .top()
-            .offset(0, 50)
-            .size(3)
-            .draw("Game Over")
-            .under()
-            .offset(0, 10)
-            .size(1)
-            .draw("final score")
-            .under()
-            .size(3)
-            .draw(&self.score.value.to_string());
-
-        text = self.draw_hiscores(text);
-
-        if self.posting_hiscore() {
-            text.size(1).draw("[ Enter Name and Press Enter ]");
-        } else {
-            text.size(1).draw("[ Press Enter ]");
-        }
+        drawer.draw_game_over(self);
 
         StateChange::None
-    }
-
-    fn draw_hiscores<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-        match self.hiscores {
-            Some(HighScores {
-                     ref higher_scores,
-                     ref lower_scores,
-                     ref has_hiscore,
-                 }) => {
-                let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
-
-                text = text.size(2).under().offset(0, 10);
-
-                for score in higher_scores {
-                    text = score.draw(text);
-                }
-
-                if *has_hiscore {
-                    text = self.score
-                        .draw(text.color(Color::RGB(255, 255, 100)))
-                        .reset_color();
-                }
-
-                for score in lower_scores {
-                    text = score.draw(text);
-                }
-
-                text.under().offset(-OFFSET, 10)
-            }
-            None => {
-                text.size(1)
-                    .under()
-                    .offset(0, 10)
-                    .draw("[ ERROR Failed to retrieve High Scores ]")
-                    .offset(0, 20)
-            }
-        }
     }
 }
 

@@ -10,6 +10,9 @@ use sdl2::rect::Point;
 use sdl2::render::Renderer;
 use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
+use game_over::GameOver;
+use score::OFFSET;
+use game_over::HighScores;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -67,6 +70,67 @@ impl<'a> Drawer<'a> {
         for x in 1..size.x() {
             self.draw_block(Pos::new(x, size.y()), BORDER_COLOR);
             self.draw_block(Pos::new(x, 0), BORDER_COLOR);
+        }
+    }
+
+    pub fn draw_game_over(&mut self, game_over: &GameOver) {
+        let mut text = self
+            .text()
+            .top()
+            .offset(0, 50)
+            .size(3)
+            .draw("Game Over")
+            .under()
+            .offset(0, 10)
+            .size(1)
+            .draw("final score")
+            .under()
+            .size(3)
+            .draw(&game_over.score.value.to_string());
+
+        text = Drawer::draw_hiscores(game_over, text);
+
+        if game_over.posting_hiscore() {
+            text.size(1).draw("[ Enter Name and Press Enter ]");
+        } else {
+            text.size(1).draw("[ Press Enter ]");
+        }
+    }
+
+    fn draw_hiscores<'b, 'c>(game_over: &GameOver, text: TextDrawer<'b, 'c>) -> TextDrawer<'b, 'c> {
+        match game_over.hiscores {
+            Some(HighScores {
+                     ref higher_scores,
+                     ref lower_scores,
+                     ref has_hiscore,
+                 }) => {
+                let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
+
+                text = text.size(2).under().offset(0, 10);
+
+                for score in higher_scores {
+                    text = score.draw(text);
+                }
+
+                if *has_hiscore {
+                    text = game_over.score
+                        .draw(text.color(Color::RGB(255, 255, 100)))
+                        .reset_color();
+                }
+
+                for score in lower_scores {
+                    text = score.draw(text);
+                }
+
+                text.under().offset(-OFFSET, 10)
+            }
+            None => {
+                text.size(1)
+                    .under()
+                    .offset(0, 10)
+                    .draw("[ ERROR Failed to retrieve High Scores ]")
+                    .offset(0, 20)
+            }
         }
     }
 
