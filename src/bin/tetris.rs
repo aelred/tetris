@@ -8,8 +8,6 @@ extern crate emscripten;
 extern crate libc;
 
 use tetris::state::State;
-use tetris::game::WINDOW_WIDTH;
-use tetris::game::WINDOW_HEIGHT;
 use tetris::draw::Drawer;
 
 use std::cmp::max;
@@ -21,6 +19,8 @@ use sdl2::EventPump;
 use sdl2::video::Window;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use tetris::draw::WINDOW_HEIGHT;
+use tetris::draw::WINDOW_WIDTH;
 
 const TICK: u64 = 33;
 

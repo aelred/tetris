@@ -1,6 +1,4 @@
 use pos::Pos;
-use game::WINDOW_HEIGHT;
-use game::WINDOW_WIDTH;
 use tetromino::TetColor;
 
 use sdl2::pixels::Color;
@@ -13,6 +11,17 @@ use sdl2::ttf::Font;
 use game_over::GameOver;
 use score::OFFSET;
 use game_over::HighScores;
+use board::Board;
+use board::HIDE_ROWS;
+use board::HEIGHT;
+use board::WIDTH;
+use tetromino::Rotation;
+use tetromino;
+use tetromino::Tetromino;
+use game::Game;
+use board;
+use piece::Piece;
+use score::Score;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -59,23 +68,8 @@ impl<'a> Drawer<'a> {
         ));
     }
 
-    pub fn draw_border(&mut self, size: Pos) {
-        let size = size + Pos::new(1, 1);
-
-        for y in 0..size.y() + 1 {
-            self.draw_block(Pos::new(0, y), BORDER_COLOR);
-            self.draw_block(Pos::new(size.x(), y), BORDER_COLOR);
-        }
-
-        for x in 1..size.x() {
-            self.draw_block(Pos::new(x, size.y()), BORDER_COLOR);
-            self.draw_block(Pos::new(x, 0), BORDER_COLOR);
-        }
-    }
-
     pub fn draw_game_over(&mut self, game_over: &GameOver) {
-        let mut text = self
-            .text()
+        let mut text = self.text()
             .top()
             .offset(0, 50)
             .size(3)
@@ -88,7 +82,7 @@ impl<'a> Drawer<'a> {
             .size(3)
             .draw(&game_over.score.value.to_string());
 
-        text = Drawer::draw_hiscores(game_over, text);
+        text = game_over.draw(text);
 
         if game_over.posting_hiscore() {
             text.size(1).draw("[ Enter Name and Press Enter ]");
@@ -97,40 +91,75 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    fn draw_hiscores<'b, 'c>(game_over: &GameOver, text: TextDrawer<'b, 'c>) -> TextDrawer<'b, 'c> {
-        match game_over.hiscores {
-            Some(HighScores {
-                     ref higher_scores,
-                     ref lower_scores,
-                     ref has_hiscore,
-                 }) => {
-                let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
+    pub fn draw_board(&mut self, board: &Board) {
+        self.set_viewport(*BOARD_BORDER_VIEW);
+        self.draw_border(Pos::new(i16::from(WIDTH), i16::from(HEIGHT - HIDE_ROWS)));
 
-                text = text.size(2).under().offset(0, 10);
+        self.set_viewport(*BOARD_VIEW);
 
-                for score in higher_scores {
-                    text = score.draw(text);
+        for y in HIDE_ROWS..HEIGHT {
+            for x in 0..WIDTH {
+                if let Some(color) = board.grid[y as usize][x as usize] {
+                    let y = y - HIDE_ROWS;
+                    let cell_pos = Pos::new(i16::from(x), i16::from(y));
+                    self.draw_block(cell_pos, color)
                 }
-
-                if *has_hiscore {
-                    text = game_over.score
-                        .draw(text.color(Color::RGB(255, 255, 100)))
-                        .reset_color();
-                }
-
-                for score in lower_scores {
-                    text = score.draw(text);
-                }
-
-                text.under().offset(-OFFSET, 10)
             }
-            None => {
-                text.size(1)
-                    .under()
-                    .offset(0, 10)
-                    .draw("[ ERROR Failed to retrieve High Scores ]")
-                    .offset(0, 20)
-            }
+        }
+    }
+
+    pub fn draw_next(&mut self, next: &Tetromino) {
+        self.set_viewport(*PREVIEW_VIEW);
+
+        self.draw_border(Pos::new(
+            i16::from(tetromino::WIDTH),
+            i16::from(tetromino::HEIGHT),
+        ));
+        self.draw_tetromino(next, Rotation::default(), Pos::new(1, 1));
+    }
+
+    pub fn draw_game_score(&mut self, game: &Game) {
+        self.set_viewport(*SCORE_VIEW);
+
+        self.text()
+            .draw("lines")
+            .size(2)
+            .left()
+            .draw(&game.lines_cleared.to_string())
+            .size(1)
+            .left()
+            .offset(0, PAD)
+            .draw("score")
+            .size(2)
+            .left()
+            .draw(&game.score.to_string());
+    }
+
+    pub fn draw_piece(&mut self, piece: &Piece) {
+        self.draw_tetromino(
+            piece.tetromino,
+            piece.rot,
+            piece.pos + Pos::new(0, -i16::from(HIDE_ROWS)),
+        );
+    }
+
+    fn draw_tetromino(&mut self, tetromino: &Tetromino, rot: Rotation, pos: Pos) {
+        for block in tetromino.blocks(rot) {
+            self.draw_block(pos + block, tetromino.color);
+        }
+    }
+
+    fn draw_border(&mut self, size: Pos) {
+        let size = size + Pos::new(1, 1);
+
+        for y in 0..size.y() + 1 {
+            self.draw_block(Pos::new(0, y), BORDER_COLOR);
+            self.draw_block(Pos::new(size.x(), y), BORDER_COLOR);
+        }
+
+        for x in 1..size.x() {
+            self.draw_block(Pos::new(x, size.y()), BORDER_COLOR);
+            self.draw_block(Pos::new(x, 0), BORDER_COLOR);
         }
     }
 
@@ -275,3 +304,96 @@ impl TextPos {
         }
     }
 }
+
+impl Score {
+    pub fn draw <'a, 'b> (&self, text: TextDrawer <'a, 'b>) -> TextDrawer <'a, 'b> {
+        let name = if self.name.is_empty() {
+            " "
+        } else {
+            & self.name
+        };
+
+        text.offset( - OFFSET, 0)
+            .draw(name)
+            .offset(OFFSET * 2, 0)
+            .draw( & self.value.to_string())
+            .under()
+            .offset( - OFFSET, 10)
+    }
+}
+
+impl GameOver {
+    fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
+        match self.hiscores {
+            Some(HighScores {
+                     ref higher_scores,
+                     ref lower_scores,
+                     ref has_hiscore,
+                 }) => {
+                let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
+
+                text = text.size(2).under().offset(0, 10);
+
+                for score in higher_scores {
+                    text = score.draw(text);
+                }
+
+                if *has_hiscore {
+                    text = self
+                        .score
+                        .draw(text.color(Color::RGB(255, 255, 100)))
+                        .reset_color();
+                }
+
+                for score in lower_scores {
+                    text = score.draw(text);
+                }
+
+                text.under().offset(-OFFSET, 10)
+            }
+            None => {
+                text.size(1)
+                    .under()
+                    .offset(0, 10)
+                    .draw("[ ERROR Failed to retrieve High Scores ]")
+                    .offset(0, 20)
+            }
+        }
+    }
+}
+
+
+lazy_static! {
+    static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+
+    static ref SCORE_VIEW: Rect = Rect::new(SCORE_X, PAD, PREVIEW_WIDTH, BOARD_HEIGHT);
+
+    static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
+                                                   0,
+                                                   BOARD_WIDTH + BOARD_BORDER * 2,
+                                                   BOARD_HEIGHT + BOARD_BORDER * 2);
+
+    static ref BOARD_VIEW: Rect = Rect::new(BOARD_BORDER as i32,
+                                            BOARD_BORDER as i32,
+                                            BOARD_WIDTH,
+                                            BOARD_HEIGHT);
+}
+
+const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
+const BOARD_WIDTH: u32 = board::WIDTH as u32 * BLOCK_SIZE as u32;
+const BOARD_HEIGHT: u32 = (board::HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE as u32;
+const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
+
+const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
+const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
+    (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
+const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
+const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
+
+const SCORE_X: i32 = PREVIEW_X + BOARD_BORDER as i32 + PAD;
+
+const PAD: i32 = BLOCK_SIZE as i32;
+
+pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
+pub const WINDOW_HEIGHT: u32 = TOTAL_BOARD_HEIGHT;
+pub const WINDOW_RATIO: f32 = WINDOW_HEIGHT as f32 / WINDOW_WIDTH as f32;

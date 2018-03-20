@@ -1,4 +1,3 @@
-use draw::TextDrawer;
 use game::History;
 use err::Result;
 use std::cmp::Ordering;
@@ -16,21 +15,6 @@ pub struct Score {
 impl Score {
     pub fn new(value: u32, name: String) -> Self {
         Score { value, name }
-    }
-
-    pub fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-        let name = if self.name.is_empty() {
-            " "
-        } else {
-            &self.name
-        };
-
-        text.offset(-OFFSET, 0)
-            .draw(name)
-            .offset(OFFSET * 2, 0)
-            .draw(&self.value.to_string())
-            .under()
-            .offset(-OFFSET, 10)
     }
 }
 

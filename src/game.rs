@@ -1,14 +1,8 @@
-use draw::BLOCK_SIZE;
-use board;
-use board::HIDE_ROWS;
 use board::Board;
 use board::FillResult;
 use piece::Piece;
 use state::State;
 use state::StateChange;
-use pos::Pos;
-use tetromino;
-use tetromino::Rotation;
 use tetromino::Bag;
 use draw::Drawer;
 use game_over::GameOver;
@@ -18,9 +12,9 @@ use rand;
 use rand::XorShiftRng;
 use rand::SeedableRng;
 use sdl2::event::Event;
-use sdl2::rect::Rect;
 use sdl2::keyboard::Keycode;
 use sdl2::event::WindowEvent::FocusLost;
+use draw::WINDOW_RATIO;
 
 const INITIAL_GRAVITY: u32 = 4;
 const GRAVITY_UNITS_PER_BLOCK: u32 = 100;
@@ -146,16 +140,13 @@ impl GamePlay {
 
         let is_game_over = self.game.apply_step();
 
-        drawer.set_viewport(*BOARD_BORDER_VIEW);
-        self.game.board.draw_border(drawer);
+        drawer.draw_board(&self.game.board);
 
-        drawer.set_viewport(*BOARD_VIEW);
-        self.game.board.draw(drawer);
-        self.game.piece.draw(drawer);
+        drawer.draw_piece(&self.game.piece);
 
-        self.draw_next(drawer);
+        drawer.draw_next(self.game.bag.peek());
 
-        self.draw_score(drawer);
+        drawer.draw_game_score(&self.game);
 
         if is_game_over {
             let game_over = GameOver::new(self.game.score, self.history.clone());
@@ -164,49 +155,17 @@ impl GamePlay {
             StateChange::None
         }
     }
-
-    fn draw_score(&self, drawer: &mut Drawer) {
-        drawer.set_viewport(*SCORE_VIEW);
-
-        drawer
-            .text()
-            .draw("lines")
-            .size(2)
-            .left()
-            .draw(&self.game.lines_cleared.to_string())
-            .size(1)
-            .left()
-            .offset(0, PAD)
-            .draw("score")
-            .size(2)
-            .left()
-            .draw(&self.game.score.to_string());
-    }
-
-    fn draw_next(&self, drawer: &mut Drawer) {
-        drawer.set_viewport(*PREVIEW_VIEW);
-
-        drawer.draw_border(Pos::new(
-            i16::from(tetromino::WIDTH),
-            i16::from(tetromino::HEIGHT),
-        ));
-        self.game.bag.peek().draw(
-            drawer,
-            Rotation::default(),
-            Pos::new(1, 1),
-        );
-    }
 }
 
 pub struct Game {
     piece: Piece,
     board: Board,
-    bag: Bag,
+    pub bag: Bag,
     drop_tick: u32,
     lock_delay: bool,
     gravity: Gravity,
-    lines_cleared: u32,
-    score: u32,
+    pub lines_cleared: u32,
+    pub score: u32,
     tick: Tick,
 }
 
@@ -417,38 +376,3 @@ impl History {
         }
     }
 }
-
-lazy_static! {
-    static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
-                                                   0,
-                                                   BOARD_WIDTH + BOARD_BORDER * 2,
-                                                   BOARD_HEIGHT + BOARD_BORDER * 2);
-
-    static ref BOARD_VIEW: Rect = Rect::new(BOARD_BORDER as i32,
-                                            BOARD_BORDER as i32,
-                                            BOARD_WIDTH,
-                                            BOARD_HEIGHT);
-
-    static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
-    static ref SCORE_VIEW: Rect = Rect::new(SCORE_X, PAD, PREVIEW_WIDTH, BOARD_HEIGHT);
-}
-
-const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
-const BOARD_WIDTH: u32 = board::WIDTH as u32 * BLOCK_SIZE as u32;
-const BOARD_HEIGHT: u32 = (board::HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE as u32;
-const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
-
-const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
-    (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
-const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
-const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
-
-const SCORE_X: i32 = PREVIEW_X + BOARD_BORDER as i32 + PAD;
-
-const PAD: i32 = BLOCK_SIZE as i32;
-
-pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
-pub const WINDOW_HEIGHT: u32 = TOTAL_BOARD_HEIGHT;
-pub const WINDOW_RATIO: f32 = WINDOW_HEIGHT as f32 / WINDOW_WIDTH as f32;
