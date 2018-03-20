@@ -78,9 +78,8 @@ impl ScoreMessage {
             return Err(From::from(message));
         }
 
-        match self.verify_score() {
-            Ok(_) => {}
-            Err(e) => println!("{:?}", e),
+        if let Err(e) = self.verify_score() {
+            println!("{:?}", e)
         };
 
         Ok(self.score)
