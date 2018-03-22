@@ -6,3 +6,4 @@ static/tetris.js
 .idea
 .vscode
 tetris.iml
+*.iml
