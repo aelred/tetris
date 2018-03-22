@@ -25,10 +25,13 @@ use sdl2::video::Window;
 use draw::WINDOW_HEIGHT;
 use draw::WINDOW_WIDTH;
 use event::EventHandler;
+use sdl2::mixer::{DEFAULT_CHANNELS, AUDIO_S16LSB};
+use sdl2::mixer::LoaderRWops;
 
 const TICK: u64 = 33;
 
 static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
+static MUSIC_DATA: &'static [u8] = include_bytes!("../resources/tetris.mid");
 
 const FONT_MULTIPLE: u16 = 9;
 
@@ -53,6 +56,16 @@ fn main() {
         .unwrap();
 
     let window = create_window(&sdl_context);
+
+    let frequency = 44_100;
+    let format = AUDIO_S16LSB;
+    let channels = DEFAULT_CHANNELS;
+    let chunk_size = 1_024;
+    sdl2::mixer::open_audio(frequency, format, channels, chunk_size).unwrap();
+
+    let music_data = RWops::from_bytes(MUSIC_DATA).unwrap();
+    let music = music_data.load_music().unwrap();
+    music.play(1).unwrap();
 
     let event_handler = EventHandler::new(sdl_context.event_pump().unwrap());
 
