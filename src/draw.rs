@@ -64,8 +64,7 @@ impl<'a> Drawer<'a> {
     }
 
     fn title_draw(&mut self) {
-        self
-            .text()
+        self.text()
             .size(4)
             .centered()
             .draw("Tetris")
@@ -121,7 +120,7 @@ impl<'a> Drawer<'a> {
         self.draw_board(&game.board);
         self.draw_piece(&game.piece);
         self.draw_next(game.bag.peek());
-        self.draw_game_score(&game);
+        self.draw_game_score(game);
     }
 
     fn draw_board(&mut self, board: &Board) {
@@ -339,19 +338,19 @@ impl TextPos {
 }
 
 impl Score {
-    pub fn draw <'a, 'b> (&self, text: TextDrawer <'a, 'b>) -> TextDrawer <'a, 'b> {
+    pub fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
         let name = if self.name.is_empty() {
             " "
         } else {
-            & self.name
+            &self.name
         };
 
-        text.offset( - OFFSET, 0)
+        text.offset(-OFFSET, 0)
             .draw(name)
             .offset(OFFSET * 2, 0)
-            .draw( & self.value.to_string())
+            .draw(&self.value.to_string())
             .under()
-            .offset( - OFFSET, 10)
+            .offset(-OFFSET, 10)
     }
 }
 
@@ -372,8 +371,7 @@ impl GameOver {
                 }
 
                 if *has_hiscore {
-                    text = self
-                        .score
+                    text = self.score
                         .draw(text.color(Color::RGB(255, 255, 100)))
                         .reset_color();
                 }

@@ -1,19 +1,11 @@
-use state::State;
-use state::StateChange;
 use game::History;
 use rest;
 use score::Score;
-use score::ScoreMessage;
-
-use regex::Regex;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
-
 
 pub struct GameOver {
     pub hiscores: Option<HighScores>,
     pub score: Score,
-    history: History,
+    pub history: History,
 }
 
 pub struct HighScores {
@@ -71,48 +63,6 @@ impl GameOver {
             false,
             HighScores::has_hiscore,
         )
-    }
-
-    pub fn update(&mut self, events: &[Event]) -> StateChange {
-        lazy_static! {
-            static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
-        }
-
-        for event in events {
-            match *event {
-                Event::KeyDown { keycode: Some(keycode), .. } => {
-                    match keycode {
-                        Keycode::Return => {
-                            if !self.posting_hiscore() || !self.score.name.is_empty() {
-                                if self.posting_hiscore() {
-                                    let message =
-                                        ScoreMessage::new(self.score.clone(), self.history.clone());
-                                    rest::post_hiscore(&message);
-                                }
-                                return StateChange::Replace(State::play());
-                            }
-                        }
-                        Keycode::Backspace => {
-                            self.score.name.pop();
-                        }
-                        k if ALPHANUMERIC.is_match(&k.name()) => {
-                            self.score.name.push_str(&k.name());
-                            self.score.name.truncate(3);
-                        }
-                        _ => {}
-                    }
-                }
-                Event::FingerUp { .. } => {
-                    // TODO: Find a way to submit high-scores with touch
-                    if !self.posting_hiscore() {
-                        return StateChange::Replace(State::play());
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        StateChange::None
     }
 }
 

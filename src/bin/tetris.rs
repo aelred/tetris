@@ -15,13 +15,11 @@ use std::cmp::max;
 use sdl2::Sdl;
 use sdl2::rwops::RWops;
 use sdl2::ttf;
-use sdl2::EventPump;
 use sdl2::video::Window;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
 use tetris::draw::WINDOW_HEIGHT;
 use tetris::draw::WINDOW_WIDTH;
 use tetris::state::StateChange;
+use tetris::event::EventHandler;
 
 const TICK: u64 = 33;
 
@@ -34,7 +32,7 @@ const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIP
 
 struct Context<'a> {
     drawer: Drawer<'a>,
-    event_pump: EventPump,
+    event_handler: EventHandler,
     states: Vec<State>,
 }
 
@@ -51,9 +49,11 @@ fn main() {
 
     let window = create_window(&sdl_context);
 
+    let event_handler = EventHandler::new(sdl_context.event_pump().unwrap());
+
     let mut context = Context {
         drawer: Drawer::new(window.renderer().build().unwrap(), font),
-        event_pump: sdl_context.event_pump().unwrap(),
+        event_handler,
         states: Vec::new(),
     };
 
@@ -94,34 +94,18 @@ fn play_tetris(mut context: &mut Context) {
 fn main_loop(context: &mut Context) {
     context.drawer.clear();
 
-    let mut events = Vec::new();
-
-    for event in context.event_pump.poll_iter() {
-        match event {
-            Event::Quit { .. } |
-            Event::KeyDown { keycode: Some(Keycode::Escape), .. } => exit(),
-            _ => {}
-        }
-
-        events.push(event);
-    }
-
-    let state_change = tick(context, &events);
+    let state_change = tick(context);
 
     state_change.apply(&mut context.states);
 
     context.drawer.present();
 }
 
-fn tick(context: &mut Context, events: &[Event]) -> StateChange {
+fn tick(context: &mut Context) -> StateChange {
     let state = context.states.last_mut().unwrap();
-    let state_change = state.update(&events);
+    let state_change = context.event_handler.handle(state);
     context.drawer.draw_state(state);
     state_change
-}
-
-fn exit() {
-    std::process::exit(0);
 }
 
 fn create_window(sdl_context: &Sdl) -> Window {

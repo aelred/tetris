@@ -7,6 +7,7 @@ pub mod draw;
 pub mod score;
 pub mod rest;
 pub mod err;
+pub mod event;
 
 mod tetromino;
 mod pos;
