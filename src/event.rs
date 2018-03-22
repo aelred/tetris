@@ -9,9 +9,6 @@ use state::State;
 use state::StateChange;
 use game::GamePlay;
 use game_over::GameOver;
-use score::ScoreMessage;
-use rest;
-use regex::Regex;
 
 // the minimum velocity before movement is registered, in % of screen width per ms
 const FINGER_SENSITIVITY: f32 = 0.0002;
@@ -55,7 +52,7 @@ impl EventHandler {
             match event {
                 Event::KeyDown { keycode: Some(Keycode::Return), .. } |
                 Event::FingerUp { .. } => {
-                    return StateChange::Push(State::play());
+                    return State::start_game();
                 }
                 _ => {}
             }
@@ -77,7 +74,7 @@ impl EventHandler {
     fn handle_paused(&mut self) -> StateChange {
         for event in self.events() {
             if let Event::Window { win_event: WindowEvent::FocusGained, .. } = event {
-                return StateChange::Pop;
+                return State::unpause();
             }
         }
 
@@ -85,40 +82,25 @@ impl EventHandler {
     }
 
     fn handle_game_over(&mut self, game_over: &mut GameOver) -> StateChange {
-        lazy_static! {
-            static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
-        }
-
         for event in self.events() {
             match event {
                 Event::KeyDown { keycode: Some(keycode), .. } => {
                     match keycode {
                         Keycode::Return => {
-                            if !game_over.posting_hiscore() || !game_over.score.name.is_empty() {
-                                if game_over.posting_hiscore() {
-                                    let message = ScoreMessage::new(
-                                        game_over.score.clone(),
-                                        game_over.history.clone(),
-                                    );
-                                    rest::post_hiscore(&message);
-                                }
-                                return StateChange::Replace(State::play());
-                            }
+                            return game_over.submit();
                         }
                         Keycode::Backspace => {
-                            game_over.score.name.pop();
+                            game_over.backspace();
+                        },
+                        k => {
+                            game_over.push_name(&k.name());
                         }
-                        k if ALPHANUMERIC.is_match(&k.name()) => {
-                            game_over.score.name.push_str(&k.name());
-                            game_over.score.name.truncate(3);
-                        }
-                        _ => {}
                     }
                 }
                 Event::FingerUp { .. } => {
                     // TODO: Find a way to submit high-scores with touch
                     if !game_over.posting_hiscore() {
-                        return StateChange::Replace(State::play());
+                        return game_over.exit();
                     }
                 }
                 _ => {}

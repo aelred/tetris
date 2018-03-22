@@ -1,6 +1,10 @@
 use game::History;
 use rest;
 use score::Score;
+use state::StateChange;
+use score::ScoreMessage;
+use state::State;
+use regex::Regex;
 
 pub struct GameOver {
     pub hiscores: Option<HighScores>,
@@ -63,6 +67,40 @@ impl GameOver {
             false,
             HighScores::has_hiscore,
         )
+    }
+
+    pub fn backspace(&mut self) {
+        self.score.name.pop();
+    }
+
+    pub fn push_name(&mut self, str: &str) {
+        lazy_static! {
+            static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
+        }
+
+        if ALPHANUMERIC.is_match(str) {
+            self.score.name.push_str(str);
+            self.score.name.truncate(3);
+        }
+    }
+
+    pub fn submit(&mut self) -> StateChange {
+        if !self.posting_hiscore() || !self.score.name.is_empty() {
+            if self.posting_hiscore() {
+                let message = ScoreMessage::new(
+                    self.score.clone(),
+                    self.history.clone(),
+                );
+                rest::post_hiscore(&message);
+            }
+            StateChange::Replace(State::play())
+        } else {
+            StateChange::None
+        }
+    }
+
+    pub fn exit(&mut self) -> StateChange {
+        StateChange::Replace(State::play())
     }
 }
 

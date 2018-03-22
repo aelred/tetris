@@ -19,6 +19,14 @@ impl State {
             _ => StateChange::None,
         }
     }
+
+    pub fn unpause() -> StateChange {
+        StateChange::Pop
+    }
+
+    pub fn start_game() -> StateChange {
+        StateChange::Push(State::play())
+    }
 }
 
 pub enum StateChange {

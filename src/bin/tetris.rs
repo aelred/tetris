@@ -18,7 +18,6 @@ use sdl2::ttf;
 use sdl2::video::Window;
 use tetris::draw::WINDOW_HEIGHT;
 use tetris::draw::WINDOW_WIDTH;
-use tetris::state::StateChange;
 use tetris::event::EventHandler;
 
 const TICK: u64 = 33;
@@ -68,7 +67,7 @@ fn play_tetris(context: &mut Context) {
     use std::time::Duration;
 
     loop {
-        main_loop(context);
+        context.main_loop();
         sleep(Duration::from_millis(TICK));
     }
 }
@@ -80,7 +79,7 @@ fn play_tetris(mut context: &mut Context) {
 
     extern "C" fn em_loop(arg: *mut libc::c_void) {
         let context = unsafe { transmute::<*mut libc::c_void, &mut Context>(arg) };
-        main_loop(context);
+        context.main_loop();
     }
 
     em::set_main_loop_arg(
@@ -91,21 +90,35 @@ fn play_tetris(mut context: &mut Context) {
     );
 }
 
-fn main_loop(context: &mut Context) {
-    context.drawer.clear();
+impl <'a> Context<'a> {
+    fn main_loop(&mut self) {
+        self.handle_events();
+        self.update_state();
+        self.draw();
+    }
 
-    let state_change = tick(context);
+    fn handle_events(&mut self) {
+        let state_change = {
+            let state = self.states.last_mut().unwrap();
+            self.event_handler.handle(state)
+        };
+        state_change.apply(&mut self.states);
+    }
 
-    state_change.apply(&mut context.states);
+    fn update_state(&mut self) {
+        let state_change = {
+            let state = self.states.last_mut().unwrap();
+            state.update()
+        };
+        state_change.apply(&mut self.states);
+    }
 
-    context.drawer.present();
-}
-
-fn tick(context: &mut Context) -> StateChange {
-    let state = context.states.last_mut().unwrap();
-    let state_change = context.event_handler.handle(state);
-    context.drawer.draw_state(state);
-    state_change
+    fn draw(&mut self) {
+        self.drawer.clear();
+        let state = self.states.last_mut().unwrap();
+        self.drawer.draw_state(state);
+        self.drawer.present();
+    }
 }
 
 fn create_window(sdl_context: &Sdl) -> Window {
