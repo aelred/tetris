@@ -7,3 +7,7 @@ authors = ["Felix Chapman <aelred717@gmail.com>"]
 tetris = {path="../tetris", version="0.1.0"}
 sdl2 = {version="0.29", default-features=false, features=["ttf"]}
 lazy_static = "0.2"
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
+libc = "0.2.16"
+emscripten = {git = "https://github.com/lucklove/emscripten.git"}
