@@ -61,7 +61,7 @@ impl Client {
         Ok(body)
     }
 
-    fn post_raw_hiscores(&self, score: &str) -> Result<()> {
+    fn post_raw_hiscores(&self, score: String) -> Result<()> {
         self.hyper_client
             .post(self.scores_endpoint())
             .body(score.as_bytes())
