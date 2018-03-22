@@ -1,3 +1,4 @@
 #!/bin/bash
-cargo install --bin tetris-server --force
+cd tetris-server
+cargo install --force
 sudo systemctl restart tetris
