@@ -1,5 +1,4 @@
 use pos::Pos;
-use draw::Drawer;
 use tetromino::TetColor;
 
 pub const WIDTH: u8 = 10;
@@ -9,7 +8,7 @@ pub const HIDE_ROWS: u8 = 4;
 
 #[derive(Clone, Debug)]
 pub struct Board {
-    grid: [[Option<TetColor>; WIDTH as usize]; HEIGHT as usize],
+    pub grid: [[Option<TetColor>; WIDTH as usize]; HEIGHT as usize],
 }
 
 pub struct FillResult {
@@ -76,22 +75,6 @@ impl Board {
 
         for x in 0..WIDTH as usize {
             self.grid[0][x] = None;
-        }
-    }
-
-    pub fn draw_border(&self, drawer: &mut Drawer) {
-        drawer.draw_border(Pos::new(i16::from(WIDTH), i16::from(HEIGHT - HIDE_ROWS)));
-    }
-
-    pub fn draw(&self, drawer: &mut Drawer) {
-        for y in HIDE_ROWS..HEIGHT {
-            for x in 0..WIDTH {
-                if let Some(color) = self.grid[y as usize][x as usize] {
-                    let y = y - HIDE_ROWS;
-                    let cell_pos = Pos::new(i16::from(x), i16::from(y));
-                    drawer.draw_block(cell_pos, color)
-                }
-            }
         }
     }
 }

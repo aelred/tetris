@@ -1,7 +1,6 @@
 extern crate rand;
 
 use pos::Pos;
-use draw::Drawer;
 
 use std::fmt;
 use rand::XorShiftRng;
@@ -130,12 +129,6 @@ impl Tetromino {
         }
 
         blocks
-    }
-
-    pub fn draw(&self, drawer: &mut Drawer, rot: Rotation, pos: Pos) {
-        for block in self.blocks(rot) {
-            drawer.draw_block(pos + block, self.color);
-        }
     }
 }
 

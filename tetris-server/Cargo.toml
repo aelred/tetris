@@ -1,0 +1,10 @@
+[package]
+name = "tetris-server"
+version = "0.1.0"
+authors = ["Felix Chapman <aelred717@gmail.com>"]
+
+[dependencies]
+tetris = {path="../tetris", version="0.1.0"}
+hyper = "0.10.5"
+serde_json = "1.0"
+clap = "2.26"

@@ -1,26 +1,15 @@
-use draw::BLOCK_SIZE;
-use board;
-use board::HIDE_ROWS;
 use board::Board;
 use board::FillResult;
 use piece::Piece;
 use state::State;
 use state::StateChange;
-use pos::Pos;
-use tetromino;
-use tetromino::Rotation;
 use tetromino::Bag;
-use draw::Drawer;
 use game_over::GameOver;
 use std::cmp;
 
 use rand;
 use rand::XorShiftRng;
 use rand::SeedableRng;
-use sdl2::event::Event;
-use sdl2::rect::Rect;
-use sdl2::keyboard::Keycode;
-use sdl2::event::WindowEvent::FocusLost;
 
 const INITIAL_GRAVITY: u32 = 4;
 const GRAVITY_UNITS_PER_BLOCK: u32 = 100;
@@ -28,9 +17,6 @@ const LEVELS_BETWEEN_GRAVITY_INCREASE: u32 = 10;
 const GRAVITY_INCREASE: u32 = 2;
 const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_BLOCK;
 const HARD_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_BLOCK * 20;
-
-// the minimum velocity before movement is registered, in % of screen width per ms
-const FINGER_SENSITIVITY: f32 = 0.0002;
 
 enum Gravity {
     Normal,
@@ -46,6 +32,7 @@ pub enum Action {
     StartSoftDrop,
     StartHardDrop,
     StopDrop,
+    Pause,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq, Debug)]
@@ -61,25 +48,9 @@ impl Tick {
     }
 }
 
-pub struct FingerPress {
-    x: f32,
-    y: f32,
-    timestamp: u32,
-}
-
-impl FingerPress {
-    fn velocity(self, other: &FingerPress) -> (f32, f32) {
-        let dx = self.x - other.x;
-        let dy = (self.y - other.y) * WINDOW_RATIO;
-        let dt = (self.timestamp - other.timestamp) as f32;
-        (dx / dt, dy / dt)
-    }
-}
-
 pub struct GamePlay {
-    game: Game,
+    pub game: Game,
     history: History,
-    last_finger_press: Option<FingerPress>,
 }
 
 impl Default for GamePlay {
@@ -88,74 +59,13 @@ impl Default for GamePlay {
         GamePlay {
             game: Game::new(seed),
             history: History::new(seed),
-            last_finger_press: None,
         }
     }
 }
 
 impl GamePlay {
-    pub fn update(&mut self, drawer: &mut Drawer, events: &[Event]) -> StateChange {
-        let mut actions = Vec::new();
-
-        for event in events {
-            match *event {
-                Event::Window { win_event: FocusLost, .. } => {
-                    return StateChange::Push(State::Paused);
-                }
-                Event::KeyDown { keycode: Some(keycode), .. } => {
-                    match keycode {
-                        Keycode::Left => actions.push(Action::MoveLeft),
-                        Keycode::Right => actions.push(Action::MoveRight),
-                        Keycode::Up => actions.push(Action::Rotate),
-                        Keycode::Down => actions.push(Action::StartSoftDrop),
-                        Keycode::Space => actions.push(Action::StartHardDrop),
-                        _ => {}
-                    }
-                }
-                Event::KeyUp { keycode: Some(Keycode::Down), .. } => {
-                    actions.push(Action::StopDrop);
-                }
-                Event::FingerDown { x, y, timestamp, .. } => {
-                    self.last_finger_press = Some(FingerPress { x, y, timestamp });
-                }
-                Event::FingerUp { x, y, timestamp, .. } => {
-                    if let Some(ref last_finger_press) = self.last_finger_press {
-                        let finger_press = FingerPress { x, y, timestamp };
-                        let (vx, vy) = finger_press.velocity(last_finger_press);
-                        let action = if vx < -FINGER_SENSITIVITY {
-                            Action::MoveLeft
-                        } else if vx > FINGER_SENSITIVITY {
-                            Action::MoveRight
-                        } else if vy > FINGER_SENSITIVITY {
-                            Action::StartHardDrop
-                        } else {
-                            Action::Rotate
-                        };
-                        actions.push(action);
-                    }
-                    self.last_finger_press = None;
-                }
-                _ => {}
-            }
-        }
-
-        for action in actions {
-            self.history.push(self.game.tick, action);
-            self.game.apply_action(action);
-        }
-
+    pub fn update(&mut self) -> StateChange {
         let is_game_over = self.game.apply_step();
-
-        drawer.set_viewport(*BOARD_BORDER_VIEW);
-        self.game.board.draw_border(drawer);
-
-        drawer.set_viewport(*BOARD_VIEW);
-        self.game.board.draw(drawer);
-        self.game.piece.draw(drawer);
-
-        self.draw_next(drawer);
-
-        self.draw_score(drawer);
 
         if is_game_over {
             let game_over = GameOver::new(self.game.score, self.history.clone());
@@ -165,48 +75,21 @@ impl GamePlay {
         }
     }
 
-    fn draw_score(&self, drawer: &mut Drawer) {
-        drawer.set_viewport(*SCORE_VIEW);
-
-        drawer
-            .text()
-            .draw("lines")
-            .size(2)
-            .left()
-            .draw(&self.game.lines_cleared.to_string())
-            .size(1)
-            .left()
-            .offset(0, PAD)
-            .draw("score")
-            .size(2)
-            .left()
-            .draw(&self.game.score.to_string());
-    }
-
-    fn draw_next(&self, drawer: &mut Drawer) {
-        drawer.set_viewport(*PREVIEW_VIEW);
-
-        drawer.draw_border(Pos::new(
-            i16::from(tetromino::WIDTH),
-            i16::from(tetromino::HEIGHT),
-        ));
-        self.game.bag.peek().draw(
-            drawer,
-            Rotation::default(),
-            Pos::new(1, 1),
-        );
+    pub fn apply_action(&mut self, action: Action) -> Option<StateChange> {
+        self.history.push(self.game.tick, action);
+        self.game.apply_action(action)
     }
 }
 
 pub struct Game {
-    piece: Piece,
-    board: Board,
-    bag: Bag,
+    pub piece: Piece,
+    pub board: Board,
+    pub bag: Bag,
     drop_tick: u32,
     lock_delay: bool,
     gravity: Gravity,
-    lines_cleared: u32,
-    score: u32,
+    pub lines_cleared: u32,
+    pub score: u32,
     tick: Tick,
 }
 
@@ -226,8 +109,7 @@ impl Game {
         }
     }
 
-    fn apply_action(&mut self, action: Action) {
-
+    pub fn apply_action(&mut self, action: Action) -> Option<StateChange> {
         match action {
             Action::MoveLeft => {
                 self.try_move_left();
@@ -241,7 +123,10 @@ impl Game {
             Action::StartSoftDrop => self.gravity = Gravity::SoftDrop,
             Action::StartHardDrop => self.gravity = Gravity::HardDrop,
             Action::StopDrop => self.gravity = Gravity::Normal,
+            Action::Pause => return Some(StateChange::Push(State::Paused)),
         }
+
+        None
     }
 
     fn apply_step(&mut self) -> bool {
@@ -417,38 +302,3 @@ impl History {
         }
     }
 }
-
-lazy_static! {
-    static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
-                                                   0,
-                                                   BOARD_WIDTH + BOARD_BORDER * 2,
-                                                   BOARD_HEIGHT + BOARD_BORDER * 2);
-
-    static ref BOARD_VIEW: Rect = Rect::new(BOARD_BORDER as i32,
-                                            BOARD_BORDER as i32,
-                                            BOARD_WIDTH,
-                                            BOARD_HEIGHT);
-
-    static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
-    static ref SCORE_VIEW: Rect = Rect::new(SCORE_X, PAD, PREVIEW_WIDTH, BOARD_HEIGHT);
-}
-
-const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
-const BOARD_WIDTH: u32 = board::WIDTH as u32 * BLOCK_SIZE as u32;
-const BOARD_HEIGHT: u32 = (board::HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE as u32;
-const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
-
-const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
-    (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
-const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
-const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
-
-const SCORE_X: i32 = PREVIEW_X + BOARD_BORDER as i32 + PAD;
-
-const PAD: i32 = BLOCK_SIZE as i32;
-
-pub const WINDOW_WIDTH: u32 = BOARD_WIDTH + BOARD_BORDER + PREVIEW_WIDTH;
-pub const WINDOW_HEIGHT: u32 = TOTAL_BOARD_HEIGHT;
-pub const WINDOW_RATIO: f32 = WINDOW_HEIGHT as f32 / WINDOW_WIDTH as f32;

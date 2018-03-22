@@ -2,16 +2,14 @@ use tetromino::Tetromino;
 use tetromino::Rotation;
 use pos::Pos;
 use board::WIDTH;
-use board::HIDE_ROWS;
-use draw::Drawer;
 
 const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 
 #[derive(Debug)]
 pub struct Piece {
     pub tetromino: &'static Tetromino,
-    rot: Rotation,
-    pos: Pos,
+    pub rot: Rotation,
+    pub pos: Pos,
 }
 
 impl Piece {
@@ -45,14 +43,6 @@ impl Piece {
 
     pub fn down(&mut self) {
         self.pos = self.pos.down();
-    }
-
-    pub fn draw(&self, drawer: &mut Drawer) {
-        self.tetromino.draw(
-            drawer,
-            self.rot,
-            self.pos + Pos::new(0, -i16::from(HIDE_ROWS)),
-        );
     }
 
     pub fn blocks(&self) -> Vec<Pos> {

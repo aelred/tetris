@@ -7,24 +7,28 @@ extern crate emscripten;
 #[cfg(target_os = "emscripten")]
 extern crate libc;
 
+#[macro_use]
+extern crate lazy_static;
+
+mod draw;
+mod event;
+
 use tetris::state::State;
-use tetris::game::WINDOW_WIDTH;
-use tetris::game::WINDOW_HEIGHT;
-use tetris::draw::Drawer;
+use draw::Drawer;
 
 use std::cmp::max;
 
 use sdl2::Sdl;
 use sdl2::rwops::RWops;
 use sdl2::ttf;
-use sdl2::EventPump;
 use sdl2::video::Window;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use draw::WINDOW_HEIGHT;
+use draw::WINDOW_WIDTH;
+use event::EventHandler;
 
 const TICK: u64 = 33;
 
-static FONT_DATA: &'static [u8] = include_bytes!("../../resources/8-BIT WONDER.TTF");
+static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
 
 const FONT_MULTIPLE: u16 = 9;
 
@@ -33,7 +37,7 @@ const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIP
 
 struct Context<'a> {
     drawer: Drawer<'a>,
-    event_pump: EventPump,
+    event_handler: EventHandler,
     states: Vec<State>,
 }
 
@@ -50,9 +54,11 @@ fn main() {
 
     let window = create_window(&sdl_context);
 
+    let event_handler = EventHandler::new(sdl_context.event_pump().unwrap());
+
     let mut context = Context {
         drawer: Drawer::new(window.renderer().build().unwrap(), font),
-        event_pump: sdl_context.event_pump().unwrap(),
+        event_handler,
         states: Vec::new(),
     };
 
@@ -67,7 +73,7 @@ fn play_tetris(context: &mut Context) {
     use std::time::Duration;
 
     loop {
-        main_loop(context);
+        context.main_loop();
         sleep(Duration::from_millis(TICK));
     }
 }
@@ -79,7 +85,7 @@ fn play_tetris(mut context: &mut Context) {
 
     extern "C" fn em_loop(arg: *mut libc::c_void) {
         let context = unsafe { transmute::<*mut libc::c_void, &mut Context>(arg) };
-        main_loop(context);
+        context.main_loop();
     }
 
     em::set_main_loop_arg(
@@ -90,33 +96,35 @@ fn play_tetris(mut context: &mut Context) {
     );
 }
 
-fn main_loop(context: &mut Context) {
-    context.drawer.clear();
-
-    let mut events = Vec::new();
-
-    for event in context.event_pump.poll_iter() {
-        match event {
-            Event::Quit { .. } |
-            Event::KeyDown { keycode: Some(Keycode::Escape), .. } => exit(),
-            _ => {}
-        }
-
-        events.push(event);
+impl <'a> Context<'a> {
+    fn main_loop(&mut self) {
+        self.handle_events();
+        self.update_state();
+        self.draw();
     }
 
-    let state_change = {
-        let mut state = context.states.last_mut().unwrap();
-        state.update(&mut context.drawer, &events)
-    };
+    fn handle_events(&mut self) {
+        let state_change = {
+            let state = self.states.last_mut().unwrap();
+            self.event_handler.handle(state)
+        };
+        state_change.apply(&mut self.states);
+    }
 
-    state_change.apply(&mut context.states);
+    fn update_state(&mut self) {
+        let state_change = {
+            let state = self.states.last_mut().unwrap();
+            state.update()
+        };
+        state_change.apply(&mut self.states);
+    }
 
-    context.drawer.present();
-}
-
-fn exit() {
-    std::process::exit(0);
+    fn draw(&mut self) {
+        self.drawer.clear();
+        let state = self.states.last_mut().unwrap();
+        self.drawer.draw_state(state);
+        self.drawer.present();
+    }
 }
 
 fn create_window(sdl_context: &Sdl) -> Window {
