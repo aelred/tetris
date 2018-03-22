@@ -16,6 +16,8 @@ jobs:
     - stage: deploy
       rust: stable
       script: ./deploy/travis-deploy.sh
+      on:
+        branch: master
 
 dist: trusty
 
