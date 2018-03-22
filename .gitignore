@@ -5,5 +5,4 @@ static/tetris.js
 *.bk
 .idea
 .vscode
-tetris.iml
 *.iml
