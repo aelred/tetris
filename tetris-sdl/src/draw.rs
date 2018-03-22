@@ -1,8 +1,7 @@
 use sdl2::pixels::Color;
-use sdl2::pixels::Color::RGB;
 use sdl2::rect::Rect;
 use sdl2::rect::Point;
-use sdl2::render::Renderer;
+use sdl2::render::Canvas;
 use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
 use tetris::game::Game;
@@ -22,33 +21,34 @@ use tetris::piece::Piece;
 use tetris::pos::Pos;
 use tetris::board::Board;
 use tetris::tetromino::TetColor;
+use sdl2::video::Window;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
 pub const BLOCK_SIZE: u8 = INNER_BLOCK_SIZE + BLOCK_BORDER * 2;
 
-const BORDER_COLOR: Color = Color::RGB(100, 100, 100);
+const BORDER_COLOR: Color = Color { r: 100, g: 100, b: 100, a: 255 };
 
 pub struct Drawer<'a> {
-    renderer: Renderer<'a>,
+    canvas: Canvas<Window>,
     font: Font<'a, 'a>,
 }
 
 fn tetromino_color_to_rgb(color: TetColor) -> Color {
     match color {
-        TetColor::O => RGB(255, 255, 0),
-        TetColor::I => RGB(0, 255, 255),
-        TetColor::J => RGB(0, 0, 255),
-        TetColor::L => RGB(255, 165, 0),
-        TetColor::S => RGB(0, 255, 0),
-        TetColor::T => RGB(255, 0, 255),
-        TetColor::Z => RGB(255, 0, 0),
+        TetColor::O => Color::RGB(255, 255, 0),
+        TetColor::I => Color::RGB(0, 255, 255),
+        TetColor::J => Color::RGB(0, 0, 255),
+        TetColor::L => Color::RGB(255, 165, 0),
+        TetColor::S => Color::RGB(0, 255, 0),
+        TetColor::T => Color::RGB(255, 0, 255),
+        TetColor::Z => Color::RGB(255, 0, 0),
     }
 }
 
 impl<'a> Drawer<'a> {
-    pub fn new(renderer: Renderer<'a>, font: Font<'a, 'a>) -> Self {
-        Drawer { renderer, font }
+    pub fn new(canvas: Canvas<Window>, font: Font<'a, 'a>) -> Self {
+        Drawer { canvas, font }
     }
 
     pub fn draw_state(&mut self, state: &State) {
@@ -79,8 +79,8 @@ impl<'a> Drawer<'a> {
         let x = pos.x() as i16;
         let y = pos.y() as i16;
 
-        self.renderer.set_draw_color(col);
-        let _ = self.renderer.fill_rect(Rect::new(
+        self.canvas.set_draw_color(col);
+        let _ = self.canvas.fill_rect(Rect::new(
             i32::from(x) * i32::from(BLOCK_SIZE) +
                 i32::from(BLOCK_BORDER),
             i32::from(y) * i32::from(BLOCK_SIZE) +
@@ -194,13 +194,14 @@ impl<'a> Drawer<'a> {
 
     fn draw_text(&mut self, text_pos: &TextPos, text: &str, size: u32, color: Color) -> Rect {
         let surface = self.font.render(text).solid(color).unwrap();
-        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+        let texture_creator = self.canvas.texture_creator();
+        let texture = texture_creator.create_texture_from_surface(&surface).unwrap();
 
         let TextureQuery { width, height, .. } = texture.query();
 
         let target = text_pos.apply(width * size, height * size);
 
-        self.renderer.copy(&texture, None, Some(target)).unwrap();
+        self.canvas.copy(&texture, None, Some(target)).unwrap();
 
         target
     }
@@ -216,17 +217,17 @@ impl<'a> Drawer<'a> {
     }
 
     pub fn set_viewport(&mut self, rect: Rect) {
-        self.renderer.set_viewport(Some(rect));
+        self.canvas.set_viewport(Some(rect));
     }
 
     pub fn clear(&mut self) {
-        self.renderer.set_viewport(None);
-        self.renderer.set_draw_color(Color::RGB(32, 48, 32));
-        self.renderer.clear();
+        self.canvas.set_viewport(None);
+        self.canvas.set_draw_color(Color::RGB(32, 48, 32));
+        self.canvas.clear();
     }
 
     pub fn present(&mut self) {
-        self.renderer.present();
+        self.canvas.present();
     }
 }
 

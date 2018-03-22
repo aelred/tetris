@@ -5,7 +5,7 @@ authors = ["Felix Chapman <aelred717@gmail.com>"]
 
 [dependencies]
 tetris = {path="../tetris", version="0.1.0"}
-sdl2 = {version="0.29", default-features=false, features=["ttf"]}
+sdl2 = {version="0.31", default-features=false, features=["ttf"]}
 lazy_static = "0.2"
 
 [target.'cfg(target_os = "emscripten")'.dependencies]

@@ -57,7 +57,7 @@ fn main() {
     let event_handler = EventHandler::new(sdl_context.event_pump().unwrap());
 
     let mut context = Context {
-        drawer: Drawer::new(window.renderer().build().unwrap(), font),
+        drawer: Drawer::new(window.into_canvas().build().unwrap(), font),
         event_handler,
         states: Vec::new(),
     };
