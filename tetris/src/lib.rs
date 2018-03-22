@@ -3,22 +3,18 @@ mod macros;
 
 pub mod game;
 pub mod state;
-pub mod draw;
 pub mod score;
 pub mod rest;
 pub mod err;
-pub mod event;
-
-mod tetromino;
-mod pos;
-mod board;
-mod piece;
-mod game_over;
+pub mod game_over;
+pub mod tetromino;
+pub mod board;
+pub mod piece;
+pub mod pos;
 
 #[macro_use]
 extern crate lazy_static;
 
-extern crate sdl2;
 extern crate rand;
 extern crate serde;
 extern crate serde_json;

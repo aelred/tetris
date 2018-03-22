@@ -7,8 +7,14 @@ extern crate emscripten;
 #[cfg(target_os = "emscripten")]
 extern crate libc;
 
+#[macro_use]
+extern crate lazy_static;
+
+mod draw;
+mod event;
+
 use tetris::state::State;
-use tetris::draw::Drawer;
+use draw::Drawer;
 
 use std::cmp::max;
 
@@ -16,13 +22,13 @@ use sdl2::Sdl;
 use sdl2::rwops::RWops;
 use sdl2::ttf;
 use sdl2::video::Window;
-use tetris::draw::WINDOW_HEIGHT;
-use tetris::draw::WINDOW_WIDTH;
-use tetris::event::EventHandler;
+use draw::WINDOW_HEIGHT;
+use draw::WINDOW_WIDTH;
+use event::EventHandler;
 
 const TICK: u64 = 33;
 
-static FONT_DATA: &'static [u8] = include_bytes!("../../resources/8-BIT WONDER.TTF");
+static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
 
 const FONT_MULTIPLE: u16 = 9;
 

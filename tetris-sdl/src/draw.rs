@@ -1,6 +1,3 @@
-use pos::Pos;
-use tetromino::TetColor;
-
 use sdl2::pixels::Color;
 use sdl2::pixels::Color::RGB;
 use sdl2::rect::Rect;
@@ -8,21 +5,23 @@ use sdl2::rect::Point;
 use sdl2::render::Renderer;
 use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
-use game_over::GameOver;
-use score::OFFSET;
-use game_over::HighScores;
-use board::Board;
-use board::HIDE_ROWS;
-use board::HEIGHT;
-use board::WIDTH;
-use tetromino::Rotation;
-use tetromino;
-use tetromino::Tetromino;
-use game::Game;
-use board;
-use piece::Piece;
-use score::Score;
-use state::State;
+use tetris::game::Game;
+use tetris::game_over::GameOver;
+use tetris::score::OFFSET;
+use tetris::score::Score;
+use tetris::state::State;
+use std::i32;
+use std::i16;
+use tetris::game_over::HighScores;
+use tetris::tetromino::Tetromino;
+use tetris::tetromino;
+use tetris::tetromino::Rotation;
+use tetris::board;
+use tetris::board::HIDE_ROWS;
+use tetris::piece::Piece;
+use tetris::pos::Pos;
+use tetris::board::Board;
+use tetris::tetromino::TetColor;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -35,17 +34,15 @@ pub struct Drawer<'a> {
     font: Font<'a, 'a>,
 }
 
-impl Into<Color> for TetColor {
-    fn into(self) -> Color {
-        match self {
-            TetColor::O => RGB(255, 255, 0),
-            TetColor::I => RGB(0, 255, 255),
-            TetColor::J => RGB(0, 0, 255),
-            TetColor::L => RGB(255, 165, 0),
-            TetColor::S => RGB(0, 255, 0),
-            TetColor::T => RGB(255, 0, 255),
-            TetColor::Z => RGB(255, 0, 0),
-        }
+fn tetromino_color_to_rgb(color: TetColor) -> Color {
+    match color {
+        TetColor::O => RGB(255, 255, 0),
+        TetColor::I => RGB(0, 255, 255),
+        TetColor::J => RGB(0, 0, 255),
+        TetColor::L => RGB(255, 165, 0),
+        TetColor::S => RGB(0, 255, 0),
+        TetColor::T => RGB(255, 0, 255),
+        TetColor::Z => RGB(255, 0, 0),
     }
 }
 
@@ -78,11 +75,11 @@ impl<'a> Drawer<'a> {
         self.text().centered().draw("Paused");
     }
 
-    pub fn draw_block<T: Into<Color>>(&mut self, pos: Pos, col: T) {
+    pub fn draw_block(&mut self, pos: Pos, col: Color) {
         let x = pos.x() as i16;
         let y = pos.y() as i16;
 
-        self.renderer.set_draw_color(col.into());
+        self.renderer.set_draw_color(col);
         let _ = self.renderer.fill_rect(Rect::new(
             i32::from(x) * i32::from(BLOCK_SIZE) +
                 i32::from(BLOCK_BORDER),
@@ -125,16 +122,16 @@ impl<'a> Drawer<'a> {
 
     fn draw_board(&mut self, board: &Board) {
         self.set_viewport(*BOARD_BORDER_VIEW);
-        self.draw_border(Pos::new(i16::from(WIDTH), i16::from(HEIGHT - HIDE_ROWS)));
+        self.draw_border(Pos::new(i16::from(board::WIDTH), i16::from(board::HEIGHT - HIDE_ROWS)));
 
         self.set_viewport(*BOARD_VIEW);
 
-        for y in HIDE_ROWS..HEIGHT {
-            for x in 0..WIDTH {
+        for y in HIDE_ROWS..board::HEIGHT {
+            for x in 0..board::WIDTH {
                 if let Some(color) = board.grid[y as usize][x as usize] {
                     let y = y - HIDE_ROWS;
                     let cell_pos = Pos::new(i16::from(x), i16::from(y));
-                    self.draw_block(cell_pos, color)
+                    self.draw_block(cell_pos, tetromino_color_to_rgb(color))
                 }
             }
         }
@@ -177,7 +174,7 @@ impl<'a> Drawer<'a> {
 
     fn draw_tetromino(&mut self, tetromino: &Tetromino, rot: Rotation, pos: Pos) {
         for block in tetromino.blocks(rot) {
-            self.draw_block(pos + block, tetromino.color);
+            self.draw_block(pos + block, tetromino_color_to_rgb(tetromino.color));
         }
     }
 
@@ -337,8 +334,12 @@ impl TextPos {
     }
 }
 
-impl Score {
-    pub fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
+trait Drawable {
+    fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b>;
+}
+
+impl Drawable for Score {
+    fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
         let name = if self.name.is_empty() {
             " "
         } else {
@@ -354,7 +355,7 @@ impl Score {
     }
 }
 
-impl GameOver {
+impl Drawable for GameOver {
     fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
         match self.hiscores {
             Some(HighScores {

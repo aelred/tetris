@@ -3,12 +3,12 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::WindowEvent;
 use sdl2::EventPump;
 use draw::WINDOW_RATIO;
-use game::Action;
 use std;
-use state::State;
-use state::StateChange;
-use game::GamePlay;
-use game_over::GameOver;
+use tetris::state::State;
+use tetris::state::StateChange;
+use tetris::game::GamePlay;
+use tetris::game_over::GameOver;
+use tetris::game::Action;
 
 // the minimum velocity before movement is registered, in % of screen width per ms
 const FINGER_SENSITIVITY: f32 = 0.0002;
