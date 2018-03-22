@@ -23,7 +23,7 @@ pub fn get_hiscores() -> Result<Vec<Score>> {
 
 pub fn post_hiscore(score: &ScoreMessage) {
     let body = serde_json::to_string(score).unwrap();
-    let response = CLIENT.post_raw_hiscores(&body);
+    let response = CLIENT.post_raw_hiscores(body);
 
     if let Err(e) = response {
         println!("Failed to post hiscores: {}", e);
