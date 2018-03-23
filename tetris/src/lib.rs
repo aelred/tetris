@@ -28,7 +28,7 @@ extern crate serde_derive;
 extern crate hyper;
 
 #[cfg(target_os = "emscripten")]
-extern crate emscripten;
+extern crate libc;
 
 #[cfg(test)]
 #[macro_use]

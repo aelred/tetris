@@ -76,14 +76,41 @@ struct Client {
 }
 
 #[cfg(target_os = "emscripten")]
+use libc;
+
+#[cfg(target_os = "emscripten")]
+extern "C" {
+    pub fn emscripten_run_script(script: * const libc::c_char);
+    pub fn emscripten_run_script_string(script: * const libc::c_char) -> * mut libc::c_char;
+}
+
+#[cfg(target_os = "emscripten")]
 impl Client {
     fn new(url: Url) -> Self {
         Client { url }
     }
 
-    fn get_raw_hiscores(&self) -> Result<String> {
-        use emscripten::em;
+    fn run_script(script: &str) {
+        use std::ffi::CString;
 
+        let script = CString::new(script).unwrap();
+        unsafe {
+            emscripten_run_script(script.as_ptr());
+        }
+    }
+
+    fn run_script_string(script: &str) -> String {
+        use std::ffi::{CString, CStr};
+
+        let script = CString::new(script).unwrap();
+        unsafe {
+            let ptr = emscripten_run_script_string(script.as_ptr());
+            let c_str = CStr::from_ptr(ptr);
+            String::from(c_str.to_str().unwrap())
+        }
+    }
+
+    fn get_raw_hiscores(&self) -> Result<String> {
         let script = format!(
             r#"(function() {{
             var req = new XMLHttpRequest();
@@ -94,12 +121,10 @@ impl Client {
             self.scores_endpoint()
         );
 
-        Ok(em::run_script_string(&script))
+        Ok(Client::run_script_string(&script))
     }
 
     fn post_raw_hiscores(&self, score: String) -> Result<()> {
-        use emscripten::em;
-
         let script = format!(
             r#"(function() {{
             var req = new XMLHttpRequest();
@@ -110,7 +135,7 @@ impl Client {
             score
         );
 
-        em::run_script(&script);
+        Client::run_script(&script);
         Ok(())
     }
 }

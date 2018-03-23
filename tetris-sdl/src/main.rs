@@ -3,8 +3,6 @@ extern crate tetris;
 extern crate sdl2;
 
 #[cfg(target_os = "emscripten")]
-extern crate emscripten;
-#[cfg(target_os = "emscripten")]
 extern crate libc;
 
 #[macro_use]
@@ -93,15 +91,26 @@ fn play_tetris(context: &mut Context) {
 
 #[cfg(target_os = "emscripten")]
 fn play_tetris(mut context: &mut Context) {
-    use emscripten::em;
     use std::mem::transmute;
+
+    type EmArgCallbackFun = extern fn(_: *mut libc::c_void);
+
+    extern "C" {
+        fn emscripten_set_main_loop_arg(func: EmArgCallbackFun, arg: *mut libc::c_void, fps: libc::c_int, simulate_infinite_loop: libc::c_int);
+    }
+
+    fn set_main_loop_arg(func: EmArgCallbackFun, arg: *mut libc::c_void, fps: i32, simulate_infinite_loop: bool) {
+        unsafe {
+            emscripten_set_main_loop_arg(func, arg, fps, if simulate_infinite_loop { 1 } else { 0 });
+        }
+    }
 
     extern "C" fn em_loop(arg: *mut libc::c_void) {
         let context = unsafe { transmute::<*mut libc::c_void, &mut Context>(arg) };
         context.main_loop();
     }
 
-    em::set_main_loop_arg(
+    set_main_loop_arg(
         em_loop,
         unsafe { transmute::<&mut Context, *mut libc::c_void>(&mut context) },
         (1000 / TICK) as i32,
