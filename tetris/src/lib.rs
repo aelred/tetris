@@ -32,3 +32,28 @@ extern crate libc;
 #[cfg(test)]
 #[macro_use]
 extern crate quickcheck;
+
+use state::State;
+use state::StateChange;
+
+pub struct Tetris {
+    states: Vec<State>
+}
+
+impl Default for Tetris {
+    fn default() -> Self {
+        let mut states = Vec::new();
+        states.push(State::Title);
+        Tetris { states }
+    }
+}
+
+impl Tetris {
+    pub fn state(&mut self) -> &mut State {
+        self.states.last_mut().unwrap()
+    }
+
+    pub fn apply_state_change(&mut self, state_change: StateChange) {
+        state_change.apply(&mut self.states);
+    }
+}

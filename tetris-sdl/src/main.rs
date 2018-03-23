@@ -11,7 +11,6 @@ extern crate lazy_static;
 mod draw;
 mod event;
 
-use tetris::state::State;
 use draw::Drawer;
 
 use std::cmp::max;
@@ -25,6 +24,7 @@ use draw::WINDOW_WIDTH;
 use event::EventHandler;
 use sdl2::mixer::{DEFAULT_CHANNELS, AUDIO_S16LSB};
 use sdl2::mixer::LoaderRWops;
+use tetris::Tetris;
 
 const TICK: u64 = 33;
 
@@ -39,7 +39,7 @@ const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIP
 struct Context<'a> {
     drawer: Drawer<'a>,
     event_handler: EventHandler,
-    states: Vec<State>,
+    tetris: Tetris,
 }
 
 fn main() {
@@ -70,10 +70,8 @@ fn main() {
     let mut context = Context {
         drawer: Drawer::new(window.into_canvas().build().unwrap(), font),
         event_handler,
-        states: Vec::new(),
+        tetris: Tetris::default(),
     };
-
-    context.states.push(State::Title);
 
     play_tetris(&mut context);
 }
@@ -126,25 +124,18 @@ impl <'a> Context<'a> {
     }
 
     fn handle_events(&mut self) {
-        let state_change = {
-            let state = self.states.last_mut().unwrap();
-            self.event_handler.handle(state)
-        };
-        state_change.apply(&mut self.states);
+        let state_change = self.event_handler.handle(self.tetris.state());
+        self.tetris.apply_state_change(state_change);
     }
 
     fn update_state(&mut self) {
-        let state_change = {
-            let state = self.states.last_mut().unwrap();
-            state.update()
-        };
-        state_change.apply(&mut self.states);
+        let state_change = self.tetris.state().update();
+        self.tetris.apply_state_change(state_change);
     }
 
     fn draw(&mut self) {
         self.drawer.clear();
-        let state = self.states.last_mut().unwrap();
-        self.drawer.draw_state(state);
+        self.drawer.draw_state(self.tetris.state());
         self.drawer.present();
     }
 }
