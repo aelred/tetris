@@ -4,7 +4,7 @@ use score::Score;
 use state::StateChange;
 use score::ScoreMessage;
 use state::State;
-use regex::Regex;
+use std::char;
 
 pub struct GameOver {
     pub hiscores: Option<HighScores>,
@@ -74,11 +74,7 @@ impl GameOver {
     }
 
     pub fn push_name(&mut self, str: &str) {
-        lazy_static! {
-            static ref ALPHANUMERIC: Regex = Regex::new("^[a-zA-Z0-9]$").unwrap();
-        }
-
-        if ALPHANUMERIC.is_match(str) {
+        if str.chars().all(char::is_alphanumeric) {
             self.score.name.push_str(str);
             self.score.name.truncate(3);
         }
