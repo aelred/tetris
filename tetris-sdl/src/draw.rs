@@ -27,7 +27,12 @@ const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
 pub const BLOCK_SIZE: u8 = INNER_BLOCK_SIZE + BLOCK_BORDER * 2;
 
-const BORDER_COLOR: Color = Color { r: 100, g: 100, b: 100, a: 255 };
+const BORDER_COLOR: Color = Color {
+    r: 100,
+    g: 100,
+    b: 100,
+    a: 255,
+};
 
 pub struct Drawer<'a> {
     canvas: Canvas<Window>,
@@ -53,9 +58,9 @@ impl<'a> Drawer<'a> {
 
     pub fn draw_state(&mut self, state: &State) {
         match *state {
-            State::Title => self.title_draw(),
+            State::Title(_) => self.title_draw(),
             State::Play(ref game) => self.draw_game(&game.game),
-            State::Paused => self.pause_draw(),
+            State::Paused(_) => self.pause_draw(),
             State::GameOver(ref game_over) => self.draw_game_over(game_over),
         }
     }
@@ -122,7 +127,10 @@ impl<'a> Drawer<'a> {
 
     fn draw_board(&mut self, board: &Board) {
         self.set_viewport(*BOARD_BORDER_VIEW);
-        self.draw_border(Pos::new(i16::from(board::WIDTH), i16::from(board::HEIGHT - HIDE_ROWS)));
+        self.draw_border(Pos::new(
+            i16::from(board::WIDTH),
+            i16::from(board::HEIGHT - HIDE_ROWS),
+        ));
 
         self.set_viewport(*BOARD_VIEW);
 
@@ -195,7 +203,9 @@ impl<'a> Drawer<'a> {
     fn draw_text(&mut self, text_pos: &TextPos, text: &str, size: u32, color: Color) -> Rect {
         let surface = self.font.render(text).solid(color).unwrap();
         let texture_creator = self.canvas.texture_creator();
-        let texture = texture_creator.create_texture_from_surface(&surface).unwrap();
+        let texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .unwrap();
 
         let TextureQuery { width, height, .. } = texture.query();
 

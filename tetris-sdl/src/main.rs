@@ -17,6 +17,7 @@ use std::cmp::max;
 
 use sdl2::Sdl;
 use sdl2::rwops::RWops;
+use tetris::state::State;
 use sdl2::ttf;
 use sdl2::video::Window;
 use draw::WINDOW_HEIGHT;
@@ -24,7 +25,6 @@ use draw::WINDOW_WIDTH;
 use event::EventHandler;
 use sdl2::mixer::{DEFAULT_CHANNELS, AUDIO_S16LSB};
 use sdl2::mixer::LoaderRWops;
-use tetris::Tetris;
 
 const TICK: u64 = 33;
 
@@ -39,7 +39,7 @@ const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIP
 struct Context<'a> {
     drawer: Drawer<'a>,
     event_handler: EventHandler,
-    tetris: Tetris,
+    state: State,
 }
 
 fn main() {
@@ -67,22 +67,22 @@ fn main() {
 
     let event_handler = EventHandler::new(sdl_context.event_pump().unwrap());
 
-    let mut context = Context {
+    let context = Context {
         drawer: Drawer::new(window.into_canvas().build().unwrap(), font),
         event_handler,
-        tetris: Tetris::default(),
+        state: State::default(),
     };
 
-    play_tetris(&mut context);
+    play_tetris(context);
 }
 
 #[cfg(not(target_os = "emscripten"))]
-fn play_tetris(context: &mut Context) {
+fn play_tetris(mut context: Context) {
     use std::thread::sleep;
     use std::time::Duration;
 
     loop {
-        context.main_loop();
+        context = context.main_loop();
         sleep(Duration::from_millis(TICK));
     }
 }
@@ -91,15 +91,30 @@ fn play_tetris(context: &mut Context) {
 fn play_tetris(mut context: &mut Context) {
     use std::mem::transmute;
 
-    type EmArgCallbackFun = extern fn(_: *mut libc::c_void);
+    type EmArgCallbackFun = extern "C" fn(_: *mut libc::c_void);
 
     extern "C" {
-        fn emscripten_set_main_loop_arg(func: EmArgCallbackFun, arg: *mut libc::c_void, fps: libc::c_int, simulate_infinite_loop: libc::c_int);
+        fn emscripten_set_main_loop_arg(
+            func: EmArgCallbackFun,
+            arg: *mut libc::c_void,
+            fps: libc::c_int,
+            simulate_infinite_loop: libc::c_int,
+        );
     }
 
-    fn set_main_loop_arg(func: EmArgCallbackFun, arg: *mut libc::c_void, fps: i32, simulate_infinite_loop: bool) {
+    fn set_main_loop_arg(
+        func: EmArgCallbackFun,
+        arg: *mut libc::c_void,
+        fps: i32,
+        simulate_infinite_loop: bool,
+    ) {
         unsafe {
-            emscripten_set_main_loop_arg(func, arg, fps, if simulate_infinite_loop { 1 } else { 0 });
+            emscripten_set_main_loop_arg(
+                func,
+                arg,
+                fps,
+                if simulate_infinite_loop { 1 } else { 0 },
+            );
         }
     }
 
@@ -116,27 +131,15 @@ fn play_tetris(mut context: &mut Context) {
     );
 }
 
-impl <'a> Context<'a> {
-    fn main_loop(&mut self) {
-        self.handle_events();
-        self.update_state();
-        self.draw();
-    }
+impl<'a> Context<'a> {
+    fn main_loop(mut self) -> Self {
+        self.state = self.event_handler.handle(self.state);
+        self.state = self.state.update();
 
-    fn handle_events(&mut self) {
-        let state_change = self.event_handler.handle(self.tetris.state());
-        self.tetris.apply_state_change(state_change);
-    }
-
-    fn update_state(&mut self) {
-        let state_change = self.tetris.state().update();
-        self.tetris.apply_state_change(state_change);
-    }
-
-    fn draw(&mut self) {
         self.drawer.clear();
-        self.drawer.draw_state(self.tetris.state());
+        self.drawer.draw_state(&self.state);
         self.drawer.present();
+        self
     }
 }
 

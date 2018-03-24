@@ -2,7 +2,7 @@ use board::Board;
 use board::FillResult;
 use piece::Piece;
 use state::State;
-use state::StateChange;
+use state::Paused;
 use tetromino::Bag;
 use game_over::GameOver;
 use std::cmp;
@@ -32,7 +32,6 @@ pub enum Action {
     StartSoftDrop,
     StartHardDrop,
     StopDrop,
-    Pause,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq, Debug)]
@@ -64,20 +63,48 @@ impl Default for GamePlay {
 }
 
 impl GamePlay {
-    pub fn update(&mut self) -> StateChange {
+    pub fn update(mut self) -> State {
         let is_game_over = self.game.apply_step();
 
         if is_game_over {
             let game_over = GameOver::new(self.game.score, self.history.clone());
-            StateChange::Replace(State::GameOver(game_over))
+            State::GameOver(game_over)
         } else {
-            StateChange::None
+            State::Play(self)
         }
     }
 
-    pub fn apply_action(&mut self, action: Action) -> Option<StateChange> {
+    pub fn move_left(&mut self) {
+        self.apply_action(Action::MoveLeft);
+    }
+
+    pub fn move_right(&mut self) {
+        self.apply_action(Action::MoveRight);
+    }
+
+    pub fn rotate(&mut self) {
+        self.apply_action(Action::Rotate);
+    }
+
+    pub fn start_soft_drop(&mut self) {
+        self.apply_action(Action::StartSoftDrop);
+    }
+
+    pub fn start_hard_drop(&mut self) {
+        self.apply_action(Action::StartHardDrop);
+    }
+
+    pub fn stop_drop(&mut self) {
+        self.apply_action(Action::StopDrop);
+    }
+
+    pub fn pause(self) -> State {
+        State::Paused(Paused(self))
+    }
+
+    fn apply_action(&mut self, action: Action) {
         self.history.push(self.game.tick, action);
-        self.game.apply_action(action)
+        self.game.apply_action(action);
     }
 }
 
@@ -109,7 +136,7 @@ impl Game {
         }
     }
 
-    pub fn apply_action(&mut self, action: Action) -> Option<StateChange> {
+    pub fn apply_action(&mut self, action: Action) {
         match action {
             Action::MoveLeft => {
                 self.try_move_left();
@@ -123,10 +150,7 @@ impl Game {
             Action::StartSoftDrop => self.gravity = Gravity::SoftDrop,
             Action::StartHardDrop => self.gravity = Gravity::HardDrop,
             Action::StopDrop => self.gravity = Gravity::Normal,
-            Action::Pause => return Some(StateChange::Push(State::Paused)),
         }
-
-        None
     }
 
     fn apply_step(&mut self) -> bool {

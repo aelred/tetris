@@ -1,7 +1,6 @@
 use game::History;
 use rest;
 use score::Score;
-use state::StateChange;
 use score::ScoreMessage;
 use state::State;
 use std::char;
@@ -80,23 +79,20 @@ impl GameOver {
         }
     }
 
-    pub fn submit(&mut self) -> StateChange {
+    pub fn submit(self) -> State {
         if !self.posting_hiscore() || !self.score.name.is_empty() {
             if self.posting_hiscore() {
-                let message = ScoreMessage::new(
-                    self.score.clone(),
-                    self.history.clone(),
-                );
+                let message = ScoreMessage::new(self.score.clone(), self.history.clone());
                 rest::post_hiscore(&message);
             }
-            StateChange::Replace(State::play())
+            State::play()
         } else {
-            StateChange::None
+            State::from(self)
         }
     }
 
-    pub fn exit(&mut self) -> StateChange {
-        StateChange::Replace(State::play())
+    pub fn exit(self) -> State {
+        State::play()
     }
 }
 

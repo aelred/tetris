@@ -80,8 +80,8 @@ use libc;
 
 #[cfg(target_os = "emscripten")]
 extern "C" {
-    pub fn emscripten_run_script(script: * const libc::c_char);
-    pub fn emscripten_run_script_string(script: * const libc::c_char) -> * mut libc::c_char;
+    pub fn emscripten_run_script(script: *const libc::c_char);
+    pub fn emscripten_run_script_string(script: *const libc::c_char) -> *mut libc::c_char;
 }
 
 #[cfg(target_os = "emscripten")]
