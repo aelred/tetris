@@ -30,7 +30,7 @@ impl EventHandler {
         self.event_pump.poll_iter().collect()
     }
 
-    pub fn handle(&mut self, mut state: State) -> State {
+    pub fn handle(&mut self, &mut state: State) -> State {
         for event in self.events() {
             state = self.handle_event(state, event);
         }

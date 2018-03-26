@@ -1,5 +1,6 @@
 use game::GamePlay;
 use game_over::GameOver;
+use std;
 
 pub enum State {
     Title(Title),
@@ -21,10 +22,9 @@ impl State {
         State::from(Paused(game_play))
     }
 
-    pub fn update(self) -> State {
-        match self {
-            State::Play(game) => game.update(),
-            _ => self,
+    pub fn update(&mut self) {
+        if let &mut State::Play(game) = self {
+            std::mem::replace(self, game.update());
         }
     }
 }

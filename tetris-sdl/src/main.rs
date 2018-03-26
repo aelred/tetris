@@ -82,7 +82,7 @@ fn play_tetris(mut context: Context) {
     use std::time::Duration;
 
     loop {
-        context = context.main_loop();
+        context.main_loop();
         sleep(Duration::from_millis(TICK));
     }
 }
@@ -132,14 +132,13 @@ fn play_tetris(mut context: &mut Context) {
 }
 
 impl<'a> Context<'a> {
-    fn main_loop(mut self) -> Self {
-        self.state = self.event_handler.handle(self.state);
-        self.state = self.state.update();
+    fn main_loop(&mut self) {
+        self.event_handler.handle(self.state);
+        self.state.update();
 
         self.drawer.clear();
         self.drawer.draw_state(&self.state);
         self.drawer.present();
-        self
     }
 }
 
