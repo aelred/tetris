@@ -39,7 +39,10 @@ const FONT_SIZE: u16 = (WINDOW_HEIGHT / 32) as u16 / FONT_MULTIPLE * FONT_MULTIP
 struct Context<'a> {
     drawer: Drawer<'a>,
     event_handler: EventHandler,
-    state: State,
+
+    /// The game [State]. This is an [Option] so that update methods can 
+    /// [Option::take] the [State] and consume it.
+    state: Option<State>,
 }
 
 fn main() {
@@ -70,7 +73,7 @@ fn main() {
     let context = Context {
         drawer: Drawer::new(window.into_canvas().build().unwrap(), font),
         event_handler,
-        state: State::default(),
+        state: Some(State::default()),
     };
 
     play_tetris(context);
@@ -133,12 +136,15 @@ fn play_tetris(mut context: &mut Context) {
 
 impl<'a> Context<'a> {
     fn main_loop(&mut self) {
-        self.event_handler.handle(self.state);
-        self.state.update();
+        let mut state = self.state.take().unwrap();
+        state = self.event_handler.handle(state);
+        state = state.update();
 
         self.drawer.clear();
-        self.drawer.draw_state(&self.state);
+        self.drawer.draw_state(&state);
         self.drawer.present();
+
+        self.state = Some(state);
     }
 }
 
