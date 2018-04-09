@@ -28,7 +28,7 @@ before_install:
 before_script:
   - |
     rustup component add rustfmt-preview
-    cargo install cargo-when
+    cargo install --force cargo-when
 
 script:
   - |
