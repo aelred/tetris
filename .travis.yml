@@ -26,11 +26,14 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_c494ad7d7799_key -iv $encrypted_c494ad7d7799_iv -in deploy/deploy_key.enc -out deploy_key -d
 
 before_script:
-  - rustup component add rustfmt-preview
+  - |
+    rustup component add rustfmt-preview
+    cargo install cargo-when
 
 script:
-  - cargo +stable fmt --all -- --write-mode=diff
-  - cargo test --verbose
+  - |
+    cargo when --channel=stable fmt --all -- --write-mode=diff
+    cargo test --verbose
 
 cache:
   cargo: true
