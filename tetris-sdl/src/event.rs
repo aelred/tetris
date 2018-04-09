@@ -39,8 +39,11 @@ impl EventHandler {
 
     fn handle_event(&mut self, state: State, event: Event) -> State {
         match event {
-            Event::Quit { .. } |
-            Event::KeyDown { keycode: Some(Keycode::Escape), .. } => exit(),
+            Event::Quit { .. }
+            | Event::KeyDown {
+                keycode: Some(Keycode::Escape),
+                ..
+            } => exit(),
             _ => {}
         }
 
@@ -54,30 +57,44 @@ impl EventHandler {
 
     fn handle_title(&mut self, title: Title, event: Event) -> State {
         match event {
-            Event::KeyDown { keycode: Some(Keycode::Return), .. } |
-            Event::FingerUp { .. } => title.start_game(),
+            Event::KeyDown {
+                keycode: Some(Keycode::Return),
+                ..
+            }
+            | Event::FingerUp { .. } => title.start_game(),
             _ => State::from(title),
         }
     }
 
     fn handle_game(&mut self, mut game: GamePlay, event: Event) -> State {
         match event {
-            Event::Window { win_event: WindowEvent::FocusLost, .. } => return game.pause(),
-            Event::KeyDown { keycode: Some(keycode), .. } => {
-                match keycode {
-                    Keycode::Left => game.move_left(),
-                    Keycode::Right => game.move_right(),
-                    Keycode::Up => game.rotate(),
-                    Keycode::Down => game.start_soft_drop(),
-                    Keycode::Space => game.start_hard_drop(),
-                    _ => {}
-                }
-            }
-            Event::KeyUp { keycode: Some(Keycode::Down), .. } => game.stop_drop(),
-            Event::FingerDown { x, y, timestamp, .. } => {
+            Event::Window {
+                win_event: WindowEvent::FocusLost,
+                ..
+            } => return game.pause(),
+            Event::KeyDown {
+                keycode: Some(keycode),
+                ..
+            } => match keycode {
+                Keycode::Left => game.move_left(),
+                Keycode::Right => game.move_right(),
+                Keycode::Up => game.rotate(),
+                Keycode::Down => game.start_soft_drop(),
+                Keycode::Space => game.start_hard_drop(),
+                _ => {}
+            },
+            Event::KeyUp {
+                keycode: Some(Keycode::Down),
+                ..
+            } => game.stop_drop(),
+            Event::FingerDown {
+                x, y, timestamp, ..
+            } => {
                 self.last_finger_press = Some(FingerPress { x, y, timestamp });
             }
-            Event::FingerUp { x, y, timestamp, .. } => {
+            Event::FingerUp {
+                x, y, timestamp, ..
+            } => {
                 self.last_finger_press.take().map(|last_finger_press| {
                     let finger_press = FingerPress { x, y, timestamp };
                     let (vx, vy) = finger_press.velocity(&last_finger_press);
@@ -99,26 +116,30 @@ impl EventHandler {
 
     fn handle_paused(&mut self, paused: Paused, event: Event) -> State {
         match event {
-            Event::Window { win_event: WindowEvent::FocusGained, .. } => paused.unpause(),
+            Event::Window {
+                win_event: WindowEvent::FocusGained,
+                ..
+            } => paused.unpause(),
             _ => State::from(paused),
         }
     }
 
     fn handle_game_over(&mut self, mut game_over: GameOver, event: Event) -> State {
         match event {
-            Event::KeyDown { keycode: Some(keycode), .. } => {
-                match keycode {
-                    Keycode::Return => {
-                        return game_over.submit();
-                    }
-                    Keycode::Backspace => {
-                        game_over.backspace();
-                    }
-                    k => {
-                        game_over.push_name(&k.name());
-                    }
+            Event::KeyDown {
+                keycode: Some(keycode),
+                ..
+            } => match keycode {
+                Keycode::Return => {
+                    return game_over.submit();
                 }
-            }
+                Keycode::Backspace => {
+                    game_over.backspace();
+                }
+                k => {
+                    game_over.push_name(&k.name());
+                }
+            },
             // TODO: Find a way to submit high-scores with touch
             Event::FingerUp { .. } => {
                 if !game_over.posting_hiscore() {

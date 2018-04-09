@@ -23,7 +23,7 @@ use sdl2::video::Window;
 use draw::WINDOW_HEIGHT;
 use draw::WINDOW_WIDTH;
 use event::EventHandler;
-use sdl2::mixer::{DEFAULT_CHANNELS, AUDIO_S16LSB};
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::mixer::LoaderRWops;
 
 const TICK: u64 = 33;
@@ -40,13 +40,12 @@ struct Context<'a> {
     drawer: Drawer<'a>,
     event_handler: EventHandler,
 
-    /// The game [State]. This is an [Option] so that update methods can 
+    /// The game [State]. This is an [Option] so that update methods can
     /// [Option::take] the [State] and consume it.
     state: Option<State>,
 }
 
 fn main() {
-
     let sdl_context = sdl2::init().unwrap();
     let ttf_context = ttf::init().unwrap();
 

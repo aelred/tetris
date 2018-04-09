@@ -9,11 +9,9 @@ use url::Url;
 #[cfg(not(target_os = "emscripten"))]
 use hyper;
 
-
 lazy_static! {
     static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());
 }
-
 
 pub fn get_hiscores() -> Result<Vec<Score>> {
     let body = CLIENT.get_raw_hiscores()?;
@@ -100,7 +98,7 @@ impl Client {
     }
 
     fn run_script_string(script: &str) -> String {
-        use std::ffi::{CString, CStr};
+        use std::ffi::{CStr, CString};
 
         let script = CString::new(script).unwrap();
         unsafe {

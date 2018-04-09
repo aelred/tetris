@@ -86,10 +86,8 @@ impl<'a> Drawer<'a> {
 
         self.canvas.set_draw_color(col);
         let _ = self.canvas.fill_rect(Rect::new(
-            i32::from(x) * i32::from(BLOCK_SIZE) +
-                i32::from(BLOCK_BORDER),
-            i32::from(y) * i32::from(BLOCK_SIZE) +
-                i32::from(BLOCK_BORDER),
+            i32::from(x) * i32::from(BLOCK_SIZE) + i32::from(BLOCK_BORDER),
+            i32::from(y) * i32::from(BLOCK_SIZE) + i32::from(BLOCK_BORDER),
             u32::from(BLOCK_SIZE) - u32::from(BLOCK_BORDER),
             u32::from(BLOCK_SIZE) - u32::from(BLOCK_BORDER),
         ));
@@ -251,12 +249,8 @@ pub struct TextDrawer<'a, 'b: 'a> {
 
 impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
     pub fn draw(mut self, text: &str) -> Self {
-        self.last_rect = self.drawer.draw_text(
-            &self.pos,
-            text,
-            self.size,
-            self.color,
-        );
+        self.last_rect = self.drawer
+            .draw_text(&self.pos, text, self.size, self.color);
         self
     }
 
@@ -319,22 +313,18 @@ impl TextPos {
                 let center_y = (WINDOW_HEIGHT / 2) as i32;
                 Rect::from_center(Point::new(center_x, center_y), width, height)
             }
-            TextPos::Top(rect) => {
-                Rect::new(
-                    rect.center().x() - width as i32 / 2,
-                    rect.y(),
-                    width,
-                    height,
-                )
-            }
-            TextPos::Under(rect) => {
-                Rect::new(
-                    rect.center().x() - width as i32 / 2,
-                    rect.bottom(),
-                    width,
-                    height,
-                )
-            }
+            TextPos::Top(rect) => Rect::new(
+                rect.center().x() - width as i32 / 2,
+                rect.y(),
+                width,
+                height,
+            ),
+            TextPos::Under(rect) => Rect::new(
+                rect.center().x() - width as i32 / 2,
+                rect.bottom(),
+                width,
+                height,
+            ),
             TextPos::Left(rect) => Rect::new(rect.x(), rect.bottom(), width, height),
             TextPos::Offset(ref pos, x, y) => {
                 let mut rect = pos.apply(width, height);
@@ -370,10 +360,10 @@ impl Drawable for GameOver {
     fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
         match self.hiscores {
             Some(HighScores {
-                     ref higher_scores,
-                     ref lower_scores,
-                     ref has_hiscore,
-                 }) => {
+                ref higher_scores,
+                ref lower_scores,
+                ref has_hiscore,
+            }) => {
                 let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
 
                 text = text.size(2).under().offset(0, 10);
@@ -394,17 +384,14 @@ impl Drawable for GameOver {
 
                 text.under().offset(-OFFSET, 10)
             }
-            None => {
-                text.size(1)
-                    .under()
-                    .offset(0, 10)
-                    .draw("[ ERROR Failed to retrieve High Scores ]")
-                    .offset(0, 20)
-            }
+            None => text.size(1)
+                .under()
+                .offset(0, 10)
+                .draw("[ ERROR Failed to retrieve High Scores ]")
+                .offset(0, 20),
         }
     }
 }
-
 
 lazy_static! {
     static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
@@ -428,8 +415,8 @@ const BOARD_HEIGHT: u32 = (board::HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE
 const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 -
-    (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
+const PREVIEW_Y: i32 =
+    TOTAL_BOARD_HEIGHT as i32 - (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
 const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
 const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 

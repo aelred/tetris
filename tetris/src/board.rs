@@ -18,7 +18,9 @@ pub struct FillResult {
 
 impl Board {
     pub fn new() -> Board {
-        Board { grid: [[None; WIDTH as usize]; HEIGHT as usize] }
+        Board {
+            grid: [[None; WIDTH as usize]; HEIGHT as usize],
+        }
     }
 
     pub fn touches(&self, pos: Pos) -> bool {

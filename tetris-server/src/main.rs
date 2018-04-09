@@ -20,9 +20,9 @@ use std::fs::DirBuilder;
 use clap::{App, Arg};
 
 use hyper::{Get, Post};
-use hyper::server::{Server, Handler, Request, Response};
+use hyper::server::{Handler, Request, Response, Server};
 use hyper::uri::RequestUri::AbsolutePath;
-use hyper::header::{ContentType, AccessControlAllowOrigin};
+use hyper::header::{AccessControlAllowOrigin, ContentType};
 use hyper::status::StatusCode;
 
 macro_rules! print_err (
@@ -78,9 +78,7 @@ impl ScoresHandler {
             hiscores.pop();
 
             let mut file = File::create(&self.hiscores_path)?;
-            file.write_all(
-                serde_json::to_string(hiscores).unwrap().as_bytes(),
-            )?;
+            file.write_all(serde_json::to_string(hiscores).unwrap().as_bytes())?;
         }
 
         *res.status_mut() = StatusCode::Created;
@@ -152,9 +150,8 @@ fn main() {
 
 fn read_hiscores(file: &mut File) -> Vec<Score> {
     let mut hiscores = String::new();
-    file.read_to_string(&mut hiscores).expect(
-        "Hiscores file is invalid",
-    );
+    file.read_to_string(&mut hiscores)
+        .expect("Hiscores file is invalid");
     serde_json::from_str(&hiscores).expect("Hiscores file is invalid")
 }
 

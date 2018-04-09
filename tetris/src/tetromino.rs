@@ -381,17 +381,15 @@ mod tests {
 
     impl Arbitrary for TetColor {
         fn arbitrary<G: Gen>(g: &mut G) -> TetColor {
-            *g.choose(
-                &[
-                    TetColor::O,
-                    TetColor::I,
-                    TetColor::J,
-                    TetColor::L,
-                    TetColor::S,
-                    TetColor::T,
-                    TetColor::Z,
-                ],
-            ).unwrap()
+            *g.choose(&[
+                TetColor::O,
+                TetColor::I,
+                TetColor::J,
+                TetColor::L,
+                TetColor::S,
+                TetColor::T,
+                TetColor::Z,
+            ]).unwrap()
         }
     }
 

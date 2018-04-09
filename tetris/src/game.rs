@@ -246,10 +246,8 @@ impl Game {
         let FillResult {
             mut is_game_over,
             lines_cleared,
-        } = self.board.fill(
-            self.piece.blocks(),
-            self.piece.tetromino.color,
-        );
+        } = self.board
+            .fill(self.piece.blocks(), self.piece.tetromino.color);
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;

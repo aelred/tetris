@@ -23,10 +23,8 @@ impl State {
 
     pub fn update(self) -> Self {
         match self {
-            State::Play(game) => {
-                game.update()
-            }
-            _ => self
+            State::Play(game) => game.update(),
+            _ => self,
         }
     }
 }

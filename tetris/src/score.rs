@@ -76,9 +76,7 @@ impl ScoreMessage {
 
         let message = format!(
             "Score does not match game history {:?}:\n History suggests {} but was {}",
-            self,
-            expected_score,
-            self.score.value
+            self, expected_score, self.score.value
         );
         Err(From::from(message))
     }

@@ -62,10 +62,9 @@ impl GameOver {
     }
 
     pub fn posting_hiscore(&self) -> bool {
-        self.hiscores.as_ref().map_or(
-            false,
-            HighScores::has_hiscore,
-        )
+        self.hiscores
+            .as_ref()
+            .map_or(false, HighScores::has_hiscore)
     }
 
     pub fn backspace(&mut self) {
