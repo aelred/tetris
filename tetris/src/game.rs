@@ -48,7 +48,7 @@ impl Tick {
 }
 
 pub struct GamePlay {
-    pub game: Game,
+    pub game: Box<Game>,
     history: History,
 }
 
@@ -56,7 +56,7 @@ impl Default for GamePlay {
     fn default() -> Self {
         let seed = rand::random();
         GamePlay {
-            game: Game::new(seed),
+            game: Box::new(Game::new(seed)),
             history: History::new(seed),
         }
     }
@@ -125,7 +125,7 @@ impl Game {
         let mut bag = Bag::new(XorShiftRng::from_seed(seed));
         Game {
             piece: Piece::new(bag.pop()),
-            board: Board::new(),
+            board: Board::default(),
             bag,
             drop_tick: 0,
             lock_delay: false,

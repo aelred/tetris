@@ -32,12 +32,12 @@ impl EventHandler {
 
     pub fn handle(&mut self, mut state: State) -> State {
         for event in self.events() {
-            state = self.handle_event(state, event);
+            state = self.handle_event(state, &event);
         }
         state
     }
 
-    fn handle_event(&mut self, state: State, event: Event) -> State {
+    fn handle_event(&mut self, state: State, event: &Event) -> State {
         match event {
             Event::Quit { .. }
             | Event::KeyDown {
@@ -55,7 +55,7 @@ impl EventHandler {
         }
     }
 
-    fn handle_title(&mut self, title: Title, event: Event) -> State {
+    fn handle_title(&mut self, title: Title, event: &Event) -> State {
         match event {
             Event::KeyDown {
                 keycode: Some(Keycode::Return),
@@ -66,8 +66,8 @@ impl EventHandler {
         }
     }
 
-    fn handle_game(&mut self, mut game: GamePlay, event: Event) -> State {
-        match event {
+    fn handle_game(&mut self, mut game: GamePlay, event: &Event) -> State {
+        match *event {
             Event::Window {
                 win_event: WindowEvent::FocusLost,
                 ..
@@ -95,7 +95,7 @@ impl EventHandler {
             Event::FingerUp {
                 x, y, timestamp, ..
             } => {
-                self.last_finger_press.take().map(|last_finger_press| {
+                if let Some(last_finger_press) = self.last_finger_press.take() {
                     let finger_press = FingerPress { x, y, timestamp };
                     let (vx, vy) = finger_press.velocity(&last_finger_press);
                     if vx < -FINGER_SENSITIVITY {
@@ -107,14 +107,14 @@ impl EventHandler {
                     } else {
                         game.rotate();
                     }
-                });
+                }
             }
             _ => {}
         }
         State::from(game)
     }
 
-    fn handle_paused(&mut self, paused: Paused, event: Event) -> State {
+    fn handle_paused(&mut self, paused: Paused, event: &Event) -> State {
         match event {
             Event::Window {
                 win_event: WindowEvent::FocusGained,
@@ -124,7 +124,7 @@ impl EventHandler {
         }
     }
 
-    fn handle_game_over(&mut self, mut game_over: GameOver, event: Event) -> State {
+    fn handle_game_over(&mut self, mut game_over: GameOver, event: &Event) -> State {
         match event {
             Event::KeyDown {
                 keycode: Some(keycode),

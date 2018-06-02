@@ -21,7 +21,7 @@ pub fn get_hiscores() -> Result<Vec<Score>> {
 
 pub fn post_hiscore(score: &ScoreMessage) {
     let body = serde_json::to_string(score).unwrap();
-    let response = CLIENT.post_raw_hiscores(body);
+    let response = CLIENT.post_raw_hiscores(&body);
 
     if let Err(e) = response {
         println!("Failed to post hiscores: {}", e);
@@ -59,7 +59,7 @@ impl Client {
         Ok(body)
     }
 
-    fn post_raw_hiscores(&self, score: String) -> Result<()> {
+    fn post_raw_hiscores(&self, score: &str) -> Result<()> {
         self.hyper_client
             .post(self.scores_endpoint())
             .body(score.as_bytes())

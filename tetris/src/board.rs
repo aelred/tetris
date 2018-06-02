@@ -16,13 +16,15 @@ pub struct FillResult {
     pub lines_cleared: u32,
 }
 
-impl Board {
-    pub fn new() -> Board {
+impl Default for Board {
+    fn default() -> Self {
         Board {
             grid: [[None; WIDTH as usize]; HEIGHT as usize],
         }
     }
+}
 
+impl Board {
     pub fn touches(&self, pos: Pos) -> bool {
         out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
