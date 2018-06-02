@@ -119,7 +119,7 @@ mod tests {
 
         fn a_new_board_is_empty(pos: Pos) -> TestResult {
             when!(in_bounds(pos));
-            then!(!Board::new().touches(pos))
+            then!(!Board::default().touches(pos))
         }
 
         fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: TetColor) -> TestResult {
