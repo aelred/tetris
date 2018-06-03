@@ -1,7 +1,7 @@
-use tetromino::Tetromino;
-use tetromino::Rotation;
-use pos::Pos;
 use board::WIDTH;
+use pos::Pos;
+use tetromino::Rotation;
+use tetromino::Tetromino;
 
 const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 

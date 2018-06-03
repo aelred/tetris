@@ -5,25 +5,25 @@ extern crate tetris;
 #[macro_use]
 extern crate clap;
 
-use tetris::score::SCORE_ENDPOINT;
+use tetris::err::Result;
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
-use tetris::err::Result;
+use tetris::score::SCORE_ENDPOINT;
 
-use std::path::PathBuf;
-use std::fs::File;
-use std::io::Write;
-use std::sync::RwLock;
-use std::io::Read;
 use std::fs::DirBuilder;
+use std::fs::File;
+use std::io::Read;
+use std::io::Write;
+use std::path::PathBuf;
+use std::sync::RwLock;
 
 use clap::{App, Arg};
 
-use hyper::{Get, Post};
-use hyper::server::{Handler, Request, Response, Server};
-use hyper::uri::RequestUri::AbsolutePath;
 use hyper::header::{AccessControlAllowOrigin, ContentType};
+use hyper::server::{Handler, Request, Response, Server};
 use hyper::status::StatusCode;
+use hyper::uri::RequestUri::AbsolutePath;
+use hyper::{Get, Post};
 
 macro_rules! print_err (
     ($e:expr) => {{

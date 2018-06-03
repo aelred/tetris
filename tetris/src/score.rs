@@ -1,5 +1,5 @@
-use game::History;
 use err::Result;
+use game::History;
 use std::cmp::Ordering;
 
 pub const OFFSET: i32 = 100;

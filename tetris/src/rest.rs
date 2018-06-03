@@ -1,8 +1,8 @@
 extern crate url;
 
-use score::{Score, SCORE_ENDPOINT};
 use err::Result;
 use score::ScoreMessage;
+use score::{Score, SCORE_ENDPOINT};
 use serde_json;
 use url::Url;
 

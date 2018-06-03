@@ -1,16 +1,16 @@
 #[macro_use]
 mod macros;
 
-pub mod game;
-pub mod state;
-pub mod score;
-pub mod rest;
-pub mod err;
-pub mod game_over;
-pub mod tetromino;
 pub mod board;
+pub mod err;
+pub mod game;
+pub mod game_over;
 pub mod piece;
 pub mod pos;
+pub mod rest;
+pub mod score;
+pub mod state;
+pub mod tetromino;
 
 #[macro_use]
 extern crate lazy_static;

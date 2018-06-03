@@ -1,13 +1,13 @@
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
-use sdl2::event::WindowEvent;
-use sdl2::EventPump;
 use draw::WINDOW_RATIO;
+use sdl2::event::Event;
+use sdl2::event::WindowEvent;
+use sdl2::keyboard::Keycode;
+use sdl2::EventPump;
 use std;
-use tetris::state::State;
 use tetris::game::GamePlay;
 use tetris::game_over::GameOver;
 use tetris::state::Paused;
+use tetris::state::State;
 use tetris::state::Title;
 
 // the minimum velocity before movement is registered, in % of screen width per ms

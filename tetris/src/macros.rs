@@ -1,6 +1,6 @@
 #[cfg(test)]
 macro_rules! when {
-    ( $x:expr ) => {
+    ($x:expr) => {
         if !$x {
             return TestResult::discard();
         }
@@ -9,7 +9,7 @@ macro_rules! when {
 
 #[cfg(test)]
 macro_rules! then {
-    ( $x:expr ) => {
+    ($x:expr) => {
         TestResult::from_bool($x)
     };
 }

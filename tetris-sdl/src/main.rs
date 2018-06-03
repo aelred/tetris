@@ -15,16 +15,16 @@ use draw::Drawer;
 
 use std::cmp::max;
 
-use sdl2::Sdl;
-use sdl2::rwops::RWops;
-use tetris::state::State;
-use sdl2::ttf;
-use sdl2::video::Window;
 use draw::WINDOW_HEIGHT;
 use draw::WINDOW_WIDTH;
 use event::EventHandler;
-use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::mixer::LoaderRWops;
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
+use sdl2::rwops::RWops;
+use sdl2::ttf;
+use sdl2::video::Window;
+use sdl2::Sdl;
+use tetris::state::State;
 
 const TICK: u64 = 33;
 

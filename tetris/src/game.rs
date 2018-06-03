@@ -1,15 +1,15 @@
 use board::Board;
 use board::FillResult;
-use piece::Piece;
-use state::State;
-use state::Paused;
-use tetromino::Bag;
 use game_over::GameOver;
+use piece::Piece;
+use state::Paused;
+use state::State;
 use std::cmp;
+use tetromino::Bag;
 
 use rand;
-use rand::XorShiftRng;
 use rand::SeedableRng;
+use rand::XorShiftRng;
 
 const INITIAL_GRAVITY: u32 = 4;
 const GRAVITY_UNITS_PER_BLOCK: u32 = 100;

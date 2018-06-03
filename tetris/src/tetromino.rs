@@ -2,9 +2,9 @@ extern crate rand;
 
 use pos::Pos;
 
-use std::fmt;
-use rand::XorShiftRng;
 use rand::Rng;
+use rand::XorShiftRng;
+use std::fmt;
 
 const NUM_TETROMINOES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;

@@ -1,27 +1,27 @@
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::rect::Point;
+use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
+use sdl2::video::Window;
+use std::i16;
+use std::i32;
+use tetris::board;
+use tetris::board::Board;
+use tetris::board::HIDE_ROWS;
 use tetris::game::Game;
 use tetris::game_over::GameOver;
-use tetris::score::OFFSET;
-use tetris::score::Score;
-use tetris::state::State;
-use std::i32;
-use std::i16;
 use tetris::game_over::HighScores;
-use tetris::tetromino::Tetromino;
-use tetris::tetromino;
-use tetris::tetromino::Rotation;
-use tetris::board;
-use tetris::board::HIDE_ROWS;
 use tetris::piece::Piece;
 use tetris::pos::Pos;
-use tetris::board::Board;
+use tetris::score::Score;
+use tetris::score::OFFSET;
+use tetris::state::State;
+use tetris::tetromino;
+use tetris::tetromino::Rotation;
 use tetris::tetromino::TetColor;
-use sdl2::video::Window;
+use tetris::tetromino::Tetromino;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -395,18 +395,19 @@ impl Drawable for GameOver {
 
 lazy_static! {
     static ref PREVIEW_VIEW: Rect = Rect::new(PREVIEW_X, PREVIEW_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
     static ref SCORE_VIEW: Rect = Rect::new(SCORE_X, PAD, PREVIEW_WIDTH, BOARD_HEIGHT);
-
-    static ref BOARD_BORDER_VIEW: Rect = Rect::new(0,
-                                                   0,
-                                                   BOARD_WIDTH + BOARD_BORDER * 2,
-                                                   BOARD_HEIGHT + BOARD_BORDER * 2);
-
-    static ref BOARD_VIEW: Rect = Rect::new(BOARD_BORDER as i32,
-                                            BOARD_BORDER as i32,
-                                            BOARD_WIDTH,
-                                            BOARD_HEIGHT);
+    static ref BOARD_BORDER_VIEW: Rect = Rect::new(
+        0,
+        0,
+        BOARD_WIDTH + BOARD_BORDER * 2,
+        BOARD_HEIGHT + BOARD_BORDER * 2
+    );
+    static ref BOARD_VIEW: Rect = Rect::new(
+        BOARD_BORDER as i32,
+        BOARD_BORDER as i32,
+        BOARD_WIDTH,
+        BOARD_HEIGHT
+    );
 }
 
 const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
