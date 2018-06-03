@@ -25,7 +25,7 @@ enum Gravity {
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
-pub enum Action {
+enum Action {
     MoveLeft,
     MoveRight,
     Rotate,
@@ -35,7 +35,7 @@ pub enum Action {
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq, Debug)]
-pub struct Tick(u32);
+struct Tick(u32);
 
 impl Tick {
     fn new() -> Tick {
@@ -121,7 +121,7 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(seed: [u32; 4]) -> Game {
+    fn new(seed: [u32; 4]) -> Game {
         let mut bag = Bag::new(XorShiftRng::from_seed(seed));
         Game {
             piece: Piece::new(bag.pop()),
@@ -136,7 +136,7 @@ impl Game {
         }
     }
 
-    pub fn apply_action(&mut self, action: Action) {
+    fn apply_action(&mut self, action: Action) {
         match action {
             Action::MoveLeft => {
                 self.try_move_left();
