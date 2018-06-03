@@ -20,7 +20,7 @@ use tetris::score::OFFSET;
 use tetris::shape;
 use tetris::shape::Rotation;
 use tetris::shape::Shape;
-use tetris::shape::TetColor;
+use tetris::shape::ShapeColor;
 use tetris::state::State;
 
 const INNER_BLOCK_SIZE: u8 = 22;
@@ -39,15 +39,15 @@ pub struct Drawer<'a> {
     font: Font<'a, 'a>,
 }
 
-fn shape_color_to_rgb(color: TetColor) -> Color {
+fn shape_color_to_rgb(color: ShapeColor) -> Color {
     match color {
-        TetColor::O => Color::RGB(255, 255, 0),
-        TetColor::I => Color::RGB(0, 255, 255),
-        TetColor::J => Color::RGB(0, 0, 255),
-        TetColor::L => Color::RGB(255, 165, 0),
-        TetColor::S => Color::RGB(0, 255, 0),
-        TetColor::T => Color::RGB(255, 0, 255),
-        TetColor::Z => Color::RGB(255, 0, 0),
+        ShapeColor::O => Color::RGB(255, 255, 0),
+        ShapeColor::I => Color::RGB(0, 255, 255),
+        ShapeColor::J => Color::RGB(0, 0, 255),
+        ShapeColor::L => Color::RGB(255, 165, 0),
+        ShapeColor::S => Color::RGB(0, 255, 0),
+        ShapeColor::T => Color::RGB(255, 0, 255),
+        ShapeColor::Z => Color::RGB(255, 0, 0),
     }
 }
 

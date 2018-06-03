@@ -1,5 +1,5 @@
 use pos::Pos;
-use shape::TetColor;
+use shape::ShapeColor;
 
 pub const WIDTH: u8 = 10;
 pub const HEIGHT: u8 = 24;
@@ -8,7 +8,7 @@ pub const HIDE_ROWS: u8 = 4;
 
 #[derive(Clone, Debug)]
 pub struct Board {
-    pub grid: [[Option<TetColor>; WIDTH as usize]; HEIGHT as usize],
+    pub grid: [[Option<ShapeColor>; WIDTH as usize]; HEIGHT as usize],
 }
 
 pub struct FillResult {
@@ -29,7 +29,7 @@ impl Board {
         out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
 
-    pub fn fill(&mut self, cells: Vec<Pos>, color: TetColor) -> FillResult {
+    pub fn fill(&mut self, cells: Vec<Pos>, color: ShapeColor) -> FillResult {
         let mut is_game_over = true;
 
         for cell in cells {
@@ -45,7 +45,7 @@ impl Board {
         }
     }
 
-    fn fill_pos(&mut self, pos: Pos, color: TetColor) {
+    fn fill_pos(&mut self, pos: Pos, color: ShapeColor) {
         assert!(!out_bounds(pos));
         self.grid[pos.y() as usize][pos.x() as usize] = Some(color);
     }
@@ -97,7 +97,7 @@ mod tests {
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<TetColor>; WIDTH as usize];
+                let mut array: [[Option<ShapeColor>; WIDTH as usize];
                                    HEIGHT as usize] = mem::uninitialized();
 
                 for row in array.iter_mut() {
@@ -122,7 +122,7 @@ mod tests {
             then!(!Board::default().touches(pos))
         }
 
-        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: TetColor) -> TestResult {
+        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: ShapeColor) -> TestResult {
             when!(in_bounds(pos));
             let mut board = board;
             board.fill_pos(pos, col);
@@ -130,7 +130,7 @@ mod tests {
         }
 
         fn after_filling_a_space_no_other_space_changes(
-            board: Board, pos1: Pos, pos2: Pos, col: TetColor) -> TestResult {
+            board: Board, pos1: Pos, pos2: Pos, col: ShapeColor) -> TestResult {
 
             when!(pos1 != pos2);
             when!(in_bounds(pos1));

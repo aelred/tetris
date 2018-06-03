@@ -100,7 +100,7 @@ impl Default for Rotation {
 }
 
 #[derive(PartialEq, Clone, Debug, Copy)]
-pub enum TetColor {
+pub enum ShapeColor {
     O,
     I,
     J,
@@ -113,7 +113,7 @@ pub enum TetColor {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Shape {
     rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS as usize],
-    pub color: TetColor,
+    pub color: ShapeColor,
 }
 
 impl Shape {
@@ -163,7 +163,7 @@ static O_SHAPE: Shape = Shape {
             [false, false, false, false],
         ],
     ],
-    color: TetColor::O,
+    color: ShapeColor::O,
 };
 
 static T_SHAPE: Shape = Shape {
@@ -193,7 +193,7 @@ static T_SHAPE: Shape = Shape {
             [false, true, false, false],
         ],
     ],
-    color: TetColor::I,
+    color: ShapeColor::I,
 };
 
 static J_SHAPE: Shape = Shape {
@@ -223,7 +223,7 @@ static J_SHAPE: Shape = Shape {
             [true, true, false, false],
         ],
     ],
-    color: TetColor::J,
+    color: ShapeColor::J,
 };
 
 static L_SHAPE: Shape = Shape {
@@ -253,7 +253,7 @@ static L_SHAPE: Shape = Shape {
             [false, true, false, false],
         ],
     ],
-    color: TetColor::L,
+    color: ShapeColor::L,
 };
 
 static S_SHAPE: Shape = Shape {
@@ -283,7 +283,7 @@ static S_SHAPE: Shape = Shape {
             [false, false, false, false],
         ],
     ],
-    color: TetColor::S,
+    color: ShapeColor::S,
 };
 
 static T_SHAPE: Shape = Shape {
@@ -313,7 +313,7 @@ static T_SHAPE: Shape = Shape {
             [false, true, false, false],
         ],
     ],
-    color: TetColor::T,
+    color: ShapeColor::T,
 };
 
 static Z_SHAPE: Shape = Shape {
@@ -343,7 +343,7 @@ static Z_SHAPE: Shape = Shape {
             [false, false, false, false],
         ],
     ],
-    color: TetColor::Z,
+    color: ShapeColor::Z,
 };
 
 #[cfg(test)]
@@ -380,16 +380,16 @@ mod tests {
         }
     }
 
-    impl Arbitrary for TetColor {
-        fn arbitrary<G: Gen>(g: &mut G) -> TetColor {
+    impl Arbitrary for ShapeColor {
+        fn arbitrary<G: Gen>(g: &mut G) -> ShapeColor {
             *g.choose(&[
-                TetColor::O,
-                TetColor::I,
-                TetColor::J,
-                TetColor::L,
-                TetColor::S,
-                TetColor::T,
-                TetColor::Z,
+                ShapeColor::O,
+                ShapeColor::I,
+                ShapeColor::J,
+                ShapeColor::L,
+                ShapeColor::S,
+                ShapeColor::T,
+                ShapeColor::Z,
             ]).unwrap()
         }
     }
@@ -407,16 +407,16 @@ mod tests {
 
         assert_eq!(
             vec![
-                TetColor::J,
-                TetColor::L,
-                TetColor::S,
-                TetColor::T,
-                TetColor::Z,
-                TetColor::O,
-                TetColor::I,
-                TetColor::Z,
-                TetColor::L,
-                TetColor::J,
+                ShapeColor::J,
+                ShapeColor::L,
+                ShapeColor::S,
+                ShapeColor::T,
+                ShapeColor::Z,
+                ShapeColor::O,
+                ShapeColor::I,
+                ShapeColor::Z,
+                ShapeColor::L,
+                ShapeColor::J,
             ],
             vec
         );
