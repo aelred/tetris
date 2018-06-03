@@ -133,7 +133,7 @@ impl Shape {
 }
 
 static SHAPES: [&'static Shape; NUM_SHAPES] = [
-    &O_SHAPE, &T_SHAPE, &J_SHAPE, &L_SHAPE, &S_SHAPE, &T_SHAPE, &Z_SHAPE,
+    &O_SHAPE, &I_SHAPE, &J_SHAPE, &L_SHAPE, &S_SHAPE, &T_SHAPE, &Z_SHAPE,
 ];
 
 static O_SHAPE: Shape = Shape {
@@ -166,7 +166,7 @@ static O_SHAPE: Shape = Shape {
     color: ShapeColor::O,
 };
 
-static T_SHAPE: Shape = Shape {
+static I_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
