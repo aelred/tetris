@@ -47,22 +47,22 @@ impl Tick {
     }
 }
 
-pub struct GamePlay {
+pub struct GameWithHistory {
     pub game: Box<Game>,
     history: History,
 }
 
-impl Default for GamePlay {
+impl Default for GameWithHistory {
     fn default() -> Self {
         let seed = rand::random();
-        GamePlay {
+        GameWithHistory {
             game: Box::new(Game::new(seed)),
             history: History::new(seed),
         }
     }
 }
 
-impl GamePlay {
+impl GameWithHistory {
     pub fn update(mut self) -> State {
         let is_game_over = self.game.apply_step();
 

@@ -1,9 +1,9 @@
-use game::GamePlay;
+use game::GameWithHistory;
 use game_over::GameOver;
 
 pub enum State {
     Title(Title),
-    Play(GamePlay),
+    Play(GameWithHistory),
     Paused(Paused),
     GameOver(GameOver),
 }
@@ -14,11 +14,11 @@ impl State {
     }
 
     pub fn play() -> State {
-        State::from(GamePlay::default())
+        State::from(GameWithHistory::default())
     }
 
-    pub fn paused(game_play: GamePlay) -> State {
-        State::from(Paused(game_play))
+    pub fn paused(game_with_history: GameWithHistory) -> State {
+        State::from(Paused(game_with_history))
     }
 
     pub fn update(self) -> Self {
@@ -35,9 +35,9 @@ impl From<Title> for State {
     }
 }
 
-impl From<GamePlay> for State {
-    fn from(game_play: GamePlay) -> Self {
-        State::Play(game_play)
+impl From<GameWithHistory> for State {
+    fn from(game_with_history: GameWithHistory) -> Self {
+        State::Play(game_with_history)
     }
 }
 
@@ -67,7 +67,7 @@ impl Title {
     }
 }
 
-pub struct Paused(pub GamePlay);
+pub struct Paused(pub GameWithHistory);
 
 impl Paused {
     pub fn unpause(self) -> State {
