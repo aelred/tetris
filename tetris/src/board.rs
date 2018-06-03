@@ -117,11 +117,11 @@ mod tests {
     /// This speeds up property tests, because they do not need to generate and discard lots of
     /// out-of-bounds positions.
     #[derive(Clone, Debug)]
-    struct InBoundPos(Pos);
+    struct InBoundsPos(Pos);
 
-    impl Arbitrary for InBoundPos {
+    impl Arbitrary for InBoundsPos {
         fn arbitrary<G: Gen>(g: &mut G) -> Self {
-            InBoundPos(Pos::new(
+            InBoundsPos(Pos::new(
                 g.gen_range(0, WIDTH as i16),
                 g.gen_range(0, HEIGHT as i16),
             ))
