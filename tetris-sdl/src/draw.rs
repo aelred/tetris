@@ -17,11 +17,11 @@ use tetris::piece::Piece;
 use tetris::pos::Pos;
 use tetris::score::Score;
 use tetris::score::OFFSET;
+use tetris::shape;
+use tetris::shape::Rotation;
+use tetris::shape::Shape;
+use tetris::shape::TetColor;
 use tetris::state::State;
-use tetris::tetromino;
-use tetris::tetromino::Rotation;
-use tetris::tetromino::TetColor;
-use tetris::tetromino::Tetromino;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -39,7 +39,7 @@ pub struct Drawer<'a> {
     font: Font<'a, 'a>,
 }
 
-fn tetromino_color_to_rgb(color: TetColor) -> Color {
+fn shape_color_to_rgb(color: TetColor) -> Color {
     match color {
         TetColor::O => Color::RGB(255, 255, 0),
         TetColor::I => Color::RGB(0, 255, 255),
@@ -137,20 +137,17 @@ impl<'a> Drawer<'a> {
                 if let Some(color) = board.grid[y as usize][x as usize] {
                     let y = y - HIDE_ROWS;
                     let cell_pos = Pos::new(i16::from(x), i16::from(y));
-                    self.draw_block(cell_pos, tetromino_color_to_rgb(color))
+                    self.draw_block(cell_pos, shape_color_to_rgb(color))
                 }
             }
         }
     }
 
-    fn draw_next(&mut self, next: &Tetromino) {
+    fn draw_next(&mut self, next: &Shape) {
         self.set_viewport(*PREVIEW_VIEW);
 
-        self.draw_border(Pos::new(
-            i16::from(tetromino::WIDTH),
-            i16::from(tetromino::HEIGHT),
-        ));
-        self.draw_tetromino(next, Rotation::default(), Pos::new(1, 1));
+        self.draw_border(Pos::new(i16::from(shape::WIDTH), i16::from(shape::HEIGHT)));
+        self.draw_shape(next, Rotation::default(), Pos::new(1, 1));
     }
 
     fn draw_game_score(&mut self, game: &Game) {
@@ -171,16 +168,16 @@ impl<'a> Drawer<'a> {
     }
 
     fn draw_piece(&mut self, piece: &Piece) {
-        self.draw_tetromino(
-            piece.tetromino,
+        self.draw_shape(
+            piece.shape,
             piece.rot,
             piece.pos + Pos::new(0, -i16::from(HIDE_ROWS)),
         );
     }
 
-    fn draw_tetromino(&mut self, tetromino: &Tetromino, rot: Rotation, pos: Pos) {
-        for block in tetromino.blocks(rot) {
-            self.draw_block(pos + block, tetromino_color_to_rgb(tetromino.color));
+    fn draw_shape(&mut self, shape: &Shape, rot: Rotation, pos: Pos) {
+        for block in shape.blocks(rot) {
+            self.draw_block(pos + block, shape_color_to_rgb(shape.color));
         }
     }
 
@@ -416,10 +413,9 @@ const BOARD_HEIGHT: u32 = (board::HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE
 const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 =
-    TOTAL_BOARD_HEIGHT as i32 - (tetromino::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
-const PREVIEW_WIDTH: u32 = (tetromino::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
-const PREVIEW_HEIGHT: u32 = (tetromino::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
+const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 - (shape::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
+const PREVIEW_WIDTH: u32 = (shape::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
+const PREVIEW_HEIGHT: u32 = (shape::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 
 const SCORE_X: i32 = PREVIEW_X + BOARD_BORDER as i32 + PAD;
 

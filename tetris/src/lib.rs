@@ -9,8 +9,8 @@ pub mod piece;
 pub mod pos;
 pub mod rest;
 pub mod score;
+pub mod shape;
 pub mod state;
-pub mod tetromino;
 
 #[macro_use]
 extern crate lazy_static;

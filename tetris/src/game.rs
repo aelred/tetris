@@ -2,10 +2,10 @@ use board::Board;
 use board::FillResult;
 use game_over::GameOver;
 use piece::Piece;
+use shape::Bag;
 use state::Paused;
 use state::State;
 use std::cmp;
-use tetromino::Bag;
 
 use rand;
 use rand::SeedableRng;
@@ -246,8 +246,7 @@ impl Game {
         let FillResult {
             mut is_game_over,
             lines_cleared,
-        } = self.board
-            .fill(self.piece.blocks(), self.piece.tetromino.color);
+        } = self.board.fill(self.piece.blocks(), self.piece.shape.color);
 
         self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;

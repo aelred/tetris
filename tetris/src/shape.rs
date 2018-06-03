@@ -6,7 +6,7 @@ use rand::Rng;
 use rand::XorShiftRng;
 use std::fmt;
 
-const NUM_TETROMINOES: usize = 7;
+const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
 
 pub const WIDTH: u8 = 4;
@@ -14,7 +14,7 @@ pub const HEIGHT: u8 = 4;
 
 #[derive(Clone)]
 pub struct Bag {
-    tetrominoes: [&'static Tetromino; NUM_TETROMINOES],
+    shapes: [&'static Shape; NUM_SHAPES],
     index: usize,
     rng: XorShiftRng,
 }
@@ -22,7 +22,7 @@ pub struct Bag {
 impl fmt::Debug for Bag {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         f.debug_struct("Bag")
-            .field("tetrominoes", &self.tetrominoes)
+            .field("tetrominoes", &self.shapes)
             .field("index", &self.index)
             .field("rng", &"<rng>")
             .finish()
@@ -32,37 +32,37 @@ impl fmt::Debug for Bag {
 impl Bag {
     pub fn new(mut rng: XorShiftRng) -> Bag {
         Bag {
-            tetrominoes: Bag::random_sequence(&mut rng),
+            shapes: Bag::random_sequence(&mut rng),
             index: 0,
             rng,
         }
     }
 
-    pub fn peek(&self) -> &'static Tetromino {
-        self.tetrominoes[self.index]
+    pub fn peek(&self) -> &'static Shape {
+        self.shapes[self.index]
     }
 
-    pub fn pop(&mut self) -> &'static Tetromino {
-        let next = self.tetrominoes[self.index];
+    pub fn pop(&mut self) -> &'static Shape {
+        let next = self.shapes[self.index];
 
         self.index += 1;
 
-        if self.index >= NUM_TETROMINOES {
-            self.tetrominoes = Bag::random_sequence(&mut self.rng);
+        if self.index >= NUM_SHAPES {
+            self.shapes = Bag::random_sequence(&mut self.rng);
             self.index = 0;
         }
 
         next
     }
 
-    fn random_sequence<R: Rng>(rng: &mut R) -> [&'static Tetromino; NUM_TETROMINOES] {
-        let mut sequence = TETROMINOES;
+    fn random_sequence<R: Rng>(rng: &mut R) -> [&'static Shape; NUM_SHAPES] {
+        let mut sequence = SHAPES;
 
         // This is inlined from `Rng::shuffle`.
         // We do this so we can cast `i` into a `u8`, meaning the shuffle is reliable regardless
         // of differences in `usize`.
         // This allows us to replay a game on a different machine and get the same result.
-        // This cast is safe because the sequence of tetrominos will definitely fit in a u8.
+        // This cast is safe because the sequence of shapes will definitely fit in a u8.
         let mut i = sequence.len() as u8;
         while i >= 2 {
             // invariant: elements with index >= i have been locked in place.
@@ -111,12 +111,12 @@ pub enum TetColor {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Tetromino {
+pub struct Shape {
     rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS as usize],
     pub color: TetColor,
 }
 
-impl Tetromino {
+impl Shape {
     pub fn blocks(&self, rot: Rotation) -> Vec<Pos> {
         let mut blocks = Vec::new();
 
@@ -132,10 +132,11 @@ impl Tetromino {
     }
 }
 
-static TETROMINOES: [&'static Tetromino; NUM_TETROMINOES] =
-    [&O_TET, &I_TET, &J_TET, &L_TET, &S_TET, &T_TET, &Z_TET];
+static SHAPES: [&'static Shape; NUM_SHAPES] = [
+    &O_SHAPE, &T_SHAPE, &J_SHAPE, &L_SHAPE, &S_SHAPE, &T_SHAPE, &Z_SHAPE,
+];
 
-static O_TET: Tetromino = Tetromino {
+static O_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -165,7 +166,7 @@ static O_TET: Tetromino = Tetromino {
     color: TetColor::O,
 };
 
-static I_TET: Tetromino = Tetromino {
+static T_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -195,7 +196,7 @@ static I_TET: Tetromino = Tetromino {
     color: TetColor::I,
 };
 
-static J_TET: Tetromino = Tetromino {
+static J_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -225,7 +226,7 @@ static J_TET: Tetromino = Tetromino {
     color: TetColor::J,
 };
 
-static L_TET: Tetromino = Tetromino {
+static L_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -255,7 +256,7 @@ static L_TET: Tetromino = Tetromino {
     color: TetColor::L,
 };
 
-static S_TET: Tetromino = Tetromino {
+static S_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -285,7 +286,7 @@ static S_TET: Tetromino = Tetromino {
     color: TetColor::S,
 };
 
-static T_TET: Tetromino = Tetromino {
+static T_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -315,7 +316,7 @@ static T_TET: Tetromino = Tetromino {
     color: TetColor::T,
 };
 
-static Z_TET: Tetromino = Tetromino {
+static Z_SHAPE: Shape = Shape {
     rotations: [
         [
             [false, false, false, false],
@@ -373,9 +374,9 @@ mod tests {
         }
     }
 
-    impl Arbitrary for &'static Tetromino {
-        fn arbitrary<G: Gen>(g: &mut G) -> &'static Tetromino {
-            g.choose(&TETROMINOES).unwrap()
+    impl Arbitrary for &'static Shape {
+        fn arbitrary<G: Gen>(g: &mut G) -> &'static Shape {
+            g.choose(&SHAPES).unwrap()
         }
     }
 
@@ -422,13 +423,13 @@ mod tests {
     }
 
     quickcheck! {
-        fn bag_always_returns_a_valid_tetromino(bag: Bag) -> bool {
+        fn bag_always_returns_a_valid_shape(bag: Bag) -> bool {
             let mut bag = bag;
-            let tetromino = bag.pop();
-            TETROMINOES.iter().any(|t| *t == tetromino)
+            let shape = bag.pop();
+            SHAPES.iter().any(|t| *t == shape)
         }
 
-        fn bag_never_returns_same_tetromino_three_times(bag: Bag) -> bool {
+        fn bag_never_returns_same_shape_three_times(bag: Bag) -> bool {
             let mut bag = bag;
             let first = bag.pop();
             let second = bag.pop();
@@ -436,7 +437,7 @@ mod tests {
             !(first == second && second == third)
         }
 
-        fn bag_always_returns_same_piece_within_thirteen_times(bag: Bag) -> bool {
+        fn bag_always_returns_same_shape_within_thirteen_times(bag: Bag) -> bool {
             let mut bag = bag;
             let initial = bag.pop();
             for _ in 0..13 {

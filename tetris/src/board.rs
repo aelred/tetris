@@ -1,5 +1,5 @@
 use pos::Pos;
-use tetromino::TetColor;
+use shape::TetColor;
 
 pub const WIDTH: u8 = 10;
 pub const HEIGHT: u8 = 24;

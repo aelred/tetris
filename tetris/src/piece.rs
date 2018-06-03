@@ -1,21 +1,21 @@
 use board::WIDTH;
 use pos::Pos;
-use tetromino::Rotation;
-use tetromino::Tetromino;
+use shape::Rotation;
+use shape::Shape;
 
 const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 
 #[derive(Debug)]
 pub struct Piece {
-    pub tetromino: &'static Tetromino,
+    pub shape: &'static Shape,
     pub rot: Rotation,
     pub pos: Pos,
 }
 
 impl Piece {
-    pub fn new(tetromino: &'static Tetromino) -> Piece {
+    pub fn new(shape: &'static Shape) -> Piece {
         Piece {
-            tetromino,
+            shape,
             rot: Rotation::default(),
             pos: *INITIAL_POS,
         }
@@ -46,7 +46,7 @@ impl Piece {
     }
 
     pub fn blocks(&self) -> Vec<Pos> {
-        self.tetromino
+        self.shape
             .blocks(self.rot)
             .iter()
             .map(|pos| *pos + self.pos)
