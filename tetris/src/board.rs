@@ -111,31 +111,44 @@ mod tests {
         }
     }
 
-    fn in_bounds(pos: Pos) -> bool {
-        !out_bounds(pos)
+    /// Represents only positions that are within the bounds of the board, such that
+    /// `out_bounds(pos.0)` is always `false`.
+    ///
+    /// This speeds up property tests, because they do not need to generate and discard lots of
+    /// out-of-bounds positions.
+    #[derive(Clone, Debug)]
+    struct InBoundPos(Pos);
+
+    impl Arbitrary for InBoundPos {
+        fn arbitrary<G: Gen>(g: &mut G) -> Self {
+            InBoundPos(Pos::new(
+                g.gen_range(0, WIDTH as i16),
+                g.gen_range(0, HEIGHT as i16),
+            ))
+        }
     }
 
     quickcheck! {
 
-        fn a_new_board_is_empty(pos: Pos) -> TestResult {
-            when!(in_bounds(pos));
-            then!(!Board::default().touches(pos))
+        fn a_new_board_is_empty(pos: InBoundPos) -> bool {
+            !Board::default().touches(pos.0)
         }
 
-        fn after_filling_a_space_it_is_filled(board: Board, pos: Pos, col: ShapeColor) -> TestResult {
-            when!(in_bounds(pos));
+        fn after_filling_a_space_it_is_filled(
+            board: Board, pos: InBoundPos, col: ShapeColor) -> bool {
+            let pos = pos.0;
             let mut board = board;
             board.fill_pos(pos, col);
-            then!(board.touches(pos))
+            board.touches(pos)
         }
 
         fn after_filling_a_space_no_other_space_changes(
-            board: Board, pos1: Pos, pos2: Pos, col: ShapeColor) -> TestResult {
+            board: Board, pos1: InBoundPos, pos2: Pos, col: ShapeColor) -> TestResult {
+
+            let pos1 = pos1.0;
+            let mut board = board;
 
             when!(pos1 != pos2);
-            when!(in_bounds(pos1));
-
-            let mut board = board;
 
             let touches_before = board.touches(pos2);
             board.fill_pos(pos1, col);
@@ -143,20 +156,20 @@ mod tests {
             then!(touches_before == touches_after)
         }
 
-        fn after_clearing_a_row_the_top_row_is_empty(board: Board, x: i16, y: u8) -> TestResult {
-            when!(in_bounds(Pos::new(x, y as i16)));
+        fn after_clearing_a_row_the_top_row_is_empty(board: Board, pos: InBoundPos) -> bool {
+            let pos = pos.0;
             let mut board = board;
-            board.clear_row(y);
-            then!(!board.touches(Pos::new(x, 0)))
+            board.clear_row(pos.y() as u8);
+            !board.touches(Pos::new(pos.x(), 0))
         }
 
         fn after_clearing_a_row_nothing_under_it_is_changed(
-            board: Board, y: u8, under: Pos) -> TestResult {
+            board: Board, y: u8, under: InBoundPos) -> TestResult {
 
-            when!(in_bounds(under));
-            when!(under.y() > y as i16);
-
+            let under = under.0;
             let mut board = board;
+
+            when!(under.y() > y as i16);
 
             let before = board.touches(under);
             board.clear_row(y);
@@ -165,13 +178,13 @@ mod tests {
         }
 
         fn after_clearing_a_row_everything_above_it_shifts_down(
-            board: Board, y: u8, above: Pos) -> TestResult {
+            board: Board, y: u8, above: InBoundPos) -> TestResult {
+
+            let above = above.0;
+            let mut board = board;
 
             when!(y < HEIGHT);
-            when!(!out_bounds(above));
             when!(above.y() < y as i16);
-
-            let mut board = board;
 
             let before = board.touches(above);
             board.clear_row(y);
