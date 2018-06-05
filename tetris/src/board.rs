@@ -130,12 +130,12 @@ mod tests {
 
     quickcheck! {
 
-        fn a_new_board_is_empty(pos: InBoundPos) -> bool {
+        fn a_new_board_is_empty(pos: InBoundsPos) -> bool {
             !Board::default().touches(pos.0)
         }
 
         fn after_filling_a_space_it_is_filled(
-            board: Board, pos: InBoundPos, col: ShapeColor) -> bool {
+            board: Board, pos: InBoundsPos, col: ShapeColor) -> bool {
             let pos = pos.0;
             let mut board = board;
             board.fill_pos(pos, col);
@@ -143,7 +143,7 @@ mod tests {
         }
 
         fn after_filling_a_space_no_other_space_changes(
-            board: Board, pos1: InBoundPos, pos2: Pos, col: ShapeColor) -> TestResult {
+            board: Board, pos1: InBoundsPos, pos2: Pos, col: ShapeColor) -> TestResult {
 
             let pos1 = pos1.0;
             let mut board = board;
@@ -156,7 +156,7 @@ mod tests {
             then!(touches_before == touches_after)
         }
 
-        fn after_clearing_a_row_the_top_row_is_empty(board: Board, pos: InBoundPos) -> bool {
+        fn after_clearing_a_row_the_top_row_is_empty(board: Board, pos: InBoundsPos) -> bool {
             let pos = pos.0;
             let mut board = board;
             board.clear_row(pos.y() as u8);
@@ -164,7 +164,7 @@ mod tests {
         }
 
         fn after_clearing_a_row_nothing_under_it_is_changed(
-            board: Board, y: u8, under: InBoundPos) -> TestResult {
+            board: Board, y: u8, under: InBoundsPos) -> TestResult {
 
             let under = under.0;
             let mut board = board;
@@ -178,7 +178,7 @@ mod tests {
         }
 
         fn after_clearing_a_row_everything_above_it_shifts_down(
-            board: Board, y: u8, above: InBoundPos) -> TestResult {
+            board: Board, y: u8, above: InBoundsPos) -> TestResult {
 
             let above = above.0;
             let mut board = board;
