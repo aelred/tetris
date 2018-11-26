@@ -1,10 +1,8 @@
-use std::fmt::Display;
 use std::io;
 use std::io::Result;
 use std::io::Write;
 
 use termion::color;
-use termion::color::Rgb;
 use termion::cursor;
 
 use tetris::board;
@@ -60,7 +58,8 @@ fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
         for cell in row.iter() {
             match cell {
                 Some(shape_color) => {
-                    write!(stdout, "{}{}", shape_color_to_ascii_color(*shape_color), BLOCK)?;
+                    set_shape_color(stdout, *shape_color)?;
+                    write!(stdout, "{}", BLOCK)?;
                 }
                 None => {
                     write!(stdout, "  ")?;
@@ -92,7 +91,7 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
 }
 
 fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
-    write!(stdout, "{}", shape_color_to_ascii_color(piece.shape.color))?;
+    set_shape_color(stdout, piece.shape.color)?;
 
     for pos in piece.blocks().iter() {
         if pos.y() >= i16::from(board::HIDE_ROWS) {
@@ -106,16 +105,14 @@ fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
     Ok(())
 }
 
-fn shape_color_to_ascii_color(shape_color: ShapeColor) -> impl Display {
-    let color = match shape_color {
-        ShapeColor::O => Rgb(255, 255, 0),
-        ShapeColor::I => Rgb(0, 255, 255),
-        ShapeColor::J => Rgb(0, 0, 255),
-        ShapeColor::L => Rgb(255, 165, 0),
-        ShapeColor::S => Rgb(0, 255, 0),
-        ShapeColor::T => Rgb(255, 0, 255),
-        ShapeColor::Z => Rgb(255, 0, 0),
-    };
-
-    color::Fg(color)
+fn set_shape_color<W: Write>(stdout: &mut W, shape_color: ShapeColor) -> Result<()> {
+    match shape_color {
+        ShapeColor::O => write!(stdout, "{}", color::Fg(color::Yellow)),
+        ShapeColor::I => write!(stdout, "{}", color::Fg(color::Cyan)),
+        ShapeColor::J => write!(stdout, "{}", color::Fg(color::Blue)),
+        ShapeColor::L => write!(stdout, "{}", color::Fg(color::White)),
+        ShapeColor::S => write!(stdout, "{}", color::Fg(color::Green)),
+        ShapeColor::T => write!(stdout, "{}", color::Fg(color::Magenta)),
+        ShapeColor::Z => write!(stdout, "{}", color::Fg(color::Red)),
+    }
 }
