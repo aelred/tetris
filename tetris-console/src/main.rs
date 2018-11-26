@@ -88,31 +88,32 @@ const TR_BORDER: &str = "╗";
 const BR_BORDER: &str = "╝";
 
 fn draw<W: Write>(mut stdout: &mut W, state: &mut State) -> Result<()> {
+    let mut buffer = std::io::BufWriter::new(stdout);
+
     match &state {
         State::Title(_) => {
-            write!(stdout, "{}TETRIS: Press Enter", cursor::Goto(1, 1))?;
+            write!(buffer, "{}TETRIS: Press Enter", cursor::Goto(1, 1))?;
         }
         State::Play(ref game) => {
-            draw_game(&mut stdout, &game.game)?;
+            draw_game(&mut buffer, &game.game)?;
         }
         State::Paused(_) => {
             // TODO
-            write!(stdout, "{}PAUSED", cursor::Goto(1, 1))?;
+            write!(buffer, "{}PAUSED", cursor::Goto(1, 1))?;
         }
         State::GameOver(_) => {
             // TODO
-            write!(stdout, "{}Not implemented", cursor::Goto(1, 1))?;
+            write!(buffer, "{}Not implemented", cursor::Goto(1, 1))?;
         }
     }
 
-    Ok(())
+    buffer.flush()
 }
 
 fn draw_game<W: Write>(stdout: &mut W, game: &tetris::game::Game) -> Result<()> {
-    let mut buffer = std::io::BufWriter::new(stdout);
-    draw_border(&mut buffer)?;
-    draw_board(&mut buffer, &game.board)?;
-    draw_piece(&mut buffer, &game.piece)
+    draw_border(stdout)?;
+    draw_board(stdout, &game.board)?;
+    draw_piece(stdout, &game.piece)
 }
 
 fn draw_board<W: Write>(stdout: &mut W, board: &tetris::board::Board) -> Result<()> {
