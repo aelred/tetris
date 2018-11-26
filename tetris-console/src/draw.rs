@@ -54,7 +54,7 @@ fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
 }
 
 fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
-    for (num, row) in board.grid.iter().enumerate() {
+    for (num, row) in board.grid[board::HIDE_ROWS as usize..].iter().enumerate() {
         write!(stdout, "{}", cursor::Goto(2, num as u16 + 2))?;
 
         for cell in row.iter() {
@@ -81,12 +81,12 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
 
     const RIGHT_BORDER_COLUMN: u16 = (board::WIDTH as u16 * BLOCK_WIDTH) + 2;
 
-    for row in 0..u16::from(board::HEIGHT) {
+    for row in 0..u16::from(board::VISIBLE_ROWS) {
         write!(stdout, "{}{}", cursor::Goto(1, row + 2), VERT_BORDER)?;
         write!(stdout, "{}{}", cursor::Goto(RIGHT_BORDER_COLUMN, row + 2), VERT_BORDER)?;
     }
 
-    const BOTTOM_ROW: cursor::Goto = cursor::Goto(1, board::HEIGHT as u16 + 2);
+    const BOTTOM_ROW: cursor::Goto = cursor::Goto(1, board::VISIBLE_ROWS as u16 + 2);
 
     write!(stdout, "{}{}{}{}", BOTTOM_ROW, BL_BORDER, hor_border, BR_BORDER)
 }
@@ -95,10 +95,12 @@ fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
     write!(stdout, "{}", shape_color_to_ascii_color(piece.shape.color))?;
 
     for pos in piece.blocks().iter() {
-        let cursor_x = (pos.x() as u16) * BLOCK_WIDTH + 2;
-        let cursor_y = pos.y() as u16 + 2;
-        let cursor = cursor::Goto(cursor_x, cursor_y);
-        write!(stdout, "{}{}", cursor, BLOCK)?;
+        if pos.y() >= i16::from(board::HIDE_ROWS) {
+            let cursor_x = (pos.x() as u16) * BLOCK_WIDTH + 2;
+            let cursor_y = (pos.y() - i16::from(board::HIDE_ROWS) + 2) as u16;
+            let cursor = cursor::Goto(cursor_x, cursor_y);
+            write!(stdout, "{}{}", cursor, BLOCK)?;
+        }
     }
 
     Ok(())
