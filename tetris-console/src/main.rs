@@ -5,7 +5,6 @@ use std::io;
 use std::io::Write;
 use std::io::Result;
 use termion::color;
-use termion::color::Color;
 use termion::color::Rgb;
 use termion::cursor;
 use termion::input::TermRead;
@@ -19,6 +18,7 @@ use tetris::board;
 use tetris::game::GameWithHistory;
 use tetris::game::Game;
 use tetris::board::Board;
+use std::fmt::Display;
 
 fn main() -> Result<()> {
     let stdout = io::stdout();
@@ -82,7 +82,6 @@ fn handle_key_in_game(mut game: GameWithHistory, key: Key) -> State {
 }
 
 const BLOCK_WIDTH: u16 = 2;
-const SPACE: &str = "  ";
 const BLOCK: &str = "▐▉";
 
 const HOR_BORDER: &str = "══";
@@ -92,7 +91,7 @@ const BL_BORDER: &str = "╚";
 const TR_BORDER: &str = "╗";
 const BR_BORDER: &str = "╝";
 
-fn draw<W: Write>(mut stdout: &mut W, state: &mut State) -> Result<()> {
+fn draw<W: Write>(stdout: &mut W, state: &mut State) -> Result<()> {
     let mut buffer = io::BufWriter::new(stdout);
 
     match &state {
@@ -128,15 +127,10 @@ fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
         for cell in row.iter() {
             match cell {
                 Some(shape_color) => {
-                    write!(
-                        stdout,
-                        "{}{}",
-                        color::Fg(shape_color_to_ascii_color(*shape_color)),
-                        BLOCK
-                    )?;
+                    write!(stdout, "{}{}", shape_color_to_ascii_color(*shape_color), BLOCK)?;
                 }
                 None => {
-                    write!(stdout, "{}{}", color::Fg(color::Reset), SPACE)?;
+                    write!(stdout, "  ")?;
                 }
             };
         }
@@ -147,37 +141,25 @@ fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
 
 fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
     write!(stdout, "{}", color::Fg(color::White))?;
-    write!(
-        stdout,
-        "{}{}{}{}",
-        cursor::Goto(1, 1),
-        TL_BORDER,
-        HOR_BORDER.repeat(board::WIDTH as usize),
-        TR_BORDER
-    )?;
+
+    let hor_border = HOR_BORDER.repeat(board::WIDTH as usize);
+
+    write!(stdout, "{}{}{}{}", cursor::Goto(1, 1), TL_BORDER, hor_border, TR_BORDER)?;
+
+    const RIGHT_BORDER_COLUMN: u16 = (board::WIDTH as u16 * BLOCK_WIDTH) + 2;
+
     for row in 0..u16::from(board::HEIGHT) {
-        write!(
-            stdout,
-            "{}{}{}{}",
-            cursor::Goto(1, row + 2),
-            VERT_BORDER,
-            cursor::Goto((u16::from(board::WIDTH) * BLOCK_WIDTH) + 2, row + 2),
-            VERT_BORDER
-        )?;
+        write!(stdout, "{}{}", cursor::Goto(1, row + 2), VERT_BORDER)?;
+        write!(stdout, "{}{}", cursor::Goto(RIGHT_BORDER_COLUMN, row + 2), VERT_BORDER)?;
     }
-    write!(
-        stdout,
-        "{}{}{}{}",
-        cursor::Goto(1, u16::from(board::HEIGHT) + 2),
-        BL_BORDER,
-        HOR_BORDER.repeat(board::WIDTH as usize),
-        BR_BORDER
-    )
+
+    const BOTTOM_ROW: cursor::Goto = cursor::Goto(1, board::HEIGHT as u16 + 2);
+
+    write!(stdout, "{}{}{}{}", BOTTOM_ROW, BL_BORDER, hor_border, BR_BORDER)
 }
 
 fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
-    let color = shape_color_to_ascii_color(piece.shape.color);
-    write!(stdout, "{}", color::Fg(color))?;
+    write!(stdout, "{}", shape_color_to_ascii_color(piece.shape.color))?;
 
     for pos in piece.blocks().iter() {
         let cursor_x = (pos.x() as u16) * BLOCK_WIDTH + 2;
@@ -189,8 +171,8 @@ fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
     Ok(())
 }
 
-fn shape_color_to_ascii_color(shape_color: ShapeColor) -> impl Color {
-    match shape_color {
+fn shape_color_to_ascii_color(shape_color: ShapeColor) -> impl Display {
+    let color = match shape_color {
         ShapeColor::O => Rgb(255, 255, 0),
         ShapeColor::I => Rgb(0, 255, 255),
         ShapeColor::J => Rgb(0, 0, 255),
@@ -198,5 +180,7 @@ fn shape_color_to_ascii_color(shape_color: ShapeColor) -> impl Color {
         ShapeColor::S => Rgb(0, 255, 0),
         ShapeColor::T => Rgb(255, 0, 255),
         ShapeColor::Z => Rgb(255, 0, 0),
-    }
+    };
+
+    color::Fg(color)
 }
