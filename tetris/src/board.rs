@@ -6,6 +6,8 @@ pub const HEIGHT: u8 = 24;
 
 pub const HIDE_ROWS: u8 = 4;
 
+pub const VISIBLE_ROWS: u8 = HEIGHT - HIDE_ROWS;
+
 #[derive(Clone, Debug)]
 pub struct Board {
     pub grid: [[Option<ShapeColor>; WIDTH as usize]; HEIGHT as usize],

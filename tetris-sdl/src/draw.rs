@@ -128,7 +128,7 @@ impl<'a> Drawer<'a> {
         self.set_viewport(*BOARD_BORDER_VIEW);
         self.draw_border(Pos::new(
             i16::from(board::WIDTH),
-            i16::from(board::HEIGHT - HIDE_ROWS),
+            i16::from(board::VISIBLE_ROWS),
         ));
 
         self.set_viewport(*BOARD_VIEW);
@@ -413,7 +413,7 @@ lazy_static! {
 
 const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
 const BOARD_WIDTH: u32 = board::WIDTH as u32 * BLOCK_SIZE as u32;
-const BOARD_HEIGHT: u32 = (board::HEIGHT as u32 - HIDE_ROWS as u32) * BLOCK_SIZE as u32;
+const BOARD_HEIGHT: u32 = board::VISIBLE_ROWS as u32 * BLOCK_SIZE as u32;
 const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
