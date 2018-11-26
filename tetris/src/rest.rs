@@ -52,7 +52,6 @@ impl Client {
     fn get_raw_hiscores(&self) -> Result<String> {
         use std::io::Read;
 
-        println!("{}", self.scores_endpoint());
         let mut body = String::new();
         let mut res = self.hyper_client.get(self.scores_endpoint()).send()?;
         res.read_to_string(&mut body)?;
