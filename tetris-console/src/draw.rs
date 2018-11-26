@@ -12,6 +12,31 @@ use tetris::piece::Piece;
 use tetris::shape::ShapeColor;
 use tetris::state::State;
 
+const TITLE: &str = r#"
+╔════════════════════╗
+║                    ║
+║                    ║
+║                    ║
+║    ===========     ║
+║    T E T R I S     ║
+║    ===========     ║
+║                    ║
+║                    ║
+║                    ║
+║                    ║
+║       PRESS        ║
+║       ENTER        ║
+║                    ║
+║                    ║
+║                    ║
+║                    ║
+║                    ║
+║                    ║
+║                    ║
+║                    ║
+╚════════════════════╝
+"#;
+
 const BLOCK_WIDTH: u16 = 2;
 const BLOCK: &str = "▐▉";
 
@@ -27,7 +52,7 @@ pub fn draw<W: Write>(stdout: &mut W, state: &mut State) -> Result<()> {
 
     match &state {
         State::Title(_) => {
-            write!(buffer, "{}TETRIS: Press Enter", cursor::Goto(1, 1))?;
+            draw_title(&mut buffer)?;
         }
         State::Play(ref game) => {
             draw_game(&mut buffer, &game.game)?;
@@ -43,6 +68,13 @@ pub fn draw<W: Write>(stdout: &mut W, state: &mut State) -> Result<()> {
     }
 
     buffer.flush()
+}
+
+fn draw_title<W: Write>(stdout: &mut W) -> Result<()> {
+    for (row, line) in TITLE.lines().enumerate() {
+        write!(stdout, "{}{}", cursor::Goto(1, row as u16), line)?;
+    }
+    Ok(())
 }
 
 fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
