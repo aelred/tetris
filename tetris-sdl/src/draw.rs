@@ -94,7 +94,8 @@ impl<'a> Drawer<'a> {
     }
 
     pub fn draw_game_over(&mut self, game_over: &GameOver) {
-        let mut text = self.text()
+        let mut text = self
+            .text()
             .top()
             .offset(0, 50)
             .size(3)
@@ -184,7 +185,7 @@ impl<'a> Drawer<'a> {
     fn draw_border(&mut self, size: Pos) {
         let size = size + Pos::new(1, 1);
 
-        for y in 0..size.y() + 1 {
+        for y in 0..=size.y() {
             self.draw_block(Pos::new(0, y), BORDER_COLOR);
             self.draw_block(Pos::new(size.x(), y), BORDER_COLOR);
         }
@@ -246,7 +247,8 @@ pub struct TextDrawer<'a, 'b: 'a> {
 
 impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
     pub fn draw(mut self, text: &str) -> Self {
-        self.last_rect = self.drawer
+        self.last_rect = self
+            .drawer
             .draw_text(&self.pos, text, self.size, self.color);
         self
     }
@@ -370,7 +372,8 @@ impl Drawable for GameOver {
                 }
 
                 if *has_hiscore {
-                    text = self.score
+                    text = self
+                        .score
                         .draw(text.color(Color::RGB(255, 255, 100)))
                         .reset_color();
                 }
@@ -381,7 +384,8 @@ impl Drawable for GameOver {
 
                 text.under().offset(-OFFSET, 10)
             }
-            None => text.size(1)
+            None => text
+                .size(1)
                 .under()
                 .offset(0, 10)
                 .draw("[ ERROR Failed to retrieve High Scores ]")

@@ -73,7 +73,7 @@ impl Board {
     }
 
     fn clear_row(&mut self, y: u8) {
-        for yy in (1..y as usize + 1).rev() {
+        for yy in (1..=y as usize).rev() {
             self.grid[yy] = self.grid[yy - 1];
         }
 

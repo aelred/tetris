@@ -79,11 +79,11 @@ impl Bag {
 pub struct Rotation(i8);
 
 impl Rotation {
-    pub fn clockwise(&self) -> Rotation {
+    pub fn clockwise(self) -> Rotation {
         Rotation(modulo(self.0 + 1, NUM_ROTATIONS))
     }
 
-    pub fn anticlockwise(&self) -> Rotation {
+    pub fn anticlockwise(self) -> Rotation {
         Rotation(modulo(self.0 - 1, NUM_ROTATIONS))
     }
 }

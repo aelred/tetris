@@ -1,3 +1,4 @@
+extern crate dirs;
 extern crate hyper;
 extern crate serde_json;
 extern crate tetris;
@@ -131,8 +132,7 @@ fn main() {
                 .long("port")
                 .default_value("4444")
                 .help("Set the port to use"),
-        )
-        .get_matches();
+        ).get_matches();
 
     let port = value_t!(matches, "PORT", u16).unwrap_or_else(|e| e.exit());
 
@@ -166,7 +166,7 @@ fn init_hiscores() -> Vec<Score> {
 const TETRIS_CONF: &str = ".tetris";
 
 fn hiscores_path() -> PathBuf {
-    let mut path = std::env::home_dir().unwrap();
+    let mut path = dirs::home_dir().unwrap();
     path.push(TETRIS_CONF);
 
     let _ = DirBuilder::new().create(&path);
