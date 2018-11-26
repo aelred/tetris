@@ -1,0 +1,8 @@
+[package]
+name = "tetris-console"
+version = "0.1.0"
+authors = ["Felix Chapman <aelred717@gmail.com>"]
+
+[dependencies]
+termion = "1.5"
+tetris = {path="../tetris", version="0.1.0"}

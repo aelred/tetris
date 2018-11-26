@@ -568,6 +568,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tetris-console"
+version = "0.1.0"
+dependencies = [
+ "termion 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tetris 0.1.0",
+]
+
+[[package]]
 name = "tetris-sdl"
 version = "0.1.0"
 dependencies = [
