@@ -14,6 +14,11 @@ use tetris::shape::ShapeColor;
 use tetris::state::State;
 use termion::event::Key;
 use std::time::Duration;
+use tetris::piece::Piece;
+use tetris::board;
+use tetris::game::GameWithHistory;
+use tetris::game::Game;
+use tetris::board::Board;
 
 fn main() -> Result<()> {
     let stdout = io::stdout();
@@ -62,7 +67,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn handle_key_in_game(mut game: tetris::game::GameWithHistory, key: Key) -> State {
+fn handle_key_in_game(mut game: GameWithHistory, key: Key) -> State {
     match key {
         Key::Up => game.rotate(),
         Key::Left => game.move_left(),
@@ -88,7 +93,7 @@ const TR_BORDER: &str = "╗";
 const BR_BORDER: &str = "╝";
 
 fn draw<W: Write>(mut stdout: &mut W, state: &mut State) -> Result<()> {
-    let mut buffer = std::io::BufWriter::new(stdout);
+    let mut buffer = io::BufWriter::new(stdout);
 
     match &state {
         State::Title(_) => {
@@ -110,13 +115,13 @@ fn draw<W: Write>(mut stdout: &mut W, state: &mut State) -> Result<()> {
     buffer.flush()
 }
 
-fn draw_game<W: Write>(stdout: &mut W, game: &tetris::game::Game) -> Result<()> {
+fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
     draw_border(stdout)?;
     draw_board(stdout, &game.board)?;
     draw_piece(stdout, &game.piece)
 }
 
-fn draw_board<W: Write>(stdout: &mut W, board: &tetris::board::Board) -> Result<()> {
+fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
     for (num, row) in board.grid.iter().enumerate() {
         write!(stdout, "{}", cursor::Goto(2, num as u16 + 2))?;
 
@@ -147,30 +152,30 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
         "{}{}{}{}",
         cursor::Goto(1, 1),
         TL_BORDER,
-        HOR_BORDER.repeat(tetris::board::WIDTH as usize),
+        HOR_BORDER.repeat(board::WIDTH as usize),
         TR_BORDER
     )?;
-    for row in 0..u16::from(tetris::board::HEIGHT) {
+    for row in 0..u16::from(board::HEIGHT) {
         write!(
             stdout,
             "{}{}{}{}",
             cursor::Goto(1, row + 2),
             VERT_BORDER,
-            cursor::Goto((u16::from(tetris::board::WIDTH) * BLOCK_WIDTH) + 2, row + 2),
+            cursor::Goto((u16::from(board::WIDTH) * BLOCK_WIDTH) + 2, row + 2),
             VERT_BORDER
         )?;
     }
     write!(
         stdout,
         "{}{}{}{}",
-        cursor::Goto(1, u16::from(tetris::board::HEIGHT) + 2),
+        cursor::Goto(1, u16::from(board::HEIGHT) + 2),
         BL_BORDER,
-        HOR_BORDER.repeat(tetris::board::WIDTH as usize),
+        HOR_BORDER.repeat(board::WIDTH as usize),
         BR_BORDER
     )
 }
 
-fn draw_piece<W: Write>(stdout: &mut W, piece: &tetris::piece::Piece) -> Result<()> {
+fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
     let color = shape_color_to_ascii_color(piece.shape.color);
     write!(stdout, "{}", color::Fg(color))?;
 
