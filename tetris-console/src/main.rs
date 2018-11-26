@@ -3,6 +3,7 @@ extern crate tetris;
 
 use std::io;
 use std::io::Write;
+use std::io::Result;
 use termion::color;
 use termion::color::Color;
 use termion::color::Rgb;
@@ -11,81 +12,45 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use tetris::shape::ShapeColor;
 use tetris::state::State;
+use termion::event::Key;
+use std::time::Duration;
 
-fn main() {
+fn main() -> Result<()> {
     let stdout = io::stdout();
-    let mut stdout = stdout.lock().into_raw_mode().unwrap();
+    let mut stdout = stdout.lock().into_raw_mode()?;
     let mut stdin = termion::async_stdin().keys();
 
     let mut state = State::default();
 
-    write!(stdout, "{}{}", termion::cursor::Hide, termion::clear::All).unwrap();
+    write!(stdout, "{}{}", cursor::Hide, termion::clear::All)?;
 
     loop {
-        match &state {
-            State::Title(_) => {
-                write!(stdout, "{}TETRIS: Press Enter", cursor::Goto(1, 1)).unwrap();
-            }
-            State::Play(ref game) => {
-                draw_game(&mut stdout, &game.game);
-            }
-            State::Paused(_) => {
-                // TODO
-                write!(stdout, "{}PAUSED", cursor::Goto(1, 1)).unwrap();
-            }
-            State::GameOver(_) => {
-                // TODO
-                write!(stdout, "{}Not implemented", cursor::Goto(1, 1)).unwrap();
-            }
-        }
+        draw(&mut stdout, &mut state)?;
 
-        std::thread::sleep(std::time::Duration::from_millis(33));
+        std::thread::sleep(Duration::from_millis(33));
 
-        if let Some(b) = stdin.next().map(Result::unwrap) {
-            use termion::event::Key;
+        if let Some(key) = stdin.next() {
+            let key = key?;
 
-            if let Key::Char('q') = b {
+            if let Key::Char('q') = key {
                 write!(
                     stdout,
                     "{}{}{}{}{}",
                     termion::clear::All,
                     color::Fg(color::Reset),
                     color::Bg(color::Reset),
-                    termion::cursor::Goto(1, 1),
-                    termion::cursor::Show
-                ).unwrap();
+                    cursor::Goto(1, 1),
+                    cursor::Show
+                )?;
                 break;
             }
 
             state = match state {
-                State::Title(title) => match b {
+                State::Title(title) => match key {
                     Key::Char('\n') => title.start_game(),
                     _ => State::from(title),
                 },
-                State::Play(mut game) => match b {
-                    Key::Up => {
-                        game.rotate();
-                        State::from(game)
-                    }
-                    Key::Left => {
-                        game.move_left();
-                        State::from(game)
-                    }
-                    Key::Right => {
-                        game.move_right();
-                        State::from(game)
-                    }
-                    Key::Down => {
-                        game.start_soft_drop();
-                        State::from(game)
-                    }
-                    Key::Char(' ') => {
-                        game.start_hard_drop();
-                        State::from(game)
-                    }
-                    Key::Char('\n') => game.pause(),
-                    _ => State::from(game),
-                },
+                State::Play(mut game) => handle_key_in_game(game, key),
                 State::Paused(paused) => paused.unpause(),
                 State::GameOver(game_over) => State::from(game_over),
             };
@@ -93,6 +58,22 @@ fn main() {
 
         state = state.update();
     }
+
+    Ok(())
+}
+
+fn handle_key_in_game(mut game: tetris::game::GameWithHistory, key: Key) -> State {
+    match key {
+        Key::Up => game.rotate(),
+        Key::Left => game.move_left(),
+        Key::Right => game.move_right(),
+        Key::Down => game.start_soft_drop(),
+        Key::Char(' ') => game.start_hard_drop(),
+        Key::Char('\n') => return game.pause(),
+        _ => {}
+    };
+
+    State::from(game)
 }
 
 const BLOCK_WIDTH: u16 = 2;
@@ -106,16 +87,37 @@ const BL_BORDER: &str = "╚";
 const TR_BORDER: &str = "╗";
 const BR_BORDER: &str = "╝";
 
-fn draw_game<W: Write>(stdout: &mut W, game: &tetris::game::Game) {
-    let mut buffer = std::io::BufWriter::new(stdout);
-    draw_border(&mut buffer);
-    draw_board(&mut buffer, &game.board);
-    draw_piece(&mut buffer, &game.piece);
+fn draw<W: Write>(mut stdout: &mut W, state: &mut State) -> Result<()> {
+    match &state {
+        State::Title(_) => {
+            write!(stdout, "{}TETRIS: Press Enter", cursor::Goto(1, 1))?;
+        }
+        State::Play(ref game) => {
+            draw_game(&mut stdout, &game.game)?;
+        }
+        State::Paused(_) => {
+            // TODO
+            write!(stdout, "{}PAUSED", cursor::Goto(1, 1))?;
+        }
+        State::GameOver(_) => {
+            // TODO
+            write!(stdout, "{}Not implemented", cursor::Goto(1, 1))?;
+        }
+    }
+
+    Ok(())
 }
 
-fn draw_board<W: Write>(stdout: &mut W, board: &tetris::board::Board) {
+fn draw_game<W: Write>(stdout: &mut W, game: &tetris::game::Game) -> Result<()> {
+    let mut buffer = std::io::BufWriter::new(stdout);
+    draw_border(&mut buffer)?;
+    draw_board(&mut buffer, &game.board)?;
+    draw_piece(&mut buffer, &game.piece)
+}
+
+fn draw_board<W: Write>(stdout: &mut W, board: &tetris::board::Board) -> Result<()> {
     for (num, row) in board.grid.iter().enumerate() {
-        write!(stdout, "{}", termion::cursor::Goto(2, num as u16 + 2)).unwrap();
+        write!(stdout, "{}", cursor::Goto(2, num as u16 + 2))?;
 
         for cell in row.iter() {
             match cell {
@@ -125,56 +127,60 @@ fn draw_board<W: Write>(stdout: &mut W, board: &tetris::board::Board) {
                         "{}{}",
                         color::Fg(shape_color_to_ascii_color(*shape_color)),
                         BLOCK
-                    ).unwrap();
+                    )?;
                 }
                 None => {
-                    write!(stdout, "{}{}", color::Fg(color::Reset), SPACE).unwrap();
+                    write!(stdout, "{}{}", color::Fg(color::Reset), SPACE)?;
                 }
             };
         }
     }
+
+    Ok(())
 }
 
-fn draw_border<W: Write>(stdout: &mut W) {
-    write!(stdout, "{}", color::Fg(color::White)).unwrap();
+fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
+    write!(stdout, "{}", color::Fg(color::White))?;
     write!(
         stdout,
         "{}{}{}{}",
-        termion::cursor::Goto(1, 1),
+        cursor::Goto(1, 1),
         TL_BORDER,
         HOR_BORDER.repeat(tetris::board::WIDTH as usize),
         TR_BORDER
-    ).unwrap();
+    )?;
     for row in 0..u16::from(tetris::board::HEIGHT) {
         write!(
             stdout,
             "{}{}{}{}",
-            termion::cursor::Goto(1, row + 2),
+            cursor::Goto(1, row + 2),
             VERT_BORDER,
-            termion::cursor::Goto((u16::from(tetris::board::WIDTH) * BLOCK_WIDTH) + 2, row + 2),
+            cursor::Goto((u16::from(tetris::board::WIDTH) * BLOCK_WIDTH) + 2, row + 2),
             VERT_BORDER
-        ).unwrap();
+        )?;
     }
     write!(
         stdout,
         "{}{}{}{}",
-        termion::cursor::Goto(1, u16::from(tetris::board::HEIGHT) + 2),
+        cursor::Goto(1, u16::from(tetris::board::HEIGHT) + 2),
         BL_BORDER,
         HOR_BORDER.repeat(tetris::board::WIDTH as usize),
         BR_BORDER
-    ).unwrap();
+    )
 }
 
-fn draw_piece<W: Write>(stdout: &mut W, piece: &tetris::piece::Piece) {
+fn draw_piece<W: Write>(stdout: &mut W, piece: &tetris::piece::Piece) -> Result<()> {
     let color = shape_color_to_ascii_color(piece.shape.color);
-    write!(stdout, "{}", color::Fg(color)).unwrap();
+    write!(stdout, "{}", color::Fg(color))?;
 
     for pos in piece.blocks().iter() {
         let cursor_x = (pos.x() as u16) * BLOCK_WIDTH + 2;
         let cursor_y = pos.y() as u16 + 2;
-        let cursor = termion::cursor::Goto(cursor_x, cursor_y);
-        write!(stdout, "{}{}", cursor, BLOCK).unwrap();
+        let cursor = cursor::Goto(cursor_x, cursor_y);
+        write!(stdout, "{}{}", cursor, BLOCK)?;
     }
+
+    Ok(())
 }
 
 fn shape_color_to_ascii_color(shape_color: ShapeColor) -> impl Color {
