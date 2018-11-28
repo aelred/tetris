@@ -22,8 +22,8 @@ pub struct Board {
     pub grid: [[Option<ShapeColor>; WIDTH as usize]; HEIGHT as usize],
 }
 
-/// The result of calling [`Board::fill`](struct.Board.html#method.fill), which is called when
-/// freezing a piece. Indicates if this caused a game over, or if any lines were cleared.
+/// The result of calling [`Board::lock_piece`](struct.Board.html#method.lock_piece), which is
+/// called when locking a piece. Indicates if this caused a game over, or if any lines were cleared.
 pub struct FillResult {
     pub is_game_over: bool,
     pub lines_cleared: u32,
