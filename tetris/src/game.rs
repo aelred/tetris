@@ -13,16 +13,16 @@ use rand::XorShiftRng;
 use std::mem;
 
 const INITIAL_GRAVITY: u32 = 4;
-const GRAVITY_UNITS_PER_BLOCK: u32 = 100;
-const LEVELS_BETWEEN_GRAVITY_INCREASE: u32 = 10;
-const GRAVITY_INCREASE: u32 = 2;
-const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_BLOCK;
-const HARD_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_BLOCK * 20;
+const GRAVITY_UNITS_PER_CELL: u32 = 100;
+const NUM_LINES_CLEARED_PER_LEVEL: u32 = 10;
+const GRAVITY_INCREASE_PER_LEVEL: u32 = 2;
+const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_CELL;
+const HARD_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_CELL * 20;
 
-enum Gravity {
+enum Drop {
     Normal,
-    SoftDrop,
-    HardDrop,
+    Soft,
+    Hard,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
@@ -104,7 +104,7 @@ impl GameWithHistory {
     }
 
     fn apply_action(&mut self, action: Action) {
-        self.history.push(self.game.tick, action);
+        self.history.push_action(self.game.tick, action);
         self.game.apply_action(action);
     }
 }
@@ -115,7 +115,7 @@ pub struct Game {
     pub bag: Bag,
     drop_tick: u32,
     lock_delay: bool,
-    gravity: Gravity,
+    drop: Drop,
     pub lines_cleared: u32,
     pub score: u32,
     tick: Tick,
@@ -130,7 +130,7 @@ impl Game {
             bag,
             drop_tick: 0,
             lock_delay: false,
-            gravity: Gravity::Normal,
+            drop: Drop::Normal,
             lines_cleared: 0,
             score: 0,
             tick: Tick::new(),
@@ -148,36 +148,36 @@ impl Game {
             Action::Rotate => {
                 self.try_rotate();
             }
-            Action::StartSoftDrop => self.gravity = Gravity::SoftDrop,
-            Action::StartHardDrop => self.gravity = Gravity::HardDrop,
-            Action::StopDrop => self.gravity = Gravity::Normal,
+            Action::StartSoftDrop => self.drop = Drop::Soft,
+            Action::StartHardDrop => self.drop = Drop::Hard,
+            Action::StopDrop => self.drop = Drop::Normal,
         }
     }
 
     fn apply_step(&mut self) -> bool {
         self.tick.incr();
 
-        while self.drop_tick >= GRAVITY_UNITS_PER_BLOCK {
-            self.drop_tick -= GRAVITY_UNITS_PER_BLOCK;
-            let is_game_over = self.drop();
+        while self.drop_tick >= GRAVITY_UNITS_PER_CELL {
+            self.drop_tick -= GRAVITY_UNITS_PER_CELL;
+            let is_game_over = self.drop_piece();
             if is_game_over {
                 return true;
             }
         }
 
-        self.drop_tick += match self.gravity {
-            Gravity::Normal => self.normal_gravity(),
-            Gravity::SoftDrop => SOFT_DROP_GRAVITY,
-            Gravity::HardDrop => HARD_DROP_GRAVITY,
+        self.drop_tick += match self.drop {
+            Drop::Normal => self.normal_gravity(),
+            Drop::Soft => SOFT_DROP_GRAVITY,
+            Drop::Hard => HARD_DROP_GRAVITY,
         };
 
         false
     }
 
     fn normal_gravity(&self) -> u32 {
-        let level = self.lines_cleared / LEVELS_BETWEEN_GRAVITY_INCREASE;
+        let level = self.lines_cleared / NUM_LINES_CLEARED_PER_LEVEL;
 
-        let g = INITIAL_GRAVITY + GRAVITY_INCREASE * level;
+        let g = INITIAL_GRAVITY + GRAVITY_INCREASE_PER_LEVEL * level;
         cmp::min(g, SOFT_DROP_GRAVITY)
     }
 
@@ -185,7 +185,7 @@ impl Game {
         self.piece.rotate_clockwise();
         self.reset_lock_delay();
 
-        let successful_rotation = !self.collides() || self.try_wall_kick();
+        let successful_rotation = !self.piece_overlaps_board() || self.try_wall_kick();
 
         if !successful_rotation {
             self.piece.rotate_anticlockwise();
@@ -198,7 +198,7 @@ impl Game {
         self.piece.left();
         self.reset_lock_delay();
 
-        let collides = self.collides();
+        let collides = self.piece_overlaps_board();
 
         if collides {
             self.piece.right();
@@ -211,7 +211,7 @@ impl Game {
         self.piece.right();
         self.reset_lock_delay();
 
-        let collides = self.collides();
+        let collides = self.piece_overlaps_board();
 
         if collides {
             self.piece.left();
@@ -226,13 +226,13 @@ impl Game {
         }
     }
 
-    fn drop(&mut self) -> bool {
+    fn drop_piece(&mut self) -> bool {
         self.piece.down();
 
-        if self.collides() {
+        if self.piece_overlaps_board() {
             self.piece.up();
             if self.lock_delay {
-                return self.lock();
+                return self.lock_piece();
             } else {
                 self.lock_delay = true;
             }
@@ -243,7 +243,7 @@ impl Game {
         false
     }
 
-    fn lock(&mut self) -> bool {
+    fn lock_piece(&mut self) -> bool {
         let new_piece = Piece::new(self.bag.pop());
         let old_piece = mem::replace(&mut self.piece, new_piece);
 
@@ -252,29 +252,29 @@ impl Game {
             lines_cleared,
         } = self.board.lock_piece(old_piece);
 
-        self.gravity = Gravity::Normal;
+        self.drop = Drop::Normal;
         self.drop_tick = 0;
         self.lock_delay = false;
         self.lines_cleared += lines_cleared;
         self.score += lines_cleared * lines_cleared * 100;
 
-        if self.collides() {
+        if self.piece_overlaps_board() {
             is_game_over = true;
         }
 
         is_game_over
     }
 
-    fn collides(&self) -> bool {
-        let mut collides = false;
+    fn piece_overlaps_board(&self) -> bool {
+        let mut overlaps = false;
 
         for block in self.piece.blocks() {
             if !self.board.is_pos_free(block) {
-                collides = true;
+                overlaps = true;
             }
         }
 
-        collides
+        overlaps
     }
 
     /// Perform a naive wall-kick (not SRS):
@@ -299,7 +299,7 @@ impl History {
         }
     }
 
-    fn push(&mut self, tick: Tick, action: Action) {
+    fn push_action(&mut self, tick: Tick, action: Action) {
         self.actions.push((tick, action));
     }
 
