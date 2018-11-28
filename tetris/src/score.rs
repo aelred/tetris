@@ -1,6 +1,9 @@
-use err::Result;
 use game::History;
 use std::cmp::Ordering;
+use std::error::Error;
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt;
 
 pub const OFFSET: i32 = 100;
 
@@ -36,49 +39,70 @@ pub struct ScoreMessage {
     history: History,
 }
 
+#[derive(Debug)]
+pub enum ScoreValidationError {
+    NameEmpty,
+    NameTooLong(usize),
+    NameNotAlphanumeric(String),
+    UnexpectedScore {
+        score_message: Box<ScoreMessage>,
+        expected_score: u32,
+    }
+}
+
+impl Error for ScoreValidationError {}
+
+impl Display for ScoreValidationError {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            ScoreValidationError::NameEmpty => {
+                write!(f, "Name should not be empty")
+            },
+            ScoreValidationError::NameTooLong(length) => {
+                write!(f, "Name must be at most 3 characters, but was {}", length)
+            },
+            ScoreValidationError::NameNotAlphanumeric(name) => {
+                write!(f, "Name must contain only alphanumeric characters, but was {}", name)
+            }
+            ScoreValidationError::UnexpectedScore { score_message, expected_score } => {
+                write!(f,
+                    "Score does not match game history {:?}:\n History suggests {} but was {}",
+                    score_message, expected_score, score_message.score.value
+                )
+            }
+        }
+    }
+}
+
 impl ScoreMessage {
     pub fn new(score: Score, history: History) -> Self {
         ScoreMessage { score, history }
     }
 
-    pub fn score(self) -> Result<Score> {
+    pub fn score(self) -> Result<Score, ScoreValidationError> {
         if self.score.name.is_empty() {
-            return Err(From::from("Name should not be empty"));
+            return Err(ScoreValidationError::NameEmpty);
         }
 
         if self.score.name.len() > 3 {
-            let message = format!(
-                "Name must be at most 3 characters, but was {}",
-                self.score.name.len()
-            );
-            return Err(From::from(message));
+            return Err(ScoreValidationError::NameTooLong(self.score.name.len()))
         }
 
         if !self.score.name.chars().all(char::is_alphanumeric) {
-            let message = format!(
-                "Name must contain only alphanumeric characters, but was {}",
-                self.score.name
-            );
-            return Err(From::from(message));
+            return Err(ScoreValidationError::NameNotAlphanumeric(self.score.name))
         }
 
-        self.verify_score()?;
-
-        Ok(self.score)
+        self.verify_score()
     }
 
-    fn verify_score(&self) -> Result<()> {
+    fn verify_score(self) -> Result<Score, ScoreValidationError> {
         let expected_score = self.history.replay();
 
         if expected_score == self.score.value {
-            return Ok(());
+            return Ok(self.score);
         }
 
-        let message = format!(
-            "Score does not match game history {:?}:\n History suggests {} but was {}",
-            self, expected_score, self.score.value
-        );
-        Err(From::from(message))
+        Err(ScoreValidationError::UnexpectedScore { score_message: Box::new(self), expected_score })
     }
 }
 

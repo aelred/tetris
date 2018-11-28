@@ -1,6 +1,5 @@
 extern crate url;
 
-use err::Result;
 use score::ScoreMessage;
 use score::{Score, SCORE_ENDPOINT};
 use serde_json;
@@ -12,6 +11,8 @@ use hyper;
 lazy_static! {
     static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());
 }
+
+type Result<T> = std::result::Result<T, Box<Error>>;
 
 pub fn get_hiscores() -> Result<Vec<Score>> {
     let body = CLIENT.get_raw_hiscores()?;
@@ -74,6 +75,7 @@ struct Client {
 
 #[cfg(target_os = "emscripten")]
 use libc;
+use std::error::Error;
 
 #[cfg(target_os = "emscripten")]
 extern "C" {

@@ -2,7 +2,6 @@
 mod macros;
 
 pub mod board;
-pub mod err;
 pub mod game;
 pub mod game_over;
 pub mod piece;

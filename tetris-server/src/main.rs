@@ -6,7 +6,6 @@ extern crate tetris;
 #[macro_use]
 extern crate clap;
 
-use tetris::err::Result;
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
 use tetris::score::SCORE_ENDPOINT;
@@ -25,6 +24,9 @@ use hyper::server::{Handler, Request, Response, Server};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri::AbsolutePath;
 use hyper::{Get, Post};
+use std::error::Error;
+
+type Result<T> = std::result::Result<T, Box<Error>>;
 
 macro_rules! print_err (
     ($e:expr) => {{
