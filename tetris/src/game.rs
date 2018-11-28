@@ -101,12 +101,17 @@ impl Tick {
     }
 }
 
+/// A game, bundled with a record of every action performed in that game.
+///
+/// This is used for live games, so the history can be sent to the server and used to verify the
+/// score.
 pub struct GameWithHistory {
     pub game: Box<Game>,
     history: History,
 }
 
 impl Default for GameWithHistory {
+    /// Create a new game with a random seed and empty history.
     fn default() -> Self {
         let seed = rand::random();
         GameWithHistory {
@@ -117,6 +122,11 @@ impl Default for GameWithHistory {
 }
 
 impl GameWithHistory {
+
+    /// Advance the game one frame.
+    ///
+    /// Consumes the game and returns the new state. In the event of a game over, the returned state
+    /// will be a "game over" state, otherwise it will be the game itself.
     pub fn update(mut self) -> State {
         let is_game_over = self.game.apply_step();
 
@@ -128,53 +138,85 @@ impl GameWithHistory {
         }
     }
 
+    /// Move the piece to the left.
     pub fn move_left(&mut self) {
         self.apply_action(Action::MoveLeft);
     }
 
+    /// Move the piece to the right.
     pub fn move_right(&mut self) {
         self.apply_action(Action::MoveRight);
     }
 
+    /// Rotate the piece clockwise.
     pub fn rotate(&mut self) {
         self.apply_action(Action::Rotate);
     }
 
+    /// Start a fast soft drop.
     pub fn start_soft_drop(&mut self) {
         self.apply_action(Action::StartSoftDrop);
     }
 
+    /// Immediately drop and lock the piece.
     pub fn start_hard_drop(&mut self) {
         self.apply_action(Action::StartHardDrop);
     }
 
+    /// Stop a soft or hard drop and return to the normal drop speed.
     pub fn stop_drop(&mut self) {
         self.apply_action(Action::StopDrop);
     }
 
+    /// Pause the game, consuming the current state and returing a "paused" state.
     pub fn pause(self) -> State {
         State::Paused(Paused(self))
     }
 
+    /// Apply the given action to the game and record it in the history.
     fn apply_action(&mut self, action: Action) {
         self.history.push_action(self.game.tick, action);
         self.game.apply_action(action);
     }
 }
 
+/// A game of Tetris in-progress.
 pub struct Game {
+
+    /// The current piece that the user is placing.
     pub piece: Piece,
+
+    /// The board, made up of blocks from old pieces.
     pub board: Board,
+
+    /// A bag to pull new pieces from.
     pub bag: Bag,
+
+    /// How far the piece has dropped through the current cell - once it reaches 100 the piece
+    /// drops one cell, or locks.
+    ///
+    /// If lock delay is on, this resets to zero when the piece is moved or rotated.
     drop_tick: u32,
+
+    /// Toggled on when the piece can't drop down a cell. When the piece drops again, it will lock.
     lock_delay: bool,
+
+    /// The current drop rate.
     drop: Drop,
+
+    /// The number of lines that have been cleared.
     pub lines_cleared: u32,
+
+    /// The player's score.
     pub score: u32,
+
+    /// Number of frames since the game has started.
     tick: Tick,
 }
 
 impl Game {
+
+    /// Create a new game from the given seed, which determines the order pieces appear.
     fn new(seed: [u32; 4]) -> Game {
         let mut bag = Bag::new(XorShiftRng::from_seed(seed));
         Game {
@@ -190,6 +232,7 @@ impl Game {
         }
     }
 
+    /// Apply the given action to the game.
     fn apply_action(&mut self, action: Action) {
         match action {
             Action::MoveLeft => {
@@ -207,6 +250,7 @@ impl Game {
         }
     }
 
+    /// Advance the game one frame. Returns true if this is a game over.
     fn apply_step(&mut self) -> bool {
         self.tick.incr();
 
@@ -227,13 +271,19 @@ impl Game {
         false
     }
 
+    /// Get the normal gravity rate, based on the current level.
     fn normal_gravity(&self) -> Gravity {
         let level = self.lines_cleared / NUM_LINES_CLEARED_PER_LEVEL;
 
         let g = Gravity::INITIAL + Gravity::INCREASE_PER_LEVEL * level;
+
+        // Normal gravity should never be faster than a soft drop.
         cmp::min(g, Gravity::SOFT_DROP)
     }
 
+    /// Try to rotate the piece clockwise, including a wall-kick.
+    ///
+    /// Returns whether the rotation was successful.
     fn try_rotate(&mut self) -> bool {
         self.piece.rotate_clockwise();
         self.reset_lock_delay();
@@ -247,6 +297,7 @@ impl Game {
         successful_rotation
     }
 
+    /// Try to move the piece left. Returns whether the piece was moved successfully.
     fn try_move_left(&mut self) -> bool {
         self.piece.left();
         self.reset_lock_delay();
@@ -260,6 +311,7 @@ impl Game {
         !collides
     }
 
+    /// Try to move the piece right. Returns whether the piece was moved successfully.
     fn try_move_right(&mut self) -> bool {
         self.piece.right();
         self.reset_lock_delay();
@@ -273,12 +325,18 @@ impl Game {
         !collides
     }
 
+    /// Reset the lock delay, if lock delay has triggered.
     fn reset_lock_delay(&mut self) {
         if self.lock_delay {
             self.drop_tick = 0;
         }
     }
 
+    /// Drop the piece down one cell.
+    ///
+    /// If the piece can't drop, lock delay is started. If lock delay is over, the piece is locked.
+    ///
+    /// Returns true if this is a game over.
     fn drop_piece(&mut self) -> bool {
         self.piece.down();
 
@@ -296,6 +354,9 @@ impl Game {
         false
     }
 
+    /// Lock the piece, clearing any rows and get a new piece from the bag.
+    ///
+    /// Returns whether this results in a game over.
     fn lock_piece(&mut self) -> bool {
         let new_piece = Piece::new(self.bag.pop());
         let old_piece = mem::replace(&mut self.piece, new_piece);
@@ -318,6 +379,7 @@ impl Game {
         is_game_over
     }
 
+    /// Return whether the piece is overlapping the board.
     fn piece_overlaps_board(&self) -> bool {
         let mut overlaps = false;
 
@@ -338,13 +400,18 @@ impl Game {
     }
 }
 
+/// A history of a game, that can be replayed. This is useful for verifying high scores.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct History {
+    /// The seed used to initialise the game, so the game can be reliably replayed.
     seed: [u32; 4],
+
+    /// A list of actions and when they occurred.
     actions: Vec<(Tick, Action)>,
 }
 
 impl History {
+    /// Create a new empty history with the given seed.
     fn new(seed: [u32; 4]) -> Self {
         History {
             seed,
@@ -352,10 +419,14 @@ impl History {
         }
     }
 
+    /// Push an action onto the history, with the time it happened.
+    ///
+    /// Actions are assumed to be pushed chronologically.
     fn push_action(&mut self, tick: Tick, action: Action) {
         self.actions.push((tick, action));
     }
 
+    /// Replay a game and return the resulting score.
     pub fn replay(&self) -> u32 {
         let mut game = Game::new(self.seed);
 
