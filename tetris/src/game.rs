@@ -269,7 +269,7 @@ impl Game {
         let mut collides = false;
 
         for block in self.piece.blocks() {
-            if self.board.touches(block) {
+            if !self.board.is_pos_free(block) {
                 collides = true;
             }
         }

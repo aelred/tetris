@@ -40,9 +40,9 @@ impl Default for Board {
 }
 
 impl Board {
-    /// Returns if this position on the board is taken or out of bounds.
-    pub fn touches(&self, pos: Pos) -> bool {
-        out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
+    /// Returns if this position on the board is free and in-bounds
+    pub fn is_pos_free(&self, pos: Pos) -> bool {
+        !out_bounds(pos) && self.grid[pos.y() as usize][pos.x() as usize].is_none()
     }
 
     /// Lock a piece, attaching it to the board permanently and potentially clearing some rows.
