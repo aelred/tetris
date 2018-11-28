@@ -10,6 +10,7 @@ use std::cmp;
 use rand;
 use rand::SeedableRng;
 use rand::XorShiftRng;
+use std::mem;
 
 const INITIAL_GRAVITY: u32 = 4;
 const GRAVITY_UNITS_PER_BLOCK: u32 = 100;
@@ -243,12 +244,14 @@ impl Game {
     }
 
     fn lock(&mut self) -> bool {
+        let new_piece = Piece::new(self.bag.pop());
+        let old_piece = mem::replace(&mut self.piece, new_piece);
+
         let FillResult {
             mut is_game_over,
             lines_cleared,
-        } = self.board.fill(self.piece.blocks(), self.piece.shape.color);
+        } = self.board.lock_piece(old_piece);
 
-        self.piece = Piece::new(self.bag.pop());
         self.gravity = Gravity::Normal;
         self.drop_tick = 0;
         self.lock_delay = false;

@@ -1,5 +1,6 @@
 use pos::Pos;
 use shape::ShapeColor;
+use piece::Piece;
 
 pub const WIDTH: u8 = 10;
 pub const HEIGHT: u8 = 24;
@@ -31,14 +32,14 @@ impl Board {
         out_bounds(pos) || self.grid[pos.y() as usize][pos.x() as usize].is_some()
     }
 
-    pub fn fill(&mut self, cells: Vec<Pos>, color: ShapeColor) -> FillResult {
+    pub fn lock_piece(&mut self, piece: Piece) -> FillResult {
         let mut is_game_over = true;
 
-        for cell in cells {
+        for cell in piece.blocks() {
             if cell.y() > i16::from(HIDE_ROWS) {
                 is_game_over = false;
             }
-            self.fill_pos(cell, color);
+            self.fill_pos(cell, piece.shape.color);
         }
 
         FillResult {
