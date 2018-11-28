@@ -2,6 +2,7 @@ use pos::Pos;
 use shape::ShapeColor;
 use piece::Piece;
 
+/// Width of the playable board in cells.
 pub const WIDTH: u8 = 10;
 
 /// Height of the playable board in cells - note that some of the top-most cells are not visible in
