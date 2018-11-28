@@ -2,20 +2,6 @@ use pos::Pos;
 use shape::ShapeColor;
 use piece::Piece;
 
-/// Width of the playable board in cells.
-pub const WIDTH: u8 = 10;
-
-/// Height of the playable board in cells - note that some of the top-most cells are not visible in
-/// play, indicated by `HIDE_ROWS`.
-pub const HEIGHT: u8 = 24;
-
-/// Number of rows at the top of the board that are not visible. This is where new pieces are
-/// spawned.
-pub const HIDE_ROWS: u8 = 4;
-
-/// Number of visible rows, based on total height and number of hidden rows.
-pub const VISIBLE_ROWS: u8 = HEIGHT - HIDE_ROWS;
-
 /// The board state, describing which cells are full and what colour tetromino they were filled
 /// with.
 #[derive(Clone, Debug)]
@@ -23,28 +9,7 @@ pub struct Board {
     pub grid: [[Option<ShapeColor>; WIDTH as usize]; HEIGHT as usize],
 }
 
-/// The result of calling [`Board::lock_piece`](struct.Board.html#method.lock_piece), which is
-/// called when locking a piece. Indicates if this caused a game over, or if any lines were cleared.
-pub struct FillResult {
-    pub is_game_over: bool,
-    pub lines_cleared: u32,
-}
-
-impl Default for Board {
-    /// Returns an empty board.
-    fn default() -> Self {
-        Board {
-            grid: [[None; WIDTH as usize]; HEIGHT as usize],
-        }
-    }
-}
-
 impl Board {
-    /// Returns if this position on the board is free and in-bounds
-    pub fn is_pos_free(&self, pos: Pos) -> bool {
-        !out_bounds(pos) && self.grid[pos.y() as usize][pos.x() as usize].is_none()
-    }
-
     /// Lock a piece, attaching it to the board permanently and potentially clearing some rows.
     ///
     /// This can cause a game over if the piece is locked above the visible playing area, which
@@ -107,12 +72,47 @@ impl Board {
             self.grid[0][x] = None;
         }
     }
+
+    /// Returns if this position on the board is free and in-bounds
+    pub fn is_pos_free(&self, pos: Pos) -> bool {
+        !out_bounds(pos) && self.grid[pos.y() as usize][pos.x() as usize].is_none()
+    }
+}
+
+/// The result of calling [`Board::lock_piece`](struct.Board.html#method.lock_piece), which is
+/// called when locking a piece. Indicates if this caused a game over, or if any lines were cleared.
+pub struct FillResult {
+    pub is_game_over: bool,
+    pub lines_cleared: u32,
+}
+
+impl Default for Board {
+    /// Returns an empty board.
+    fn default() -> Self {
+        Board {
+            grid: [[None; WIDTH as usize]; HEIGHT as usize],
+        }
+    }
 }
 
 /// Return whether the given position is out of bounds of the board (including hidden rows).
 fn out_bounds(pos: Pos) -> bool {
     pos.x() < 0 || pos.y() < 0 || pos.x() >= i16::from(WIDTH) || pos.y() >= i16::from(HEIGHT)
 }
+
+/// Width of the playable board in cells.
+pub const WIDTH: u8 = 10;
+
+/// Height of the playable board in cells - note that some of the top-most cells are not visible in
+/// play, indicated by `HIDE_ROWS`.
+pub const HEIGHT: u8 = 24;
+
+/// Number of rows at the top of the board that are not visible. This is where new pieces are
+/// spawned.
+pub const HIDE_ROWS: u8 = 4;
+
+/// Number of visible rows, based on total height and number of hidden rows.
+pub const VISIBLE_ROWS: u8 = HEIGHT - HIDE_ROWS;
 
 #[cfg(test)]
 mod tests {
