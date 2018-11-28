@@ -11,13 +11,38 @@ use rand;
 use rand::SeedableRng;
 use rand::XorShiftRng;
 use std::mem;
+use std::ops::Add;
+use std::ops::Mul;
 
-const INITIAL_GRAVITY: u32 = 4;
-const GRAVITY_UNITS_PER_CELL: u32 = 100;
+#[derive(PartialOrd, Ord, PartialEq, Eq)]
+struct Gravity(u32);
+
+impl Gravity {
+    const UNITS_PER_CELL: u32 = 100;
+}
+
+impl Add for Gravity {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        Gravity(self.0 + rhs.0)
+    }
+}
+
+impl Mul<u32> for Gravity {
+    type Output = Self;
+
+    fn mul(self, rhs: u32) -> Self {
+        Gravity(self.0 * rhs)
+    }
+}
+
+const INITIAL_GRAVITY: Gravity = Gravity(4);
+const SOFT_DROP_GRAVITY: Gravity = Gravity(Gravity::UNITS_PER_CELL);
+const HARD_DROP_GRAVITY: Gravity = Gravity(Gravity::UNITS_PER_CELL * 20);
+const GRAVITY_INCREASE_PER_LEVEL: Gravity = Gravity(2);
+
 const NUM_LINES_CLEARED_PER_LEVEL: u32 = 10;
-const GRAVITY_INCREASE_PER_LEVEL: u32 = 2;
-const SOFT_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_CELL;
-const HARD_DROP_GRAVITY: u32 = GRAVITY_UNITS_PER_CELL * 20;
 
 enum Drop {
     Normal,
@@ -157,8 +182,8 @@ impl Game {
     fn apply_step(&mut self) -> bool {
         self.tick.incr();
 
-        while self.drop_tick >= GRAVITY_UNITS_PER_CELL {
-            self.drop_tick -= GRAVITY_UNITS_PER_CELL;
+        while self.drop_tick >= Gravity::UNITS_PER_CELL {
+            self.drop_tick -= Gravity::UNITS_PER_CELL;
             let is_game_over = self.drop_piece();
             if is_game_over {
                 return true;
@@ -169,12 +194,12 @@ impl Game {
             Drop::Normal => self.normal_gravity(),
             Drop::Soft => SOFT_DROP_GRAVITY,
             Drop::Hard => HARD_DROP_GRAVITY,
-        };
+        }.0;
 
         false
     }
 
-    fn normal_gravity(&self) -> u32 {
+    fn normal_gravity(&self) -> Gravity {
         let level = self.lines_cleared / NUM_LINES_CLEARED_PER_LEVEL;
 
         let g = INITIAL_GRAVITY + GRAVITY_INCREASE_PER_LEVEL * level;
