@@ -158,7 +158,7 @@ mod tests {
     quickcheck! {
 
         fn a_new_board_is_empty(pos: InBoundsPos) -> bool {
-            !Board::default().touches(pos.0)
+            Board::default().is_pos_free(pos.0)
         }
 
         fn after_filling_a_space_it_is_filled(
@@ -166,7 +166,7 @@ mod tests {
             let pos = pos.0;
             let mut board = board;
             board.fill_pos(pos, col);
-            board.touches(pos)
+            !board.is_pos_free(pos)
         }
 
         fn after_filling_a_space_no_other_space_changes(
@@ -177,17 +177,17 @@ mod tests {
 
             when!(pos1 != pos2);
 
-            let touches_before = board.touches(pos2);
+            let free_before = board.is_pos_free(pos2);
             board.fill_pos(pos1, col);
-            let touches_after = board.touches(pos2);
-            then!(touches_before == touches_after)
+            let free_after = board.is_pos_free(pos2);
+            then!(free_before == free_after)
         }
 
         fn after_clearing_a_row_the_top_row_is_empty(board: Board, pos: InBoundsPos) -> bool {
             let pos = pos.0;
             let mut board = board;
             board.clear_row(pos.y() as u8);
-            !board.touches(Pos::new(pos.x(), 0))
+            board.is_pos_free(Pos::new(pos.x(), 0))
         }
 
         fn after_clearing_a_row_nothing_under_it_is_changed(
@@ -198,9 +198,9 @@ mod tests {
 
             when!(under.y() > y as i16);
 
-            let before = board.touches(under);
+            let before = board.is_pos_free(under);
             board.clear_row(y);
-            let after = board.touches(under);
+            let after = board.is_pos_free(under);
             then!(before == after)
         }
 
@@ -213,9 +213,9 @@ mod tests {
             when!(y < HEIGHT);
             when!(above.y() < y as i16);
 
-            let before = board.touches(above);
+            let before = board.is_pos_free(above);
             board.clear_row(y);
-            let after = board.touches(above.down());
+            let after = board.is_pos_free(above.down());
             then!(before == after)
         }
     }
