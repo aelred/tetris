@@ -14,11 +14,29 @@ use std::mem;
 use std::ops::Add;
 use std::ops::Mul;
 
+/// The rate at which pieces fall, measured in hundredths of cells per frame.
+///
+/// Typically notated with the suffix _G_, e.g. _3G_ means 3 cells per frame.
+///
+/// e.g. `Gravity(10)` = _0.1G_ = 0.1 cells per frame = 6 cells per second (at 60fps)
 #[derive(PartialOrd, Ord, PartialEq, Eq)]
 struct Gravity(u32);
 
 impl Gravity {
+    /// How many gravity units we subdivide a cell into - impacts the rate pieces fall.
     const UNITS_PER_CELL: u32 = 100;
+
+    /// The initial gravity at the start of the game.
+    const INITIAL: Gravity = Gravity(4);
+
+    /// The gravity when doing a faster soft drop - defined as _1G_.
+    const SOFT_DROP: Gravity = Gravity(Gravity::UNITS_PER_CELL);
+
+    /// The gravity when doing a hard drop - is meant to appear instantaneous, so defined as _20G_.
+    const HARD_DROP: Gravity = Gravity(Gravity::UNITS_PER_CELL * 20);
+
+    /// The rate gravity increases every level.
+    const INCREASE_PER_LEVEL: Gravity = Gravity(2);
 }
 
 impl Add for Gravity {
@@ -37,37 +55,47 @@ impl Mul<u32> for Gravity {
     }
 }
 
-const INITIAL_GRAVITY: Gravity = Gravity(4);
-const SOFT_DROP_GRAVITY: Gravity = Gravity(Gravity::UNITS_PER_CELL);
-const HARD_DROP_GRAVITY: Gravity = Gravity(Gravity::UNITS_PER_CELL * 20);
-const GRAVITY_INCREASE_PER_LEVEL: Gravity = Gravity(2);
-
+/// The number of lines to clear to go to the next level - resulting in gravity increasing.
 const NUM_LINES_CLEARED_PER_LEVEL: u32 = 10;
 
+/// The different ways a piece can drop, depending on user input.
 enum Drop {
+    /// The normal drop rate, where gravity is based on the current level.
     Normal,
+    /// The fast drop rate, where gravity is fixed to 1G.
     Soft,
+    /// The immediate drop, where gravity is 20G.
     Hard,
 }
 
+/// Actions that a user can take in the game.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 enum Action {
+    /// Move the piece to the left.
     MoveLeft,
+    /// Move the piece to the right.
     MoveRight,
+    /// Rotate the piece clockwise.
     Rotate,
+    /// Start a fast soft drop.
     StartSoftDrop,
+    /// Immediately drop and lock the piece.
     StartHardDrop,
+    /// Stop a soft or hard drop and return to the normal drop speed.
     StopDrop,
 }
 
+/// Describes how much time has passed in frames.
 #[derive(Serialize, Deserialize, Clone, Copy, PartialOrd, PartialEq, Debug)]
 struct Tick(u32);
 
 impl Tick {
+    /// Create a new `Tick` at 0.
     fn new() -> Tick {
         Tick(0)
     }
 
+    /// Advance forward one frame in time.
     fn incr(&mut self) {
         self.0 += 1;
     }
@@ -192,8 +220,8 @@ impl Game {
 
         self.drop_tick += match self.drop {
             Drop::Normal => self.normal_gravity(),
-            Drop::Soft => SOFT_DROP_GRAVITY,
-            Drop::Hard => HARD_DROP_GRAVITY,
+            Drop::Soft => Gravity::SOFT_DROP,
+            Drop::Hard => Gravity::HARD_DROP,
         }.0;
 
         false
@@ -202,8 +230,8 @@ impl Game {
     fn normal_gravity(&self) -> Gravity {
         let level = self.lines_cleared / NUM_LINES_CLEARED_PER_LEVEL;
 
-        let g = INITIAL_GRAVITY + GRAVITY_INCREASE_PER_LEVEL * level;
-        cmp::min(g, SOFT_DROP_GRAVITY)
+        let g = Gravity::INITIAL + Gravity::INCREASE_PER_LEVEL * level;
+        cmp::min(g, Gravity::SOFT_DROP)
     }
 
     fn try_rotate(&mut self) -> bool {
