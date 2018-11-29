@@ -117,20 +117,15 @@ pub struct Shape {
 }
 
 impl Shape {
-    fn is_block_at(&self, rot: Rotation, x: u8, y: u8) -> bool {
-        let bit_array = self.rotations[rot.0 as usize];
-        let index = x + y * WIDTH;
-        bit_array & (1 << index) != 0
-    }
-
     pub fn blocks(&self, rot: Rotation) -> Vec<Pos> {
         let mut blocks = Vec::new();
 
-        for y in 0..HEIGHT {
-            for x in 0..WIDTH {
-                if self.is_block_at(rot, x, y) {
-                    blocks.push(Pos::new(i16::from(x), i16::from(y)));
-                };
+        for index in 0..WIDTH * HEIGHT {
+            // Look up `index` in `rotations` bit array
+            if self.rotations[rot.0 as usize] & (1 << index) != 0 {
+                let x = index % WIDTH;
+                let y = index / WIDTH;
+                blocks.push(Pos::new(i16::from(x), i16::from(y)));
             }
         }
 
