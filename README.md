@@ -18,11 +18,11 @@ brew install sdl2 sdl2_ttf sdl2_mixer
 
 Then you can run the game with:
 ```sh
-cargo run
+cargo run --bin tetris-sdl
 ```
 
 Or install it with:
 ```sh
-cargo install
-tetris
+cargo install --path tetris-sdl
+tetris-sdl
 ```
