@@ -14,6 +14,10 @@
         })(),
       };
 
+      const url_params = new URLSearchParams(window.location.search);
+      const args = urlParams.get('args');
+
+      Module['arguments'].push(args);
 </script>
 <script async type="text/javascript" src="tetris.js"></script>
 </body>
