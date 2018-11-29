@@ -29,7 +29,7 @@ use tetris::state::State;
 const TICK: u64 = 33;
 
 static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
-static MUSIC_DATA: &'static [u8] = include_bytes!("../resources/tetris.mid");
+static MUSIC_DATA: &'static [u8] = include_bytes!("../resources/tetris.ogg");
 
 const FONT_MULTIPLE: u16 = 9;
 
