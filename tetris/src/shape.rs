@@ -5,6 +5,7 @@ use pos::Pos;
 use rand::Rng;
 use rand::XorShiftRng;
 use std::fmt;
+use args;
 
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -56,7 +57,7 @@ impl Bag {
     }
 
     fn random_sequence<R: Rng>(rng: &mut R) -> [Shape; NUM_SHAPES] {
-        let mut sequence = SHAPES;
+        let mut sequence = *SHAPES;
 
         // This is inlined from `Rng::shuffle`.
         // We do this so we can cast `i` into a `u8`, meaning the shuffle is reliable regardless
@@ -133,10 +134,6 @@ impl Shape {
     }
 }
 
-static SHAPES: [Shape; NUM_SHAPES] = [
-    O_SHAPE, I_SHAPE, J_SHAPE, L_SHAPE, S_SHAPE, T_SHAPE, Z_SHAPE,
-];
-
 /// Create a tetromino shape as a compact `u16` bit array.
 ///
 /// e.g.
@@ -160,6 +157,40 @@ macro_rules! tet {
         tet!(@b $_8) << 0x8 | tet!(@b $_9) << 0x9 | tet!(@b $_a) << 0xa | tet!(@b $_b) << 0xb |
         tet!(@b $_c) << 0xc | tet!(@b $_d) << 0xd | tet!(@b $_e) << 0xe | tet!(@b $_f) << 0xf
      };
+}
+
+lazy_static! {
+    static ref SHAPES: [Shape; NUM_SHAPES] = {
+        if args::evil_mode() {
+
+            // MWAHAHAAAAAA
+            let decoy_shape = Shape {
+                rotations: [
+                    tet!(_ _ _ _
+                         X X X X
+                         _ _ _ _
+                         _ _ _ _),
+                    tet!(_ _ X _
+                         _ _ X _
+                         _ _ X _
+                         _ X X _),
+                    tet!(_ _ _ _
+                         _ _ _ _
+                         X X X X
+                         _ _ _ _),
+                    tet!(_ X _ _
+                         _ X _ _
+                         _ X _ _
+                         _ X X _),
+                ],
+                color: ShapeColor::I,
+            };
+
+            [S_SHAPE, S_SHAPE, S_SHAPE, Z_SHAPE, Z_SHAPE, Z_SHAPE, decoy_shape]
+        } else {
+            [O_SHAPE, I_SHAPE, J_SHAPE, L_SHAPE, S_SHAPE, T_SHAPE, Z_SHAPE]
+        }
+    };
 }
 
 static O_SHAPE: Shape = Shape {

@@ -10,6 +10,7 @@ pub mod rest;
 pub mod score;
 pub mod shape;
 pub mod state;
+pub mod args;
 
 #[macro_use]
 extern crate lazy_static;
