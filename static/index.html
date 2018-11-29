@@ -15,7 +15,7 @@
       };
 
       const url_params = new URLSearchParams(window.location.search);
-      const args = urlParams.get('args');
+      const args = url_params.get('args');
 
       Module['arguments'].push(args);
 </script>
