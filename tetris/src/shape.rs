@@ -112,17 +112,23 @@ pub enum ShapeColor {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Shape {
-    rotations: [[[bool; WIDTH as usize]; HEIGHT as usize]; NUM_ROTATIONS as usize],
+    rotations: [u16; 4],
     pub color: ShapeColor,
 }
 
 impl Shape {
+    fn is_block_at(&self, rot: Rotation, x: u8, y: u8) -> bool {
+        let bit_array = self.rotations[rot.0 as usize];
+        let index = x + y * WIDTH;
+        bit_array & (1 << index) != 0
+    }
+
     pub fn blocks(&self, rot: Rotation) -> Vec<Pos> {
         let mut blocks = Vec::new();
 
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
-                if self.rotations[rot.0 as usize][y as usize][x as usize] {
+                if self.is_block_at(rot, x, y) {
                     blocks.push(Pos::new(i16::from(x), i16::from(y)));
                 };
             }
@@ -136,215 +142,181 @@ static SHAPES: [&'static Shape; NUM_SHAPES] = [
     &O_SHAPE, &I_SHAPE, &J_SHAPE, &L_SHAPE, &S_SHAPE, &T_SHAPE, &Z_SHAPE,
 ];
 
-const XX: bool = true;
-const __: bool = false;
+/// Create a tetromino shape as a compact `u16` bit array.
+///
+/// e.g.
+/// ```
+/// tet!(_ _ _ _
+///      _ X _ _
+///      _ X _ _
+///      _ X X _),
+/// ```
+///
+macro_rules! tet {
+    (@b X) => { 1 };
+    (@b _) => { 0 };
+
+    ($_0:tt $_1:tt $_2:tt $_3:tt
+     $_4:tt $_5:tt $_6:tt $_7:tt
+     $_8:tt $_9:tt $_a:tt $_b:tt
+     $_c:tt $_d:tt $_e:tt $_f:tt) => {
+        tet!(@b $_0) << 0x0 | tet!(@b $_1) << 0x1 | tet!(@b $_2) << 0x2 | tet!(@b $_3) << 0x3 |
+        tet!(@b $_4) << 0x4 | tet!(@b $_5) << 0x5 | tet!(@b $_6) << 0x6 | tet!(@b $_7) << 0x7 |
+        tet!(@b $_8) << 0x8 | tet!(@b $_9) << 0x9 | tet!(@b $_a) << 0xa | tet!(@b $_b) << 0xb |
+        tet!(@b $_c) << 0xc | tet!(@b $_d) << 0xd | tet!(@b $_e) << 0xe | tet!(@b $_f) << 0xf
+     };
+}
 
 static O_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [__, XX, XX, __],
-            [__, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, XX, __],
-            [__, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, XX, __],
-            [__, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, XX, __],
-            [__, XX, XX, __],
-            [__, __, __, __],
-        ],
+        tet!(_ _ _ _
+             _ X X _
+             _ X X _
+             _ _ _ _),
+        tet!(_ _ _ _
+             _ X X _
+             _ X X _
+             _ _ _ _),
+        tet!(_ _ _ _
+             _ X X _
+             _ X X _
+             _ _ _ _),
+        tet!(_ _ _ _
+             _ X X _
+             _ X X _
+             _ _ _ _),
     ],
     color: ShapeColor::O,
 };
 
 static I_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [XX, XX, XX, XX],
-            [__, __, __, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, XX, __],
-            [__, __, XX, __],
-            [__, __, XX, __],
-            [__, __, XX, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, __, __, __],
-            [XX, XX, XX, XX],
-            [__, __, __, __],
-        ],
-        [
-            [__, XX, __, __],
-            [__, XX, __, __],
-            [__, XX, __, __],
-            [__, XX, __, __],
-        ],
+        tet!(_ _ _ _
+             X X X X
+             _ _ _ _
+             _ _ _ _),
+        tet!(_ _ X _
+             _ _ X _
+             _ _ X _
+             _ _ X _),
+        tet!(_ _ _ _
+             _ _ _ _
+             X X X X
+             _ _ _ _),
+        tet!(_ X _ _
+             _ X _ _
+             _ X _ _
+             _ X _ _),
     ],
     color: ShapeColor::I,
 };
 
 static J_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [XX, __, __, __],
-            [XX, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, XX, __],
-            [__, XX, __, __],
-            [__, XX, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, __, __, __],
-            [XX, XX, XX, __],
-            [__, __, XX, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, __, __],
-            [__, XX, __, __],
-            [XX, XX, __, __],
-        ],
+        tet!(_ _ _ _
+             X _ _ _
+             X X X _
+             _ _ _ _),
+        tet!(_ _ _ _
+             _ X X _
+             _ X _ _
+             _ X _ _),
+        tet!(_ _ _ _
+             _ _ _ _
+             X X X _
+             _ _ X _),
+        tet!(_ _ _ _
+             _ X _ _
+             _ X _ _
+             X X _ _),
     ],
     color: ShapeColor::J,
 };
 
 static L_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [__, __, XX, __],
-            [XX, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, __, __],
-            [__, XX, __, __],
-            [__, XX, XX, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, __, __, __],
-            [XX, XX, XX, __],
-            [XX, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [XX, XX, __, __],
-            [__, XX, __, __],
-            [__, XX, __, __],
-        ],
+        tet!(_ _ _ _
+             _ _ X _
+             X X X _
+             _ _ _ _),
+        tet!(_ _ _ _
+             _ X _ _
+             _ X _ _
+             _ X X _),
+        tet!(_ _ _ _
+             _ _ _ _
+             X X X _
+             X _ _ _),
+        tet!(_ _ _ _
+             X X _ _
+             _ X _ _
+             _ X _ _),
     ],
     color: ShapeColor::L,
 };
 
 static S_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [__, XX, XX, __],
-            [XX, XX, __, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, XX, __, __],
-            [__, XX, XX, __],
-            [__, __, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, XX, XX, __],
-            [XX, XX, __, __],
-            [__, __, __, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, XX, __, __],
-            [__, XX, XX, __],
-            [__, __, XX, __],
-            [__, __, __, __],
-        ],
+        tet!(_ _ _ _
+             _ X X _
+             X X _ _
+             _ _ _ _),
+        tet!(_ X _ _
+             _ X X _
+             _ _ X _
+             _ _ _ _),
+        tet!(_ X X _
+             X X _ _
+             _ _ _ _
+             _ _ _ _),
+        tet!(_ X _ _
+             _ X X _
+             _ _ X _
+             _ _ _ _),
     ],
     color: ShapeColor::S,
 };
 
 static T_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [__, XX, __, __],
-            [XX, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, __, __],
-            [__, XX, XX, __],
-            [__, XX, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, __, __, __],
-            [XX, XX, XX, __],
-            [__, XX, __, __],
-        ],
-        [
-            [__, __, __, __],
-            [__, XX, __, __],
-            [XX, XX, __, __],
-            [__, XX, __, __],
-        ],
+        tet!(_ _ _ _
+             _ X _ _
+             X X X _
+             _ _ _ _),
+        tet!(_ _ _ _
+             _ X _ _
+             _ X X _
+             _ X _ _),
+        tet!(_ _ _ _
+             _ _ _ _
+             X X X _
+             _ X _ _),
+        tet!(_ _ _ _
+             _ X _ _
+             X X _ _
+             _ X _ _),
     ],
     color: ShapeColor::T,
 };
 
 static Z_SHAPE: Shape = Shape {
     rotations: [
-        [
-            [__, __, __, __],
-            [XX, XX, __, __],
-            [__, XX, XX, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, XX, __, __],
-            [XX, XX, __, __],
-            [XX, __, __, __],
-            [__, __, __, __],
-        ],
-        [
-            [XX, XX, __, __],
-            [__, XX, XX, __],
-            [__, __, __, __],
-            [__, __, __, __],
-        ],
-        [
-            [__, __, XX, __],
-            [__, XX, XX, __],
-            [__, XX, __, __],
-            [__, __, __, __],
-        ],
+        tet!(_ _ _ _
+             X X _ _
+             _ X X _
+             _ _ _ _),
+        tet!(_ X _ _
+             X X _ _
+             X _ _ _
+             _ _ _ _),
+        tet!(X X _ _
+             _ X X _
+             _ _ _ _
+             _ _ _ _),
+        tet!(_ _ X _
+             _ X X _
+             _ X _ _
+             _ _ _ _),
     ],
     color: ShapeColor::Z,
 };
