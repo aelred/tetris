@@ -7,13 +7,13 @@ const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 
 #[derive(Debug)]
 pub struct Piece {
-    pub shape: &'static Shape,
+    pub shape: Shape,
     pub rot: Rotation,
     pub pos: Pos,
 }
 
 impl Piece {
-    pub fn new(shape: &'static Shape) -> Piece {
+    pub fn new(shape: Shape) -> Piece {
         Piece {
             shape,
             rot: Rotation::default(),

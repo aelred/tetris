@@ -144,7 +144,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    fn draw_next(&mut self, next: &Shape) {
+    fn draw_next(&mut self, next: Shape) {
         self.set_viewport(*PREVIEW_VIEW);
 
         self.draw_border(Pos::new(i16::from(shape::WIDTH), i16::from(shape::HEIGHT)));
@@ -176,7 +176,7 @@ impl<'a> Drawer<'a> {
         );
     }
 
-    fn draw_shape(&mut self, shape: &Shape, rot: Rotation, pos: Pos) {
+    fn draw_shape(&mut self, shape: Shape, rot: Rotation, pos: Pos) {
         for block in shape.blocks(rot) {
             self.draw_block(pos + block, shape_color_to_rgb(shape.color));
         }

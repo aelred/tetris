@@ -14,7 +14,7 @@ pub const HEIGHT: u8 = 4;
 
 #[derive(Clone)]
 pub struct Bag {
-    shapes: [&'static Shape; NUM_SHAPES],
+    shapes: [Shape; NUM_SHAPES],
     index: usize,
     rng: XorShiftRng,
 }
@@ -38,11 +38,11 @@ impl Bag {
         }
     }
 
-    pub fn peek(&self) -> &'static Shape {
+    pub fn peek(&self) -> Shape {
         self.shapes[self.index]
     }
 
-    pub fn pop(&mut self) -> &'static Shape {
+    pub fn pop(&mut self) -> Shape {
         let next = self.shapes[self.index];
 
         self.index += 1;
@@ -55,7 +55,7 @@ impl Bag {
         next
     }
 
-    fn random_sequence<R: Rng>(rng: &mut R) -> [&'static Shape; NUM_SHAPES] {
+    fn random_sequence<R: Rng>(rng: &mut R) -> [Shape; NUM_SHAPES] {
         let mut sequence = SHAPES;
 
         // This is inlined from `Rng::shuffle`.
@@ -110,7 +110,7 @@ pub enum ShapeColor {
     Z,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Shape {
     rotations: [u16; 4],
     pub color: ShapeColor,
@@ -133,8 +133,8 @@ impl Shape {
     }
 }
 
-static SHAPES: [&'static Shape; NUM_SHAPES] = [
-    &O_SHAPE, &I_SHAPE, &J_SHAPE, &L_SHAPE, &S_SHAPE, &T_SHAPE, &Z_SHAPE,
+static SHAPES: [Shape; NUM_SHAPES] = [
+    O_SHAPE, I_SHAPE, J_SHAPE, L_SHAPE, S_SHAPE, T_SHAPE, Z_SHAPE,
 ];
 
 /// Create a tetromino shape as a compact `u16` bit array.
