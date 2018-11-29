@@ -377,7 +377,7 @@ mod tests {
 
     impl Arbitrary for &'static Shape {
         fn arbitrary<G: Gen>(g: &mut G) -> &'static Shape {
-            g.choose(&SHAPES).unwrap()
+            g.choose(&*SHAPES).unwrap()
         }
     }
 
