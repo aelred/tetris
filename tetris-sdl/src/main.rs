@@ -144,7 +144,7 @@ fn play_tetris(mut context: Context) {
     set_main_loop_arg(
         em_loop,
         unsafe { transmute::<Box<Context>, *mut libc::c_void>(boxed_context) },
-        (1000 / TIME_BETWEEN_FRAMES_IN_MS) as i32,
+        0,
         true,
     );
 }
