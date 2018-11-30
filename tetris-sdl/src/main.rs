@@ -125,9 +125,18 @@ fn play_tetris(mut context: Context) {
         context.main_loop();
     }
 
+    context.drawer.present();
+
+    // We box the context and pass that to `transmute`, instead of a reference. If we pass a
+    // reference, the `context` will be dropped at the end of this method (even though there is
+    // still a main loop running that needs it). A box will take ownership for us and then
+    // be magically obliterated in the `transmute` method, without dropping the context.
+    // This means we have deliberately introduced a memory leak! Yay!
+    let boxed_context = Box::new(context);
+
     set_main_loop_arg(
         em_loop,
-        unsafe { transmute::<&mut Context, *mut libc::c_void>(&mut context) },
+        unsafe { transmute::<Box<Context>, *mut libc::c_void>(boxed_context) },
         (1000 / TICK) as i32,
         true,
     );
