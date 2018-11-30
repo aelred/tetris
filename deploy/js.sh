@@ -5,6 +5,7 @@ set -e
 set -o pipefail
 
 cd tetris-sdl
-cargo build --release --target asmjs-unknown-emscripten
+cargo build --release --target wasm32-unknown-emscripten
 cd ..
-cp target/asmjs-unknown-emscripten/release/tetris-sdl.js static/tetris.js
+cp target/wasm32-unknown-emscripten/release/tetris-sdl.js static/
+cp target/wasm32-unknown-emscripten/release/tetris_sdl.wasm static/
