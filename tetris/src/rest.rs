@@ -123,7 +123,7 @@ impl Client {
         Ok(Client::run_script_string(&script))
     }
 
-    fn post_raw_hiscores(&self, score: String) -> Result<()> {
+    fn post_raw_hiscores(&self, score: &str) -> Result<()> {
         let script = format!(
             r#"(function() {{
             var req = new XMLHttpRequest();
