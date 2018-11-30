@@ -19,15 +19,10 @@ extern crate rand;
 extern crate serde;
 extern crate serde_json;
 extern crate url;
+extern crate hyper;
 
 #[macro_use]
 extern crate serde_derive;
-
-#[cfg(not(target_os = "emscripten"))]
-extern crate hyper;
-
-#[cfg(target_os = "emscripten")]
-extern crate libc;
 
 #[cfg(test)]
 #[macro_use]
