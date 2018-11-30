@@ -2,10 +2,10 @@ extern crate rand;
 
 use pos::Pos;
 
+use args;
 use rand::Rng;
 use rand::XorShiftRng;
 use std::fmt;
-use args;
 
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -145,18 +145,34 @@ impl Shape {
 /// ```
 ///
 macro_rules! tet {
-    (@b X) => { 1 };
-    (@b _) => { 0 };
+    (@b X) => {
+        1
+    };
+    (@b _) => {
+        0
+    };
 
     ($_0:tt $_1:tt $_2:tt $_3:tt
      $_4:tt $_5:tt $_6:tt $_7:tt
      $_8:tt $_9:tt $_a:tt $_b:tt
      $_c:tt $_d:tt $_e:tt $_f:tt) => {
-        tet!(@b $_0) << 0x0 | tet!(@b $_1) << 0x1 | tet!(@b $_2) << 0x2 | tet!(@b $_3) << 0x3 |
-        tet!(@b $_4) << 0x4 | tet!(@b $_5) << 0x5 | tet!(@b $_6) << 0x6 | tet!(@b $_7) << 0x7 |
-        tet!(@b $_8) << 0x8 | tet!(@b $_9) << 0x9 | tet!(@b $_a) << 0xa | tet!(@b $_b) << 0xb |
-        tet!(@b $_c) << 0xc | tet!(@b $_d) << 0xd | tet!(@b $_e) << 0xe | tet!(@b $_f) << 0xf
-     };
+        tet!(@b $_0) << 0x0
+            | tet!(@b $_1) << 0x1
+            | tet!(@b $_2) << 0x2
+            | tet!(@b $_3) << 0x3
+            | tet!(@b $_4) << 0x4
+            | tet!(@b $_5) << 0x5
+            | tet!(@b $_6) << 0x6
+            | tet!(@b $_7) << 0x7
+            | tet!(@b $_8) << 0x8
+            | tet!(@b $_9) << 0x9
+            | tet!(@b $_a) << 0xa
+            | tet!(@b $_b) << 0xb
+            | tet!(@b $_c) << 0xc
+            | tet!(@b $_d) << 0xd
+            | tet!(@b $_e) << 0xe
+            | tet!(@b $_f) << 0xf
+    };
 }
 
 lazy_static! {

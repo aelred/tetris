@@ -108,18 +108,34 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
 
     let hor_border = HOR_BORDER.repeat(board::WIDTH as usize);
 
-    write!(stdout, "{}{}{}{}", cursor::Goto(1, 1), TL_BORDER, hor_border, TR_BORDER)?;
+    write!(
+        stdout,
+        "{}{}{}{}",
+        cursor::Goto(1, 1),
+        TL_BORDER,
+        hor_border,
+        TR_BORDER
+    )?;
 
     const RIGHT_BORDER_COLUMN: u16 = (board::WIDTH as u16 * BLOCK_WIDTH) + 2;
 
     for row in 0..u16::from(board::VISIBLE_ROWS) {
         write!(stdout, "{}{}", cursor::Goto(1, row + 2), VERT_BORDER)?;
-        write!(stdout, "{}{}", cursor::Goto(RIGHT_BORDER_COLUMN, row + 2), VERT_BORDER)?;
+        write!(
+            stdout,
+            "{}{}",
+            cursor::Goto(RIGHT_BORDER_COLUMN, row + 2),
+            VERT_BORDER
+        )?;
     }
 
     const BOTTOM_ROW: cursor::Goto = cursor::Goto(1, board::VISIBLE_ROWS as u16 + 2);
 
-    write!(stdout, "{}{}{}{}", BOTTOM_ROW, BL_BORDER, hor_border, BR_BORDER)
+    write!(
+        stdout,
+        "{}{}{}{}",
+        BOTTOM_ROW, BL_BORDER, hor_border, BR_BORDER
+    )
 }
 
 fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {

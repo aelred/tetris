@@ -122,7 +122,6 @@ impl Default for GameWithHistory {
 }
 
 impl GameWithHistory {
-
     /// Advance the game one frame.
     ///
     /// Consumes the game and returns the new state. In the event of a game over, the returned state
@@ -182,7 +181,6 @@ impl GameWithHistory {
 
 /// A game of Tetris in-progress.
 pub struct Game {
-
     /// The current piece that the user is placing.
     pub piece: Piece,
 
@@ -215,7 +213,6 @@ pub struct Game {
 }
 
 impl Game {
-
     /// Create a new game from the given seed, which determines the order pieces appear.
     fn new(seed: [u32; 4]) -> Game {
         let mut bag = Bag::new(XorShiftRng::from_seed(seed));

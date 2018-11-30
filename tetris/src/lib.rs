@@ -1,6 +1,7 @@
 #[macro_use]
 mod macros;
 
+pub mod args;
 pub mod board;
 pub mod game;
 pub mod game_over;
@@ -10,7 +11,6 @@ pub mod rest;
 pub mod score;
 pub mod shape;
 pub mod state;
-pub mod args;
 
 #[macro_use]
 extern crate lazy_static;

@@ -1,9 +1,9 @@
 use game::History;
 use std::cmp::Ordering;
 use std::error::Error;
+use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::fmt;
 
 pub const OFFSET: i32 = 100;
 
@@ -47,7 +47,7 @@ pub enum ScoreValidationError {
     UnexpectedScore {
         score_message: Box<ScoreMessage>,
         expected_score: u32,
-    }
+    },
 }
 
 impl Error for ScoreValidationError {}
@@ -55,21 +55,23 @@ impl Error for ScoreValidationError {}
 impl Display for ScoreValidationError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            ScoreValidationError::NameEmpty => {
-                write!(f, "Name should not be empty")
-            },
+            ScoreValidationError::NameEmpty => write!(f, "Name should not be empty"),
             ScoreValidationError::NameTooLong(length) => {
                 write!(f, "Name must be at most 3 characters, but was {}", length)
-            },
-            ScoreValidationError::NameNotAlphanumeric(name) => {
-                write!(f, "Name must contain only alphanumeric characters, but was {}", name)
             }
-            ScoreValidationError::UnexpectedScore { score_message, expected_score } => {
-                write!(f,
-                    "Score does not match game history {:?}:\n History suggests {} but was {}",
-                    score_message, expected_score, score_message.score.value
-                )
-            }
+            ScoreValidationError::NameNotAlphanumeric(name) => write!(
+                f,
+                "Name must contain only alphanumeric characters, but was {}",
+                name
+            ),
+            ScoreValidationError::UnexpectedScore {
+                score_message,
+                expected_score,
+            } => write!(
+                f,
+                "Score does not match game history {:?}:\n History suggests {} but was {}",
+                score_message, expected_score, score_message.score.value
+            ),
         }
     }
 }
@@ -85,11 +87,11 @@ impl ScoreMessage {
         }
 
         if self.score.name.len() > 3 {
-            return Err(ScoreValidationError::NameTooLong(self.score.name.len()))
+            return Err(ScoreValidationError::NameTooLong(self.score.name.len()));
         }
 
         if !self.score.name.chars().all(char::is_alphanumeric) {
-            return Err(ScoreValidationError::NameNotAlphanumeric(self.score.name))
+            return Err(ScoreValidationError::NameNotAlphanumeric(self.score.name));
         }
 
         self.verify_score()
@@ -102,7 +104,10 @@ impl ScoreMessage {
             return Ok(self.score);
         }
 
-        Err(ScoreValidationError::UnexpectedScore { score_message: Box::new(self), expected_score })
+        Err(ScoreValidationError::UnexpectedScore {
+            score_message: Box::new(self),
+            expected_score,
+        })
     }
 }
 
