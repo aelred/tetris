@@ -12,6 +12,11 @@ rust:
 - beta
 - stable
 
+sudo: required
+
+services:
+  - docker
+
 jobs:
   include:
     - stage: deploy
@@ -24,6 +29,8 @@ dist: trusty
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_c494ad7d7799_key -iv $encrypted_c494ad7d7799_iv -in deploy/deploy_key.enc -out deploy_key -d
+  - nvm install 11.2.0
+  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
 
 before_script:
   - |
@@ -32,8 +39,10 @@ before_script:
 
 script:
   - |
+    docker exec -it emscripten make helloworld.js
     cargo when --channel=stable fmt --all -- --write-mode=diff
     cargo test --verbose
+    cargo test --target asmjs-unknown-emscripten --verbose --package tetris --package tetris-sdl
 
 cache:
   cargo: true
