@@ -24,9 +24,12 @@ use sdl2::rwops::RWops;
 use sdl2::ttf;
 use sdl2::video::Window;
 use sdl2::Sdl;
+use std::time::Duration;
+use std::time::Instant;
 use tetris::state::State;
 
-const TICK: u64 = 33;
+const TIME_BETWEEN_FRAMES_IN_MS: u64 = 33;
+const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 
 static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
 static MUSIC_DATA: &'static [u8] = include_bytes!("../resources/tetris.ogg");
@@ -43,6 +46,9 @@ struct Context<'a> {
     /// The game [State]. This is an [Option] so that update methods can
     /// [Option::take] the [State] and consume it.
     state: Option<State>,
+
+    /// The last time the game was stepped forward
+    last_update: Instant,
 }
 
 fn main() {
@@ -73,6 +79,7 @@ fn main() {
         drawer: Drawer::new(window.into_canvas().build().unwrap(), font),
         event_handler,
         state: Some(State::default()),
+        last_update: Instant::now(),
     };
 
     play_tetris(context);
@@ -85,7 +92,7 @@ fn play_tetris(mut context: Context) {
 
     loop {
         context.main_loop();
-        sleep(Duration::from_millis(TICK));
+        sleep(Duration::from_millis(TIME_BETWEEN_FRAMES_IN_MS));
     }
 }
 
@@ -137,7 +144,7 @@ fn play_tetris(mut context: Context) {
     set_main_loop_arg(
         em_loop,
         unsafe { transmute::<Box<Context>, *mut libc::c_void>(boxed_context) },
-        (1000 / TICK) as i32,
+        (1000 / TIME_BETWEEN_FRAMES_IN_MS) as i32,
         true,
     );
 }
@@ -146,7 +153,19 @@ impl<'a> Context<'a> {
     fn main_loop(&mut self) {
         let mut state = self.state.take().unwrap();
         state = self.event_handler.handle(state);
-        state = state.update();
+
+        // Check if enough time has passed to tick the game forward.
+        // This makes the game speed independent of the frame rate.
+        let time_between_updates = Duration::from_millis(TIME_BETWEEN_UPDATES_IN_MS);
+        let now = Instant::now();
+        let time_since_last_update = now - self.last_update;
+        let num_updates =
+            time_since_last_update.subsec_millis() / time_between_updates.subsec_millis();
+        
+        for _ in 0..num_updates {
+            state = state.update();
+            self.last_update = now;
+        }
 
         self.drawer.clear();
         self.drawer.draw_state(&state);
