@@ -1,7 +1,8 @@
 target
 .DS_Store
 *.swp
-static/tetris.js
+static/tetris-sdl.js
+static/tetris_sdl.wasm
 *.bk
 .idea
 .vscode
