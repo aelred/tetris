@@ -90,7 +90,7 @@ fn play_tetris(mut context: Context) {
 }
 
 #[cfg(target_os = "emscripten")]
-fn play_tetris(mut context: &mut Context) {
+fn play_tetris(mut context: Context) {
     use std::mem::transmute;
 
     type EmArgCallbackFun = extern "C" fn(_: *mut libc::c_void);
