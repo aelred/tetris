@@ -28,7 +28,6 @@ use std::time::Duration;
 use std::time::Instant;
 use tetris::state::State;
 
-const TIME_BETWEEN_FRAMES_IN_MS: u64 = 33;
 const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 
 static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
@@ -90,9 +89,13 @@ fn play_tetris(mut context: Context) {
     use std::thread::sleep;
     use std::time::Duration;
 
+    const TIME_BETWEEN_FRAMES_IN_MS: u64 = 33;
+
+    let time_between_frames = Duration::from_millis(TIME_BETWEEN_FRAMES_IN_MS);
+
     loop {
         context.main_loop();
-        sleep(Duration::from_millis(TIME_BETWEEN_FRAMES_IN_MS));
+        sleep(time_between_frames);
     }
 }
 
