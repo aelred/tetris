@@ -1,7 +1,10 @@
 use std::error::Error;
 
+#[cfg(not(target_os = "emscripten"))]
 use hyper;
 use lazy_static::lazy_static;
+#[cfg(target_os = "emscripten")]
+use libc;
 use serde_json;
 use url;
 use url::Url;
@@ -36,11 +39,13 @@ impl Client {
     }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 struct Client {
     url: Url,
     hyper_client: hyper::client::Client,
 }
 
+#[cfg(not(target_os = "emscripten"))]
 impl Client {
     fn new(url: Url) -> Self {
         Client {
@@ -63,6 +68,73 @@ impl Client {
             .post(self.scores_endpoint())
             .body(score.as_bytes())
             .send()?;
+        Ok(())
+    }
+}
+
+#[cfg(target_os = "emscripten")]
+struct Client {
+    url: Url,
+}
+
+#[cfg(target_os = "emscripten")]
+extern "C" {
+    pub fn emscripten_run_script(script: *const libc::c_char);
+    pub fn emscripten_run_script_string(script: *const libc::c_char) -> *mut libc::c_char;
+}
+
+#[cfg(target_os = "emscripten")]
+impl Client {
+    fn new(url: Url) -> Self {
+        Client { url }
+    }
+
+    fn run_script(script: &str) {
+        use std::ffi::CString;
+
+        let script = CString::new(script).unwrap();
+        unsafe {
+            emscripten_run_script(script.as_ptr());
+        }
+    }
+
+    fn run_script_string(script: &str) -> String {
+        use std::ffi::{CStr, CString};
+
+        let script = CString::new(script).unwrap();
+        unsafe {
+            let ptr = emscripten_run_script_string(script.as_ptr());
+            let c_str = CStr::from_ptr(ptr);
+            String::from(c_str.to_str().unwrap())
+        }
+    }
+
+    fn get_raw_hiscores(&self) -> Result<String> {
+        let script = format!(
+            r#"(function() {{
+            var req = new XMLHttpRequest();
+            req.open("GET", "{}", false);
+            req.send(null);
+            return req.responseText;
+        }}())"#,
+            self.scores_endpoint()
+        );
+
+        Ok(Client::run_script_string(&script))
+    }
+
+    fn post_raw_hiscores(&self, score: &str) -> Result<()> {
+        let script = format!(
+            r#"(function() {{
+            var req = new XMLHttpRequest();
+            req.open("POST", "{}", false);
+            req.send(JSON.stringify({}));
+        }}())"#,
+            self.scores_endpoint(),
+            score
+        );
+
+        Client::run_script(&script);
         Ok(())
     }
 }
