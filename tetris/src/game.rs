@@ -10,7 +10,6 @@ use std::cmp;
 use rand;
 use rand::SeedableRng;
 use rand::XorShiftRng;
-use std::mem;
 use std::ops::Add;
 use std::ops::Mul;
 
@@ -355,13 +354,12 @@ impl Game {
     ///
     /// Returns whether this results in a game over.
     fn lock_piece(&mut self) -> bool {
-        let new_piece = Piece::new(self.bag.pop());
-        let old_piece = mem::replace(&mut self.piece, new_piece);
-
         let FillResult {
             mut is_game_over,
             lines_cleared,
-        } = self.board.lock_piece(old_piece);
+        } = self.board.lock_piece(&self.piece);
+
+        self.piece = Piece::new(self.bag.pop());
 
         self.drop = Drop::Normal;
         self.drop_tick = 0;

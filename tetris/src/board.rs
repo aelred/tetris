@@ -14,7 +14,7 @@ impl Board {
     ///
     /// This can cause a game over if the piece is locked above the visible playing area, which
     /// will be indicated in the return value.
-    pub fn lock_piece(&mut self, piece: Piece) -> FillResult {
+    pub fn lock_piece(&mut self, piece: &Piece) -> FillResult {
         let mut is_game_over = true;
 
         for cell in piece.blocks() {
