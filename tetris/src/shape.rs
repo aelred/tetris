@@ -3,10 +3,10 @@ use rand;
 use crate::pos::Pos;
 
 use crate::args;
+use lazy_static::lazy_static;
 use rand::Rng;
 use rand::XorShiftRng;
 use std::fmt;
-use lazy_static::lazy_static;
 
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -408,7 +408,8 @@ mod tests {
                 ShapeColor::S,
                 ShapeColor::T,
                 ShapeColor::Z,
-            ]).unwrap()
+            ])
+            .unwrap()
         }
     }
 

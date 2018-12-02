@@ -1,6 +1,5 @@
 use termion;
 
-
 use std::io;
 use std::io::Result;
 use std::io::Write;

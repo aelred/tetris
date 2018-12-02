@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
@@ -22,7 +23,6 @@ use tetris::shape::Rotation;
 use tetris::shape::Shape;
 use tetris::shape::ShapeColor;
 use tetris::state::State;
-use lazy_static::lazy_static;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
@@ -359,7 +359,11 @@ impl Drawable for Score {
 impl Drawable for GameOver {
     fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
         match &self.hiscores {
-            Some(HighScores { higher_scores, lower_scores, has_hiscore }) => {
+            Some(HighScores {
+                higher_scores,
+                lower_scores,
+                has_hiscore,
+            }) => {
                 let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
 
                 text = text.size(2).under().offset(0, 10);

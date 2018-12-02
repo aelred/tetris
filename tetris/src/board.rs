@@ -124,8 +124,8 @@ mod tests {
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<ShapeColor>; WIDTH as usize];
-                                   HEIGHT as usize] = mem::uninitialized();
+                let mut array: [[Option<ShapeColor>; WIDTH as usize]; HEIGHT as usize] =
+                    mem::uninitialized();
 
                 for row in array.iter_mut() {
                     for cell in row.iter_mut() {

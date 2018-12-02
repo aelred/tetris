@@ -10,9 +10,9 @@ use std::cmp;
 use rand;
 use rand::SeedableRng;
 use rand::XorShiftRng;
+use serde_derive::{Deserialize, Serialize};
 use std::ops::Add;
 use std::ops::Mul;
-use serde_derive::{Serialize, Deserialize};
 
 /// The rate at which pieces fall, measured in hundredths of cells per frame.
 ///
@@ -263,7 +263,8 @@ impl Game {
             Drop::Normal => self.normal_gravity(),
             Drop::Soft => Gravity::SOFT_DROP,
             Drop::Hard => Gravity::HARD_DROP,
-        }.0;
+        }
+        .0;
 
         false
     }

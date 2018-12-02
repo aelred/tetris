@@ -2,8 +2,7 @@ use dirs;
 use hyper;
 use serde_json;
 
-
-use clap::{value_t, crate_description, crate_authors, crate_version};
+use clap::{crate_authors, crate_description, crate_version, value_t};
 
 use tetris::score::Score;
 use tetris::score::ScoreMessage;
@@ -133,7 +132,8 @@ fn main() {
                 .long("port")
                 .default_value("4444")
                 .help("Set the port to use"),
-        ).get_matches();
+        )
+        .get_matches();
 
     let port = value_t!(matches, "PORT", u16).unwrap_or_else(|e| e.exit());
 

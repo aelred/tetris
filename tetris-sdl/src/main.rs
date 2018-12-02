@@ -1,5 +1,3 @@
-
-
 use sdl2;
 
 mod draw;
@@ -159,7 +157,7 @@ impl Context<'_> {
         let time_since_last_update = now - self.last_update;
         let num_updates =
             time_since_last_update.subsec_millis() / time_between_updates.subsec_millis();
-        
+
         for _ in 0..num_updates {
             state = state.update();
             self.last_update = now;
