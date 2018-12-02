@@ -1,4 +1,4 @@
-extern crate rand;
+use rand;
 
 use crate::pos::Pos;
 
@@ -21,7 +21,7 @@ pub struct Bag {
 }
 
 impl fmt::Debug for Bag {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         f.debug_struct("Bag")
             .field("tetrominoes", &self.shapes)
             .field("index", &self.index)

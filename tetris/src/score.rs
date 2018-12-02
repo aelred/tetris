@@ -53,7 +53,7 @@ pub enum ScoreValidationError {
 impl Error for ScoreValidationError {}
 
 impl Display for ScoreValidationError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             ScoreValidationError::NameEmpty => write!(f, "Name should not be empty"),
             ScoreValidationError::NameTooLong(length) => {

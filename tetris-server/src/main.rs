@@ -1,7 +1,7 @@
-extern crate dirs;
-extern crate hyper;
-extern crate serde_json;
-extern crate tetris;
+use dirs;
+use hyper;
+use serde_json;
+
 
 #[macro_use]
 extern crate clap;
@@ -26,7 +26,7 @@ use hyper::uri::RequestUri::AbsolutePath;
 use hyper::{Get, Post};
 use std::error::Error;
 
-type Result<T> = std::result::Result<T, Box<Error>>;
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 macro_rules! print_err (
     ($e:expr) => {{
@@ -60,7 +60,7 @@ impl ScoresHandler {
         Ok(score)
     }
 
-    fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<()> {
+    fn add_hiscore(&self, req: &mut Request<'_, '_>, mut res: Response<'_>) -> Result<()> {
         let mut body = String::new();
         req.read_to_string(&mut body)?;
 
@@ -90,7 +90,7 @@ impl ScoresHandler {
         Ok(())
     }
 
-    fn send_hiscores(&self, mut res: Response) -> std::io::Result<()> {
+    fn send_hiscores(&self, mut res: Response<'_>) -> std::io::Result<()> {
         let hiscores = &(*self.hiscores.read().unwrap());
 
         res.headers_mut().set(ContentType::json());
@@ -100,7 +100,7 @@ impl ScoresHandler {
 }
 
 impl Handler for ScoresHandler {
-    fn handle(&self, mut req: Request, mut res: Response) {
+    fn handle(&self, mut req: Request<'_, '_>, mut res: Response<'_>) {
         res.headers_mut().set(AccessControlAllowOrigin::Any);
 
         if let AbsolutePath(path) = req.uri.clone() {

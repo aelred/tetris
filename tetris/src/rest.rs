@@ -1,4 +1,4 @@
-extern crate url;
+use url;
 
 use crate::score::ScoreMessage;
 use crate::score::{Score, SCORE_ENDPOINT};
@@ -12,7 +12,7 @@ lazy_static! {
     static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());
 }
 
-type Result<T> = std::result::Result<T, Box<Error>>;
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 pub fn get_hiscores() -> Result<Vec<Score>> {
     let body = CLIENT.get_raw_hiscores()?;

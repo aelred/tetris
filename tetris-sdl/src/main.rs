@@ -1,6 +1,6 @@
-extern crate tetris;
 
-extern crate sdl2;
+
+use sdl2;
 
 #[cfg(target_os = "emscripten")]
 extern crate libc;
@@ -85,7 +85,7 @@ fn main() {
 }
 
 #[cfg(not(target_os = "emscripten"))]
-fn play_tetris(mut context: Context) {
+fn play_tetris(mut context: Context<'_>) {
     use std::thread::sleep;
     use std::time::Duration;
 

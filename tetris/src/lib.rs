@@ -15,11 +15,11 @@ pub mod state;
 #[macro_use]
 extern crate lazy_static;
 
-extern crate rand;
-extern crate serde;
-extern crate serde_json;
-extern crate url;
-extern crate hyper;
+use rand;
+
+use serde_json;
+
+use hyper;
 
 #[macro_use]
 extern crate serde_derive;

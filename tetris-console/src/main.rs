@@ -1,5 +1,5 @@
-extern crate termion;
-extern crate tetris;
+use termion;
+
 
 use std::io;
 use std::io::Result;
@@ -52,7 +52,7 @@ fn main() -> Result<()> {
                     Key::Char('\n') => title.start_game(),
                     _ => State::from(title),
                 },
-                State::Play(mut game) => handle_key_in_game(game, key),
+                State::Play(game) => handle_key_in_game(game, key),
                 State::Paused(paused) => paused.unpause(),
                 State::GameOver(game_over) => State::from(game_over),
             };
