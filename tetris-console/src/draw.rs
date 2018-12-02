@@ -50,11 +50,11 @@ const BR_BORDER: &str = "╝";
 pub fn draw<W: Write>(stdout: &mut W, state: &mut State) -> Result<()> {
     let mut buffer = io::BufWriter::new(stdout);
 
-    match &state {
+    match state {
         State::Title(_) => {
             draw_title(&mut buffer)?;
         }
-        State::Play(ref game) => {
+        State::Play(game) => {
             draw_game(&mut buffer, &game.game)?;
         }
         State::Paused(_) => {

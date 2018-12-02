@@ -58,11 +58,11 @@ impl<'a> Drawer<'a> {
     }
 
     pub fn draw_state(&mut self, state: &State) {
-        match *state {
+        match state {
             State::Title(_) => self.title_draw(),
-            State::Play(ref game) => self.draw_game(&game.game),
+            State::Play(game) => self.draw_game(&game.game),
             State::Paused(_) => self.pause_draw(),
-            State::GameOver(ref game_over) => self.draw_game_over(game_over),
+            State::GameOver(game_over) => self.draw_game_over(game_over),
         }
     }
 
@@ -358,12 +358,8 @@ impl Drawable for Score {
 
 impl Drawable for GameOver {
     fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-        match self.hiscores {
-            Some(HighScores {
-                ref higher_scores,
-                ref lower_scores,
-                ref has_hiscore,
-            }) => {
+        match &self.hiscores {
+            Some(HighScores { higher_scores, lower_scores, has_hiscore }) => {
                 let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
 
                 text = text.size(2).under().offset(0, 10);

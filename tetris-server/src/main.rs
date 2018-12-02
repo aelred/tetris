@@ -104,10 +104,10 @@ impl Handler for ScoresHandler {
 
         if let AbsolutePath(path) = req.uri.clone() {
             match (&req.method, &path[..]) {
-                (&Get, SCORE_ENDPOINT) => {
+                (Get, SCORE_ENDPOINT) => {
                     print_err!(self.send_hiscores(res));
                 }
-                (&Post, SCORE_ENDPOINT) => {
+                (Post, SCORE_ENDPOINT) => {
                     print_err!(self.add_hiscore(&mut req, res));
                 }
                 _ => {
