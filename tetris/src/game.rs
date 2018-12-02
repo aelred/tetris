@@ -12,6 +12,7 @@ use rand::SeedableRng;
 use rand::XorShiftRng;
 use std::ops::Add;
 use std::ops::Mul;
+use serde_derive::{Serialize, Deserialize};
 
 /// The rate at which pieces fall, measured in hundredths of cells per frame.
 ///

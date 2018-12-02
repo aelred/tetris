@@ -22,6 +22,7 @@ use tetris::shape::Rotation;
 use tetris::shape::Shape;
 use tetris::shape::ShapeColor;
 use tetris::state::State;
+use lazy_static::lazy_static;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;

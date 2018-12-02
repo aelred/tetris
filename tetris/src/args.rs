@@ -1,3 +1,5 @@
+use lazy_static::lazy_static;
+
 pub fn evil_mode() -> bool {
     ARGS.evil_mode
 }

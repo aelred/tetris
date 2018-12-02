@@ -2,6 +2,7 @@ use crate::board::WIDTH;
 use crate::pos::Pos;
 use crate::shape::Rotation;
 use crate::shape::Shape;
+use lazy_static::lazy_static;
 
 const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 

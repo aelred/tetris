@@ -62,7 +62,7 @@ impl Add for Pos {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quickcheck::{Arbitrary, Gen};
+    use quickcheck::{quickcheck, Arbitrary, Gen};
 
     const ID: Pos = Pos { x: 0, y: 0 };
 

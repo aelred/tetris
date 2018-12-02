@@ -6,6 +6,7 @@ use crate::args;
 use rand::Rng;
 use rand::XorShiftRng;
 use std::fmt;
+use lazy_static::lazy_static;
 
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -366,7 +367,7 @@ static Z_SHAPE: Shape = Shape {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quickcheck::{Arbitrary, Gen};
+    use quickcheck::{quickcheck, Arbitrary, Gen};
 
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {

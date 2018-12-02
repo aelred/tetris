@@ -3,8 +3,7 @@ use hyper;
 use serde_json;
 
 
-#[macro_use]
-extern crate clap;
+use clap::{value_t, crate_description, crate_authors, crate_version};
 
 use tetris::score::Score;
 use tetris::score::ScoreMessage;

@@ -117,7 +117,7 @@ pub const VISIBLE_ROWS: u8 = HEIGHT - HIDE_ROWS;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use quickcheck::{Arbitrary, Gen, TestResult};
+    use quickcheck::{quickcheck, Arbitrary, Gen, TestResult};
     use std::mem;
     use std::ptr;
 

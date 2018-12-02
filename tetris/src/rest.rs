@@ -5,6 +5,7 @@ use crate::score::{Score, SCORE_ENDPOINT};
 use serde_json;
 use url::Url;
 use std::error::Error;
+use lazy_static::lazy_static;
 
 use hyper;
 

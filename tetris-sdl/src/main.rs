@@ -2,12 +2,6 @@
 
 use sdl2;
 
-#[cfg(target_os = "emscripten")]
-extern crate libc;
-
-#[macro_use]
-extern crate lazy_static;
-
 mod draw;
 mod event;
 
@@ -101,6 +95,7 @@ fn play_tetris(mut context: Context<'_>) {
 
 #[cfg(target_os = "emscripten")]
 fn play_tetris(mut context: Context) {
+    use libc;
     use std::mem::transmute;
 
     type EmArgCallbackFun = extern "C" fn(_: *mut libc::c_void);

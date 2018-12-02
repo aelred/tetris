@@ -4,6 +4,7 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
+use serde_derive::{Serialize, Deserialize};
 
 pub const OFFSET: i32 = 100;
 
