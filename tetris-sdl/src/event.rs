@@ -1,4 +1,4 @@
-use draw::WINDOW_RATIO;
+use crate::draw::WINDOW_RATIO;
 use sdl2::event::Event;
 use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;

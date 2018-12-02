@@ -1,7 +1,7 @@
 extern crate url;
 
-use score::ScoreMessage;
-use score::{Score, SCORE_ENDPOINT};
+use crate::score::ScoreMessage;
+use crate::score::{Score, SCORE_ENDPOINT};
 use serde_json;
 use url::Url;
 use std::error::Error;

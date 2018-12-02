@@ -1,4 +1,4 @@
-use game::History;
+use crate::game::History;
 use std::cmp::Ordering;
 use std::error::Error;
 use std::fmt;

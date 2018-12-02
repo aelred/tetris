@@ -11,13 +11,13 @@ extern crate lazy_static;
 mod draw;
 mod event;
 
-use draw::Drawer;
+use crate::draw::Drawer;
 
 use std::cmp::max;
 
-use draw::WINDOW_HEIGHT;
-use draw::WINDOW_WIDTH;
-use event::EventHandler;
+use crate::draw::WINDOW_HEIGHT;
+use crate::draw::WINDOW_WIDTH;
+use crate::event::EventHandler;
 use sdl2::mixer::LoaderRWops;
 use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::rwops::RWops;

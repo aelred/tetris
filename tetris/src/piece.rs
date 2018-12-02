@@ -1,7 +1,7 @@
-use board::WIDTH;
-use pos::Pos;
-use shape::Rotation;
-use shape::Shape;
+use crate::board::WIDTH;
+use crate::pos::Pos;
+use crate::shape::Rotation;
+use crate::shape::Shape;
 
 const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
 

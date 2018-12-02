@@ -1,10 +1,10 @@
-use board::Board;
-use board::FillResult;
-use game_over::GameOver;
-use piece::Piece;
-use shape::Bag;
-use state::Paused;
-use state::State;
+use crate::board::Board;
+use crate::board::FillResult;
+use crate::game_over::GameOver;
+use crate::piece::Piece;
+use crate::shape::Bag;
+use crate::state::Paused;
+use crate::state::State;
 use std::cmp;
 
 use rand;

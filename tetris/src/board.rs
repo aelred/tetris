@@ -1,6 +1,6 @@
-use piece::Piece;
-use pos::Pos;
-use shape::ShapeColor;
+use crate::piece::Piece;
+use crate::pos::Pos;
+use crate::shape::ShapeColor;
 
 /// The board state, describing which cells are full and what colour tetromino they were filled
 /// with.

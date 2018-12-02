@@ -1,8 +1,8 @@
 extern crate rand;
 
-use pos::Pos;
+use crate::pos::Pos;
 
-use args;
+use crate::args;
 use rand::Rng;
 use rand::XorShiftRng;
 use std::fmt;
