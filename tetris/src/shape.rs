@@ -1,12 +1,12 @@
-use rand;
+use std::fmt;
 
-use crate::pos::Pos;
-
-use crate::args;
 use lazy_static::lazy_static;
+use rand;
 use rand::Rng;
 use rand::XorShiftRng;
-use std::fmt;
+
+use crate::args;
+use crate::pos::Pos;
 
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -366,8 +366,9 @@ static Z_SHAPE: Shape = Shape {
 
 #[cfg(test)]
 mod tests {
+    use quickcheck::{Arbitrary, Gen, quickcheck};
+
     use super::*;
-    use quickcheck::{quickcheck, Arbitrary, Gen};
 
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {

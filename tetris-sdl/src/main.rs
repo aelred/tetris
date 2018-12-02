@@ -1,24 +1,24 @@
-use sdl2;
+use std::cmp::max;
+use std::time::Duration;
+use std::time::Instant;
 
-mod draw;
-mod event;
+use sdl2;
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
+use sdl2::mixer::LoaderRWops;
+use sdl2::rwops::RWops;
+use sdl2::Sdl;
+use sdl2::ttf;
+use sdl2::video::Window;
+
+use tetris::state::State;
 
 use crate::draw::Drawer;
-
-use std::cmp::max;
-
 use crate::draw::WINDOW_HEIGHT;
 use crate::draw::WINDOW_WIDTH;
 use crate::event::EventHandler;
-use sdl2::mixer::LoaderRWops;
-use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
-use sdl2::rwops::RWops;
-use sdl2::ttf;
-use sdl2::video::Window;
-use sdl2::Sdl;
-use std::time::Duration;
-use std::time::Instant;
-use tetris::state::State;
+
+mod draw;
+mod event;
 
 const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 

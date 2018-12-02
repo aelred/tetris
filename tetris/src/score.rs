@@ -1,10 +1,12 @@
-use crate::game::History;
-use serde_derive::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
+
+use serde_derive::{Deserialize, Serialize};
+
+use crate::game::History;
 
 pub const OFFSET: i32 = 100;
 
@@ -114,9 +116,9 @@ impl ScoreMessage {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use serde_json;
+
+    use super::*;
 
     #[test]
     fn correctly_recognise_a_valid_short_game() {

@@ -1,9 +1,10 @@
+use std::char;
+
 use crate::game::History;
 use crate::rest;
 use crate::score::Score;
 use crate::score::ScoreMessage;
 use crate::state::State;
-use std::char;
 
 pub struct GameOver {
     pub hiscores: Option<HighScores>,

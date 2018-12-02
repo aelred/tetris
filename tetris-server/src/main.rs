@@ -1,13 +1,4 @@
-use dirs;
-use hyper;
-use serde_json;
-
-use clap::{crate_authors, crate_description, crate_version, value_t};
-
-use tetris::score::Score;
-use tetris::score::ScoreMessage;
-use tetris::score::SCORE_ENDPOINT;
-
+use std::error::Error;
 use std::fs::DirBuilder;
 use std::fs::File;
 use std::io::Read;
@@ -15,14 +6,20 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::RwLock;
 
+use clap::{crate_authors, crate_description, crate_version, value_t};
 use clap::{App, Arg};
-
+use dirs;
+use hyper;
+use hyper::{Get, Post};
 use hyper::header::{AccessControlAllowOrigin, ContentType};
 use hyper::server::{Handler, Request, Response, Server};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri::AbsolutePath;
-use hyper::{Get, Post};
-use std::error::Error;
+use serde_json;
+
+use tetris::score::Score;
+use tetris::score::SCORE_ENDPOINT;
+use tetris::score::ScoreMessage;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 

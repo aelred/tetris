@@ -1,3 +1,6 @@
+use std::i16;
+use std::i32;
+
 use lazy_static::lazy_static;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
@@ -6,8 +9,7 @@ use sdl2::render::Canvas;
 use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
 use sdl2::video::Window;
-use std::i16;
-use std::i32;
+
 use tetris::board;
 use tetris::board::Board;
 use tetris::board::HIDE_ROWS;
@@ -16,8 +18,8 @@ use tetris::game_over::GameOver;
 use tetris::game_over::HighScores;
 use tetris::piece::Piece;
 use tetris::pos::Pos;
-use tetris::score::Score;
 use tetris::score::OFFSET;
+use tetris::score::Score;
 use tetris::shape;
 use tetris::shape::Rotation;
 use tetris::shape::Shape;

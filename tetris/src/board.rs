@@ -116,10 +116,12 @@ pub const VISIBLE_ROWS: u8 = HEIGHT - HIDE_ROWS;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use quickcheck::{quickcheck, Arbitrary, Gen, TestResult};
     use std::mem;
     use std::ptr;
+
+    use quickcheck::{Arbitrary, Gen, quickcheck, TestResult};
+
+    use super::*;
 
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {

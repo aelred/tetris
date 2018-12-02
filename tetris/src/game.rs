@@ -1,3 +1,12 @@
+use std::cmp;
+use std::ops::Add;
+use std::ops::Mul;
+
+use rand;
+use rand::SeedableRng;
+use rand::XorShiftRng;
+use serde_derive::{Deserialize, Serialize};
+
 use crate::board::Board;
 use crate::board::FillResult;
 use crate::game_over::GameOver;
@@ -5,14 +14,6 @@ use crate::piece::Piece;
 use crate::shape::Bag;
 use crate::state::Paused;
 use crate::state::State;
-use std::cmp;
-
-use rand;
-use rand::SeedableRng;
-use rand::XorShiftRng;
-use serde_derive::{Deserialize, Serialize};
-use std::ops::Add;
-use std::ops::Mul;
 
 /// The rate at which pieces fall, measured in hundredths of cells per frame.
 ///

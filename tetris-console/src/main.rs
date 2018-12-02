@@ -1,10 +1,9 @@
-use termion;
-
 use std::io;
 use std::io::Result;
 use std::io::Write;
 use std::time::Duration;
 
+use termion;
 use termion::color;
 use termion::cursor;
 use termion::event::Key;
