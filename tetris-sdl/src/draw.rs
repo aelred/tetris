@@ -246,7 +246,7 @@ pub struct TextDrawer<'a, 'b: 'a> {
     drawer: &'a mut Drawer<'b>,
 }
 
-impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
+impl TextDrawer<'_, '_> {
     pub fn draw(mut self, text: &str) -> Self {
         self.last_rect = self
             .drawer

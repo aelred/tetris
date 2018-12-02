@@ -24,8 +24,8 @@ use tetris::state::State;
 
 const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 
-static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
-static MUSIC_DATA: &'static [u8] = include_bytes!("../resources/tetris.ogg");
+static FONT_DATA: &[u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
+static MUSIC_DATA: &[u8] = include_bytes!("../resources/tetris.ogg");
 
 const FONT_MULTIPLE: u16 = 9;
 
@@ -147,7 +147,7 @@ fn play_tetris(mut context: Context) {
     );
 }
 
-impl<'a> Context<'a> {
+impl Context<'_> {
     fn main_loop(&mut self) {
         let mut state = self.state.take().unwrap();
         state = self.event_handler.handle(state);
