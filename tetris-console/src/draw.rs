@@ -87,7 +87,7 @@ fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
     for (num, row) in board.grid[board::HIDE_ROWS as usize..].iter().enumerate() {
         write!(stdout, "{}", cursor::Goto(2, num as u16 + 2))?;
 
-        for cell in row.iter() {
+        for cell in row {
             match cell {
                 Some(shape_color) => {
                     set_shape_color(stdout, *shape_color)?;
@@ -141,7 +141,7 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
 fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
     set_shape_color(stdout, piece.shape.color)?;
 
-    for pos in piece.blocks().iter() {
+    for pos in piece.blocks() {
         if pos.y() >= i16::from(board::HIDE_ROWS) {
             let cursor_x = (pos.x() as u16) * BLOCK_WIDTH + 2;
             let cursor_y = (pos.y() - i16::from(board::HIDE_ROWS) + 2) as u16;

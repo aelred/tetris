@@ -127,8 +127,8 @@ mod tests {
                 let mut array: [[Option<ShapeColor>; WIDTH as usize];
                                    HEIGHT as usize] = mem::uninitialized();
 
-                for row in array.iter_mut() {
-                    for cell in row.iter_mut() {
+                for row in array {
+                    for cell in row {
                         ptr::write(cell, Option::arbitrary(g));
                     }
                 }
