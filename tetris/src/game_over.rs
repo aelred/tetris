@@ -5,19 +5,34 @@ use score::ScoreMessage;
 use state::State;
 use std::char;
 
+/// Game over state, where a user can see high-scores and post their high-score.
 pub struct GameOver {
+    /// Previous high-scores.
+    ///
+    /// Optional because these are retrieved from the internet, so might not be available.
     pub hiscores: Option<HighScores>,
+
+    /// The user's score.
     pub score: Score,
+
+    /// The history of the game.
     pub history: History,
 }
 
+/// High-scores data.
 pub struct HighScores {
+    /// Scores that are strictly higher than the user's score.
     pub higher_scores: Vec<Score>,
+
+    /// Scores that are lower or equal to the user's score.
     pub lower_scores: Vec<Score>,
+
+    /// States whether the user has a high-score or not for display purposes.
     pub has_hiscore: bool,
 }
 
 impl HighScores {
+    /// Create by inspecting a list of high-scores and a user's score.
     fn new(hiscores: &[Score], user_score: &Score) -> Self {
         let index = match hiscores.binary_search(user_score) {
             Ok(i) | Err(i) => i,
@@ -43,6 +58,7 @@ impl HighScores {
 }
 
 impl GameOver {
+    /// Create a new game over state from a user's score and a game history.
     pub fn new(score: u32, history: History) -> Self {
         let hiscores = rest::get_hiscores();
 
@@ -61,16 +77,21 @@ impl GameOver {
         }
     }
 
+    /// Return whether the user can post their high-score.
+    ///
+    /// This is true only if the list of high-scores was retrieved and the user has a high-score.
     pub fn posting_hiscore(&self) -> bool {
         self.hiscores
             .as_ref()
             .map_or(false, HighScores::has_hiscore)
     }
 
+    /// Delete a character from the entered name.
     pub fn backspace(&mut self) {
         self.score.name.pop();
     }
 
+    /// Push some characters to the entered name.
     pub fn push_name(&mut self, str: &str) {
         if str.chars().all(char::is_alphanumeric) {
             self.score.name.push_str(str);
@@ -78,6 +99,8 @@ impl GameOver {
         }
     }
 
+    /// Potentially submit a high-score if allowed, then exit the game over state and return a
+    /// new game state.
     pub fn submit(self) -> State {
         if !self.posting_hiscore() || !self.score.name.is_empty() {
             if self.posting_hiscore() {
@@ -90,6 +113,7 @@ impl GameOver {
         }
     }
 
+    /// Exit the game over state and return a new game state.
     pub fn exit(self) -> State {
         State::play()
     }
