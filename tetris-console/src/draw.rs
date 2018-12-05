@@ -5,12 +5,11 @@ use std::io::Write;
 use termion::color;
 use termion::cursor;
 
-use tetris::board;
-use tetris::board::Board;
-use tetris::game::Game;
-use tetris::piece::Piece;
-use tetris::shape::ShapeColor;
-use tetris::state::State;
+use tetris::Board;
+use tetris::Game;
+use tetris::Piece;
+use tetris::ShapeColor;
+use tetris::State;
 
 const TITLE: &str = r#"
 ╔════════════════════╗
@@ -84,7 +83,7 @@ fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
 }
 
 fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
-    for (num, row) in board.grid[board::HIDE_ROWS as usize..].iter().enumerate() {
+    for (num, row) in board.grid[Board::HIDE_ROWS as usize..].iter().enumerate() {
         write!(stdout, "{}", cursor::Goto(2, num as u16 + 2))?;
 
         for cell in row {
@@ -106,7 +105,7 @@ fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
 fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
     write!(stdout, "{}", color::Fg(color::White))?;
 
-    let hor_border = HOR_BORDER.repeat(board::WIDTH as usize);
+    let hor_border = HOR_BORDER.repeat(Board::WIDTH as usize);
 
     write!(
         stdout,
@@ -117,9 +116,9 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
         TR_BORDER
     )?;
 
-    const RIGHT_BORDER_COLUMN: u16 = (board::WIDTH as u16 * BLOCK_WIDTH) + 2;
+    const RIGHT_BORDER_COLUMN: u16 = (Board::WIDTH as u16 * BLOCK_WIDTH) + 2;
 
-    for row in 0..u16::from(board::VISIBLE_ROWS) {
+    for row in 0..u16::from(Board::VISIBLE_ROWS) {
         write!(stdout, "{}{}", cursor::Goto(1, row + 2), VERT_BORDER)?;
         write!(
             stdout,
@@ -129,7 +128,7 @@ fn draw_border<W: Write>(stdout: &mut W) -> Result<()> {
         )?;
     }
 
-    const BOTTOM_ROW: cursor::Goto = cursor::Goto(1, board::VISIBLE_ROWS as u16 + 2);
+    const BOTTOM_ROW: cursor::Goto = cursor::Goto(1, Board::VISIBLE_ROWS as u16 + 2);
 
     write!(
         stdout,
@@ -142,9 +141,9 @@ fn draw_piece<W: Write>(stdout: &mut W, piece: &Piece) -> Result<()> {
     set_shape_color(stdout, piece.shape.color)?;
 
     for pos in piece.blocks() {
-        if pos.y() >= i16::from(board::HIDE_ROWS) {
+        if pos.y() >= i16::from(Board::HIDE_ROWS) {
             let cursor_x = (pos.x() as u16) * BLOCK_WIDTH + 2;
-            let cursor_y = (pos.y() - i16::from(board::HIDE_ROWS) + 2) as u16;
+            let cursor_y = (pos.y() - i16::from(Board::HIDE_ROWS) + 2) as u16;
             let cursor = cursor::Goto(cursor_x, cursor_y);
             write!(stdout, "{}{}", cursor, BLOCK)?;
         }

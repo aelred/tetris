@@ -1,16 +1,25 @@
 #[macro_use]
 mod macros;
 
-pub mod args;
-pub mod board;
-pub mod game;
-pub mod game_over;
-pub mod piece;
-pub mod pos;
-pub mod rest;
-pub mod score;
-pub mod shape;
-pub mod state;
+mod args;
+mod board;
+mod game;
+mod game_over;
+mod piece;
+mod pos;
+mod rest;
+mod score;
+mod shape;
+mod state;
+
+pub use board::Board;
+pub use game::{Game, GameWithHistory};
+pub use game_over::{GameOver, HighScores};
+pub use piece::Piece;
+pub use pos::Pos;
+pub use score::{Score, ScoreMessage, SCORE_ENDPOINT};
+pub use shape::{Shape, ShapeColor, Rotation};
+pub use state::{State, Title, Paused};
 
 #[macro_use]
 extern crate lazy_static;

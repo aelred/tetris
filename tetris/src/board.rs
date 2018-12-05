@@ -6,10 +6,24 @@ use shape::ShapeColor;
 /// with.
 #[derive(Clone, Debug)]
 pub struct Board {
-    pub grid: [[Option<ShapeColor>; WIDTH as usize]; HEIGHT as usize],
+    pub grid: [[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize],
 }
 
 impl Board {
+    /// Width of the playable board in cells.
+    pub const WIDTH: u8 = 10;
+
+    /// Height of the playable board in cells - note that some of the top-most cells are not visible
+    /// in play, indicated by `HIDE_ROWS`.
+    pub const HEIGHT: u8 = 24;
+
+    /// Number of rows at the top of the board that are not visible. This is where new pieces are
+    /// spawned.
+    pub const HIDE_ROWS: u8 = 4;
+
+    /// Number of visible rows, based on total height and number of hidden rows.
+    pub const VISIBLE_ROWS: u8 = Board::HEIGHT - Board::HIDE_ROWS;
+
     /// Lock a piece, attaching it to the board permanently and potentially clearing some rows.
     ///
     /// This can cause a game over if the piece is locked above the visible playing area, which
@@ -18,7 +32,7 @@ impl Board {
         let mut is_game_over = true;
 
         for cell in piece.blocks() {
-            if cell.y() > i16::from(HIDE_ROWS) {
+            if cell.y() > i16::from(Board::HIDE_ROWS) {
                 is_game_over = false;
             }
             self.fill_pos(cell, piece.shape.color);
@@ -43,7 +57,7 @@ impl Board {
     fn clear_full_rows(&mut self) -> u32 {
         let mut lines_cleared = 0;
 
-        for y in 0..HEIGHT {
+        for y in 0..Board::HEIGHT {
             let mut clear = true;
 
             'check_clear: for cell in &self.grid[y as usize] {
@@ -68,7 +82,7 @@ impl Board {
             self.grid[yy] = self.grid[yy - 1];
         }
 
-        for x in 0..WIDTH as usize {
+        for x in 0..Board::WIDTH as usize {
             self.grid[0][x] = None;
         }
     }
@@ -90,29 +104,15 @@ impl Default for Board {
     /// Returns an empty board.
     fn default() -> Self {
         Board {
-            grid: [[None; WIDTH as usize]; HEIGHT as usize],
+            grid: [[None; Board::WIDTH as usize]; Board::HEIGHT as usize],
         }
     }
 }
 
 /// Return whether the given position is out of bounds of the board (including hidden rows).
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() < 0 || pos.y() < 0 || pos.x() >= i16::from(WIDTH) || pos.y() >= i16::from(HEIGHT)
+    pos.x() < 0 || pos.y() < 0 || pos.x() >= i16::from(Board::WIDTH) || pos.y() >= i16::from(Board::HEIGHT)
 }
-
-/// Width of the playable board in cells.
-pub const WIDTH: u8 = 10;
-
-/// Height of the playable board in cells - note that some of the top-most cells are not visible in
-/// play, indicated by `HIDE_ROWS`.
-pub const HEIGHT: u8 = 24;
-
-/// Number of rows at the top of the board that are not visible. This is where new pieces are
-/// spawned.
-pub const HIDE_ROWS: u8 = 4;
-
-/// Number of visible rows, based on total height and number of hidden rows.
-pub const VISIBLE_ROWS: u8 = HEIGHT - HIDE_ROWS;
 
 #[cfg(test)]
 mod tests {
@@ -124,8 +124,8 @@ mod tests {
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<ShapeColor>; WIDTH as usize];
-                                   HEIGHT as usize] = mem::uninitialized();
+                let mut array: [[Option<ShapeColor>; Board::WIDTH as usize];
+                                   Board::HEIGHT as usize] = mem::uninitialized();
 
                 for row in &mut array {
                     for cell in row {
@@ -149,8 +149,8 @@ mod tests {
     impl Arbitrary for InBoundsPos {
         fn arbitrary<G: Gen>(g: &mut G) -> Self {
             InBoundsPos(Pos::new(
-                g.gen_range(0, WIDTH as i16),
-                g.gen_range(0, HEIGHT as i16),
+                g.gen_range(0, Board::WIDTH as i16),
+                g.gen_range(0, Board::HEIGHT as i16),
             ))
         }
     }
@@ -210,7 +210,7 @@ mod tests {
             let above = above.0;
             let mut board = board;
 
-            when!(y < HEIGHT);
+            when!(y < Board::HEIGHT);
             when!(above.y() < y as i16);
 
             let before = board.is_pos_free(above);

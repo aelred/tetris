@@ -5,8 +5,6 @@ use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
 
-pub const OFFSET: i32 = 100;
-
 pub const SCORE_ENDPOINT: &str = "/scores";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

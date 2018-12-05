@@ -6,9 +6,9 @@ extern crate tetris;
 #[macro_use]
 extern crate clap;
 
-use tetris::score::Score;
-use tetris::score::ScoreMessage;
-use tetris::score::SCORE_ENDPOINT;
+use tetris::Score;
+use tetris::ScoreMessage;
+use tetris::SCORE_ENDPOINT;
 
 use std::fs::DirBuilder;
 use std::fs::File;

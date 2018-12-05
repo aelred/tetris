@@ -1,9 +1,9 @@
-use board::WIDTH;
+use Board;
 use pos::Pos;
 use shape::Rotation;
 use shape::Shape;
 
-const INITIAL_X: i16 = WIDTH as i16 / 2 - 2;
+const INITIAL_X: i16 = Board::WIDTH as i16 / 2 - 2;
 
 #[derive(Debug)]
 pub struct Piece {

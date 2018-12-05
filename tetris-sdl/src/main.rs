@@ -26,7 +26,7 @@ use sdl2::video::Window;
 use sdl2::Sdl;
 use std::time::Duration;
 use std::time::Instant;
-use tetris::state::State;
+use tetris::State;
 
 const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 

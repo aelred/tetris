@@ -10,9 +10,6 @@ use std::fmt;
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
 
-pub const WIDTH: u8 = 4;
-pub const HEIGHT: u8 = 4;
-
 #[derive(Clone)]
 pub struct Bag {
     shapes: [Shape; NUM_SHAPES],
@@ -118,14 +115,17 @@ pub struct Shape {
 }
 
 impl Shape {
+    pub const WIDTH: u8 = 4;
+    pub const HEIGHT: u8 = 4;
+
     pub fn blocks(&self, rot: Rotation) -> Vec<Pos> {
         let mut blocks = Vec::new();
 
-        for index in 0..WIDTH * HEIGHT {
+        for index in 0..Shape::WIDTH * Shape::HEIGHT {
             // Look up `index` in `rotations` bit array
             if self.rotations[rot.0 as usize] & (1 << index) != 0 {
-                let x = index % WIDTH;
-                let y = index / WIDTH;
+                let x = index % Shape::WIDTH;
+                let y = index / Shape::WIDTH;
                 blocks.push(Pos::new(i16::from(x), i16::from(y)));
             }
         }
