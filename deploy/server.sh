@@ -4,6 +4,5 @@
 set -e
 set -o pipefail
 
-cd tetris-server
-cargo install --force
+cargo install --path tetris-server
 sudo systemctl restart tetris
