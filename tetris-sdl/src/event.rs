@@ -5,11 +5,11 @@ use sdl2::event::WindowEvent;
 use sdl2::EventPump;
 use sdl2::keyboard::Keycode;
 
-use tetris::game::GameWithHistory;
-use tetris::game_over::GameOver;
-use tetris::state::Paused;
-use tetris::state::State;
-use tetris::state::Title;
+use tetris::GameOver;
+use tetris::GameWithHistory;
+use tetris::Paused;
+use tetris::State;
+use tetris::Title;
 
 use crate::draw::WINDOW_RATIO;
 

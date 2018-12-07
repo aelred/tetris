@@ -8,8 +8,6 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::game::History;
 
-pub const OFFSET: i32 = 100;
-
 pub const SCORE_ENDPOINT: &str = "/scores";
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]

@@ -1,5 +1,6 @@
 use std::ops::Add;
 
+/// A 2D integer position or vector.
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Pos {
     x: i16,
@@ -7,18 +8,22 @@ pub struct Pos {
 }
 
 impl Pos {
+    /// Create a new position.
     pub fn new(x: i16, y: i16) -> Pos {
         Pos { x, y }
     }
 
+    /// Return the x component of the position.
     pub fn x(self) -> i16 {
         self.x
     }
 
+    /// Return the y component of the position.
     pub fn y(self) -> i16 {
         self.y
     }
 
+    /// Return a position one unit to the left.
     pub fn left(self) -> Pos {
         Pos {
             x: self.x - 1,
@@ -26,6 +31,7 @@ impl Pos {
         }
     }
 
+    /// Return a position one unit to the right.
     pub fn right(self) -> Pos {
         Pos {
             x: self.x + 1,
@@ -33,6 +39,7 @@ impl Pos {
         }
     }
 
+    /// Return a position one unit up.
     pub fn up(self) -> Pos {
         Pos {
             x: self.x,
@@ -40,6 +47,7 @@ impl Pos {
         }
     }
 
+    /// Return a position one unit down.
     pub fn down(self) -> Pos {
         Pos {
             x: self.x,

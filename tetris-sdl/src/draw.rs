@@ -10,25 +10,22 @@ use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
 use sdl2::video::Window;
 
-use tetris::board;
-use tetris::board::Board;
-use tetris::board::HIDE_ROWS;
-use tetris::game::Game;
-use tetris::game_over::GameOver;
-use tetris::game_over::HighScores;
-use tetris::piece::Piece;
-use tetris::pos::Pos;
-use tetris::score::OFFSET;
-use tetris::score::Score;
-use tetris::shape;
-use tetris::shape::Rotation;
-use tetris::shape::Shape;
-use tetris::shape::ShapeColor;
-use tetris::state::State;
+use tetris::Board;
+use tetris::Game;
+use tetris::GameOver;
+use tetris::HighScores;
+use tetris::Piece;
+use tetris::Pos;
+use tetris::Rotation;
+use tetris::Score;
+use tetris::Shape;
+use tetris::ShapeColor;
+use tetris::State;
 
 const INNER_BLOCK_SIZE: u8 = 22;
 const BLOCK_BORDER: u8 = 1;
 pub const BLOCK_SIZE: u8 = INNER_BLOCK_SIZE + BLOCK_BORDER * 2;
+pub const SCORE_OFFSET: i32 = 100;
 
 const BORDER_COLOR: Color = Color {
     r: 100,
@@ -130,16 +127,16 @@ impl<'a> Drawer<'a> {
     fn draw_board(&mut self, board: &Board) {
         self.set_viewport(*BOARD_BORDER_VIEW);
         self.draw_border(Pos::new(
-            i16::from(board::WIDTH),
-            i16::from(board::VISIBLE_ROWS),
+            i16::from(Board::WIDTH),
+            i16::from(Board::VISIBLE_ROWS),
         ));
 
         self.set_viewport(*BOARD_VIEW);
 
-        for y in HIDE_ROWS..board::HEIGHT {
-            for x in 0..board::WIDTH {
+        for y in Board::HIDE_ROWS..Board::HEIGHT {
+            for x in 0..Board::WIDTH {
                 if let Some(color) = board.grid[y as usize][x as usize] {
-                    let y = y - HIDE_ROWS;
+                    let y = y - Board::HIDE_ROWS;
                     let cell_pos = Pos::new(i16::from(x), i16::from(y));
                     self.draw_block(cell_pos, shape_color_to_rgb(color))
                 }
@@ -150,7 +147,7 @@ impl<'a> Drawer<'a> {
     fn draw_next(&mut self, next: Shape) {
         self.set_viewport(*PREVIEW_VIEW);
 
-        self.draw_border(Pos::new(i16::from(shape::WIDTH), i16::from(shape::HEIGHT)));
+        self.draw_border(Pos::new(i16::from(Shape::WIDTH), i16::from(Shape::HEIGHT)));
         self.draw_shape(next, Rotation::default(), Pos::new(1, 1));
     }
 
@@ -175,7 +172,7 @@ impl<'a> Drawer<'a> {
         self.draw_shape(
             piece.shape,
             piece.rot,
-            piece.pos + Pos::new(0, -i16::from(HIDE_ROWS)),
+            piece.pos + Pos::new(0, -i16::from(Board::HIDE_ROWS)),
         );
     }
 
@@ -349,12 +346,12 @@ impl Drawable for Score {
             &self.name
         };
 
-        text.offset(-OFFSET, 0)
+        text.offset(-SCORE_OFFSET, 0)
             .draw(name)
-            .offset(OFFSET * 2, 0)
+            .offset(SCORE_OFFSET * 2, 0)
             .draw(&self.value.to_string())
             .under()
-            .offset(-OFFSET, 10)
+            .offset(-SCORE_OFFSET, 10)
     }
 }
 
@@ -385,7 +382,7 @@ impl Drawable for GameOver {
                     text = score.draw(text);
                 }
 
-                text.under().offset(-OFFSET, 10)
+                text.under().offset(-SCORE_OFFSET, 10)
             }
             None => text
                 .size(1)
@@ -415,14 +412,14 @@ lazy_static! {
 }
 
 const BOARD_BORDER: u32 = BLOCK_SIZE as u32;
-const BOARD_WIDTH: u32 = board::WIDTH as u32 * BLOCK_SIZE as u32;
-const BOARD_HEIGHT: u32 = board::VISIBLE_ROWS as u32 * BLOCK_SIZE as u32;
+const BOARD_WIDTH: u32 = Board::WIDTH as u32 * BLOCK_SIZE as u32;
+const BOARD_HEIGHT: u32 = Board::VISIBLE_ROWS as u32 * BLOCK_SIZE as u32;
 const TOTAL_BOARD_HEIGHT: u32 = BOARD_HEIGHT + BOARD_BORDER * 2;
 
 const PREVIEW_X: i32 = BOARD_WIDTH as i32 + BOARD_BORDER as i32;
-const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 - (shape::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
-const PREVIEW_WIDTH: u32 = (shape::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
-const PREVIEW_HEIGHT: u32 = (shape::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
+const PREVIEW_Y: i32 = TOTAL_BOARD_HEIGHT as i32 - (Shape::HEIGHT + 2) as i32 * BLOCK_SIZE as i32;
+const PREVIEW_WIDTH: u32 = (Shape::WIDTH + 2) as u32 * BLOCK_SIZE as u32;
+const PREVIEW_HEIGHT: u32 = (Shape::HEIGHT + 2) as u32 * BLOCK_SIZE as u32;
 
 const SCORE_X: i32 = PREVIEW_X + BOARD_BORDER as i32 + PAD;
 

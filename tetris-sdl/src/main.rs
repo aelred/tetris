@@ -10,7 +10,7 @@ use sdl2::Sdl;
 use sdl2::ttf;
 use sdl2::video::Window;
 
-use tetris::state::State;
+use tetris::State;
 
 use crate::draw::Drawer;
 use crate::draw::WINDOW_HEIGHT;

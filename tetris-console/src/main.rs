@@ -10,8 +10,8 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-use tetris::game::GameWithHistory;
-use tetris::state::State;
+use tetris::GameWithHistory;
+use tetris::State;
 
 mod draw;
 

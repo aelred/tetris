@@ -17,9 +17,9 @@ use hyper::status::StatusCode;
 use hyper::uri::RequestUri::AbsolutePath;
 use serde_json;
 
-use tetris::score::Score;
-use tetris::score::SCORE_ENDPOINT;
-use tetris::score::ScoreMessage;
+use tetris::Score;
+use tetris::SCORE_ENDPOINT;
+use tetris::ScoreMessage;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
