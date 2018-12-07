@@ -1,11 +1,9 @@
-extern crate termion;
-extern crate tetris;
-
 use std::io;
 use std::io::Result;
 use std::io::Write;
 use std::time::Duration;
 
+use termion;
 use termion::color;
 use termion::cursor;
 use termion::event::Key;
@@ -52,7 +50,7 @@ fn main() -> Result<()> {
                     Key::Char('\n') => title.start_game(),
                     _ => State::from(title),
                 },
-                State::Play(mut game) => handle_key_in_game(game, key),
+                State::Play(game) => handle_key_in_game(game, key),
                 State::Paused(paused) => paused.unpause(),
                 State::GameOver(game_over) => State::from(game_over),
             };

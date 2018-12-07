@@ -1,9 +1,10 @@
-use game::History;
-use rest;
-use score::Score;
-use score::ScoreMessage;
-use state::State;
 use std::char;
+
+use crate::game::History;
+use crate::rest;
+use crate::score::Score;
+use crate::score::ScoreMessage;
+use crate::state::State;
 
 /// Game over state, where a user can see high-scores and post their high-score.
 pub struct GameOver {

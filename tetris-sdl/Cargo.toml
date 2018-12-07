@@ -2,11 +2,12 @@
 name = "tetris-sdl"
 version = "0.1.0"
 authors = ["Felix Chapman <aelred717@gmail.com>"]
+edition = "2018"
 
 [dependencies]
 tetris = {path="../tetris", version="0.1.0"}
 sdl2 = {version="0.31", default-features=false, features=["ttf", "mixer"]}
-lazy_static = "0.2"
+lazy_static = "1.0.2"
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
 libc = "0.2.16"

@@ -1,6 +1,6 @@
-use piece::Piece;
-use pos::Pos;
-use shape::ShapeColor;
+use crate::piece::Piece;
+use crate::pos::Pos;
+use crate::shape::ShapeColor;
 
 /// The board state, describing which cells are full and what colour tetromino they were filled
 /// with.
@@ -116,16 +116,18 @@ fn out_bounds(pos: Pos) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use quickcheck::{Arbitrary, Gen, TestResult};
     use std::mem;
     use std::ptr;
+
+    use quickcheck::{Arbitrary, Gen, quickcheck, TestResult};
+
+    use super::*;
 
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<ShapeColor>; Board::WIDTH as usize];
-                                   Board::HEIGHT as usize] = mem::uninitialized();
+                let mut array: [[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize] =
+                    mem::uninitialized();
 
                 for row in &mut array {
                     for cell in row {

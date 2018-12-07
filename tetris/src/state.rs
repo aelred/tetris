@@ -1,5 +1,5 @@
-use game::GameWithHistory;
-use game_over::GameOver;
+use crate::game::GameWithHistory;
+use crate::game_over::GameOver;
 
 pub enum State {
     Title(Title),

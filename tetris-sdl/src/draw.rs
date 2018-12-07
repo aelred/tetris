@@ -1,3 +1,7 @@
+use std::i16;
+use std::i32;
+
+use lazy_static::lazy_static;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use sdl2::rect::Rect;
@@ -5,16 +9,15 @@ use sdl2::render::Canvas;
 use sdl2::render::TextureQuery;
 use sdl2::ttf::Font;
 use sdl2::video::Window;
-use std::i16;
-use std::i32;
+
 use tetris::Board;
 use tetris::Game;
 use tetris::GameOver;
 use tetris::HighScores;
 use tetris::Piece;
 use tetris::Pos;
-use tetris::Score;
 use tetris::Rotation;
+use tetris::Score;
 use tetris::Shape;
 use tetris::ShapeColor;
 use tetris::State;
@@ -54,11 +57,11 @@ impl<'a> Drawer<'a> {
     }
 
     pub fn draw_state(&mut self, state: &State) {
-        match *state {
+        match state {
             State::Title(_) => self.title_draw(),
-            State::Play(ref game) => self.draw_game(&game.game),
+            State::Play(game) => self.draw_game(&game.game),
             State::Paused(_) => self.pause_draw(),
-            State::GameOver(ref game_over) => self.draw_game_over(game_over),
+            State::GameOver(game_over) => self.draw_game_over(game_over),
         }
     }
 
@@ -242,7 +245,7 @@ pub struct TextDrawer<'a, 'b: 'a> {
     drawer: &'a mut Drawer<'b>,
 }
 
-impl<'a, 'b: 'a> TextDrawer<'a, 'b> {
+impl TextDrawer<'_, '_> {
     pub fn draw(mut self, text: &str) -> Self {
         self.last_rect = self
             .drawer
@@ -354,11 +357,11 @@ impl Drawable for Score {
 
 impl Drawable for GameOver {
     fn draw<'a, 'b>(&self, text: TextDrawer<'a, 'b>) -> TextDrawer<'a, 'b> {
-        match self.hiscores {
+        match &self.hiscores {
             Some(HighScores {
-                ref higher_scores,
-                ref lower_scores,
-                ref has_hiscore,
+                higher_scores,
+                lower_scores,
+                has_hiscore,
             }) => {
                 let mut text = text.size(3).under().offset(0, 10).draw("High Scores");
 

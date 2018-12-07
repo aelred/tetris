@@ -1,18 +1,22 @@
-extern crate url;
-
-use score::ScoreMessage;
-use score::{Score, SCORE_ENDPOINT};
-use serde_json;
-use url::Url;
+use std::error::Error;
 
 #[cfg(not(target_os = "emscripten"))]
 use hyper;
+use lazy_static::lazy_static;
+#[cfg(target_os = "emscripten")]
+use libc;
+use serde_json;
+use url;
+use url::Url;
+
+use crate::score::{Score, SCORE_ENDPOINT};
+use crate::score::ScoreMessage;
 
 lazy_static! {
     static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());
 }
 
-type Result<T> = std::result::Result<T, Box<Error>>;
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 pub fn get_hiscores() -> Result<Vec<Score>> {
     let body = CLIENT.get_raw_hiscores()?;
@@ -72,10 +76,6 @@ impl Client {
 struct Client {
     url: Url,
 }
-
-#[cfg(target_os = "emscripten")]
-use libc;
-use std::error::Error;
 
 #[cfg(target_os = "emscripten")]
 extern "C" {

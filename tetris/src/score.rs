@@ -1,9 +1,12 @@
-use game::History;
 use std::cmp::Ordering;
 use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
 use std::fmt::Formatter;
+
+use serde_derive::{Deserialize, Serialize};
+
+use crate::game::History;
 
 pub const SCORE_ENDPOINT: &str = "/scores";
 
@@ -51,7 +54,7 @@ pub enum ScoreValidationError {
 impl Error for ScoreValidationError {}
 
 impl Display for ScoreValidationError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             ScoreValidationError::NameEmpty => write!(f, "Name should not be empty"),
             ScoreValidationError::NameTooLong(length) => {
@@ -111,9 +114,9 @@ impl ScoreMessage {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use serde_json;
+
+    use super::*;
 
     #[test]
     fn correctly_recognise_a_valid_short_game() {

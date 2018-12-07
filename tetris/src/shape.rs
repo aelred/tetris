@@ -1,11 +1,12 @@
-extern crate rand;
+use std::fmt;
 
-use pos::Pos;
-
-use args;
+use lazy_static::lazy_static;
+use rand;
 use rand::Rng;
 use rand::XorShiftRng;
-use std::fmt;
+
+use crate::args;
+use crate::pos::Pos;
 
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
@@ -18,7 +19,7 @@ pub struct Bag {
 }
 
 impl fmt::Debug for Bag {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         f.debug_struct("Bag")
             .field("tetrominoes", &self.shapes)
             .field("index", &self.index)
@@ -365,8 +366,9 @@ static Z_SHAPE: Shape = Shape {
 
 #[cfg(test)]
 mod tests {
+    use quickcheck::{Arbitrary, Gen, quickcheck};
+
     use super::*;
-    use quickcheck::{Arbitrary, Gen};
 
     impl Arbitrary for Bag {
         fn arbitrary<G: Gen>(g: &mut G) -> Bag {
@@ -407,7 +409,8 @@ mod tests {
                 ShapeColor::S,
                 ShapeColor::T,
                 ShapeColor::Z,
-            ]).unwrap()
+            ])
+            .unwrap()
         }
     }
 

@@ -1,17 +1,19 @@
-use board::Board;
-use board::FillResult;
-use game_over::GameOver;
-use piece::Piece;
-use shape::Bag;
-use state::Paused;
-use state::State;
 use std::cmp;
+use std::ops::Add;
+use std::ops::Mul;
 
 use rand;
 use rand::SeedableRng;
 use rand::XorShiftRng;
-use std::ops::Add;
-use std::ops::Mul;
+use serde_derive::{Deserialize, Serialize};
+
+use crate::board::Board;
+use crate::board::FillResult;
+use crate::game_over::GameOver;
+use crate::piece::Piece;
+use crate::shape::Bag;
+use crate::state::Paused;
+use crate::state::State;
 
 /// The rate at which pieces fall, measured in hundredths of cells per frame.
 ///
@@ -262,7 +264,8 @@ impl Game {
             Drop::Normal => self.normal_gravity(),
             Drop::Soft => Gravity::SOFT_DROP,
             Drop::Hard => Gravity::HARD_DROP,
-        }.0;
+        }
+        .0;
 
         false
     }

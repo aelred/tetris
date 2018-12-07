@@ -1,7 +1,9 @@
-use Board;
-use pos::Pos;
-use shape::Rotation;
-use shape::Shape;
+use lazy_static::lazy_static;
+
+use crate::Board;
+use crate::Pos;
+use crate::Rotation;
+use crate::Shape;
 
 /// The initial X position that a piece spawns on the board.
 const INITIAL_X: i16 = Board::WIDTH as i16 / 2 - 2;

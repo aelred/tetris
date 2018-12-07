@@ -1,37 +1,29 @@
-extern crate tetris;
+use std::cmp::max;
+use std::time::Duration;
+use std::time::Instant;
 
-extern crate sdl2;
+use sdl2;
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
+use sdl2::mixer::LoaderRWops;
+use sdl2::rwops::RWops;
+use sdl2::Sdl;
+use sdl2::ttf;
+use sdl2::video::Window;
 
-#[cfg(target_os = "emscripten")]
-extern crate libc;
+use tetris::State;
 
-#[macro_use]
-extern crate lazy_static;
+use crate::draw::Drawer;
+use crate::draw::WINDOW_HEIGHT;
+use crate::draw::WINDOW_WIDTH;
+use crate::event::EventHandler;
 
 mod draw;
 mod event;
 
-use draw::Drawer;
-
-use std::cmp::max;
-
-use draw::WINDOW_HEIGHT;
-use draw::WINDOW_WIDTH;
-use event::EventHandler;
-use sdl2::mixer::LoaderRWops;
-use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
-use sdl2::rwops::RWops;
-use sdl2::ttf;
-use sdl2::video::Window;
-use sdl2::Sdl;
-use std::time::Duration;
-use std::time::Instant;
-use tetris::State;
-
 const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 
-static FONT_DATA: &'static [u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
-static MUSIC_DATA: &'static [u8] = include_bytes!("../resources/tetris.ogg");
+static FONT_DATA: &[u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
+static MUSIC_DATA: &[u8] = include_bytes!("../resources/tetris.ogg");
 
 const FONT_MULTIPLE: u16 = 9;
 
@@ -85,7 +77,7 @@ fn main() {
 }
 
 #[cfg(not(target_os = "emscripten"))]
-fn play_tetris(mut context: Context) {
+fn play_tetris(mut context: Context<'_>) {
     use std::thread::sleep;
     use std::time::Duration;
 
@@ -101,6 +93,7 @@ fn play_tetris(mut context: Context) {
 
 #[cfg(target_os = "emscripten")]
 fn play_tetris(mut context: Context) {
+    use libc;
     use std::mem::transmute;
 
     type EmArgCallbackFun = extern "C" fn(_: *mut libc::c_void);
@@ -152,7 +145,7 @@ fn play_tetris(mut context: Context) {
     );
 }
 
-impl<'a> Context<'a> {
+impl Context<'_> {
     fn main_loop(&mut self) {
         let mut state = self.state.take().unwrap();
         state = self.event_handler.handle(state);
@@ -164,7 +157,7 @@ impl<'a> Context<'a> {
         let time_since_last_update = now - self.last_update;
         let num_updates =
             time_since_last_update.subsec_millis() / time_between_updates.subsec_millis();
-        
+
         for _ in 0..num_updates {
             state = state.update();
             self.last_update = now;

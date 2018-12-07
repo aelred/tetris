@@ -1,15 +1,4 @@
-extern crate dirs;
-extern crate hyper;
-extern crate serde_json;
-extern crate tetris;
-
-#[macro_use]
-extern crate clap;
-
-use tetris::Score;
-use tetris::ScoreMessage;
-use tetris::SCORE_ENDPOINT;
-
+use std::error::Error;
 use std::fs::DirBuilder;
 use std::fs::File;
 use std::io::Read;
@@ -17,16 +6,22 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::sync::RwLock;
 
+use clap::{crate_authors, crate_description, crate_version, value_t};
 use clap::{App, Arg};
-
+use dirs;
+use hyper;
+use hyper::{Get, Post};
 use hyper::header::{AccessControlAllowOrigin, ContentType};
 use hyper::server::{Handler, Request, Response, Server};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri::AbsolutePath;
-use hyper::{Get, Post};
-use std::error::Error;
+use serde_json;
 
-type Result<T> = std::result::Result<T, Box<Error>>;
+use tetris::Score;
+use tetris::SCORE_ENDPOINT;
+use tetris::ScoreMessage;
+
+type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 macro_rules! print_err (
     ($e:expr) => {{
@@ -60,7 +55,7 @@ impl ScoresHandler {
         Ok(score)
     }
 
-    fn add_hiscore(&self, req: &mut Request, mut res: Response) -> Result<()> {
+    fn add_hiscore(&self, req: &mut Request<'_, '_>, mut res: Response<'_>) -> Result<()> {
         let mut body = String::new();
         req.read_to_string(&mut body)?;
 
@@ -90,7 +85,7 @@ impl ScoresHandler {
         Ok(())
     }
 
-    fn send_hiscores(&self, mut res: Response) -> std::io::Result<()> {
+    fn send_hiscores(&self, mut res: Response<'_>) -> std::io::Result<()> {
         let hiscores = &(*self.hiscores.read().unwrap());
 
         res.headers_mut().set(ContentType::json());
@@ -100,15 +95,15 @@ impl ScoresHandler {
 }
 
 impl Handler for ScoresHandler {
-    fn handle(&self, mut req: Request, mut res: Response) {
+    fn handle(&self, mut req: Request<'_, '_>, mut res: Response<'_>) {
         res.headers_mut().set(AccessControlAllowOrigin::Any);
 
         if let AbsolutePath(path) = req.uri.clone() {
             match (&req.method, &path[..]) {
-                (&Get, SCORE_ENDPOINT) => {
+                (Get, SCORE_ENDPOINT) => {
                     print_err!(self.send_hiscores(res));
                 }
-                (&Post, SCORE_ENDPOINT) => {
+                (Post, SCORE_ENDPOINT) => {
                     print_err!(self.add_hiscore(&mut req, res));
                 }
                 _ => {
@@ -134,7 +129,8 @@ fn main() {
                 .long("port")
                 .default_value("4444")
                 .help("Set the port to use"),
-        ).get_matches();
+        )
+        .get_matches();
 
     let port = value_t!(matches, "PORT", u16).unwrap_or_else(|e| e.exit());
 
