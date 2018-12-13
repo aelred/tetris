@@ -20,6 +20,9 @@ use crate::event::EventHandler;
 mod draw;
 mod event;
 
+#[cfg(target_os = "emscripten")]
+mod emscripten;
+
 const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
 
 static FONT_DATA: &[u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
@@ -44,7 +47,7 @@ struct Context<'a> {
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
-    let ttf_context = ttf::init().unwrap();
+    let ttf_context = ttf_context();
 
     let font_data = RWops::from_bytes(FONT_DATA).unwrap();
     let font_size = max(FONT_SIZE, FONT_MULTIPLE);
@@ -77,6 +80,17 @@ fn main() {
 }
 
 #[cfg(not(target_os = "emscripten"))]
+fn ttf_context() -> ttf::Sdl2TtfContext {
+    ttf::init().unwrap()
+}
+
+#[cfg(target_os = "emscripten")]
+fn ttf_context() -> &'static ttf::Sdl2TtfContext {
+    // Deliberately leak so we get a static lifetime
+    Box::leak(Box::new(ttf::init().unwrap()))
+}
+
+#[cfg(not(target_os = "emscripten"))]
 fn play_tetris(mut context: Context<'_>) {
     use std::thread::sleep;
     use std::time::Duration;
@@ -92,57 +106,12 @@ fn play_tetris(mut context: Context<'_>) {
 }
 
 #[cfg(target_os = "emscripten")]
-fn play_tetris(mut context: Context) {
-    use libc;
-    use std::mem::transmute;
-
-    type EmArgCallbackFun = extern "C" fn(_: *mut libc::c_void);
-
-    extern "C" {
-        fn emscripten_set_main_loop_arg(
-            func: EmArgCallbackFun,
-            arg: *mut libc::c_void,
-            fps: libc::c_int,
-            simulate_infinite_loop: libc::c_int,
-        );
-    }
-
-    fn set_main_loop_arg(
-        func: EmArgCallbackFun,
-        arg: *mut libc::c_void,
-        fps: i32,
-        simulate_infinite_loop: bool,
-    ) {
-        unsafe {
-            emscripten_set_main_loop_arg(
-                func,
-                arg,
-                fps,
-                if simulate_infinite_loop { 1 } else { 0 },
-            );
-        }
-    }
-
-    extern "C" fn em_loop(arg: *mut libc::c_void) {
-        let context = unsafe { transmute::<*mut libc::c_void, &mut Context>(arg) };
-        context.main_loop();
-    }
+fn play_tetris(mut context: Context<'static>) {
+    use crate::emscripten;
 
     context.drawer.present();
 
-    // We box the context and pass that to `transmute`, instead of a reference. If we pass a
-    // reference, the `context` will be dropped at the end of this method (even though there is
-    // still a main loop running that needs it). A box will take ownership for us and then
-    // be magically obliterated in the `transmute` method, without dropping the context.
-    // This means we have deliberately introduced a memory leak! Yay!
-    let boxed_context = Box::new(context);
-
-    set_main_loop_arg(
-        em_loop,
-        unsafe { transmute::<Box<Context>, *mut libc::c_void>(boxed_context) },
-        0,
-        true,
-    );
+    emscripten::set_main_loop(move || context.main_loop(), 0);
 }
 
 impl Context<'_> {
