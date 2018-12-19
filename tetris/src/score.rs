@@ -8,8 +8,10 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::game::History;
 
+/// The end-point for the Tetris server that serves the scoreboard.
 pub const SCORE_ENDPOINT: &str = "/scores";
 
+/// A score on a scoreboard.
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Score {
     pub value: u32,
@@ -17,6 +19,7 @@ pub struct Score {
 }
 
 impl Score {
+    /// Create a new `Score` from the given `value` and `name`.
     pub fn new(value: u32, name: String) -> Self {
         Score { value, name }
     }
@@ -34,12 +37,14 @@ impl PartialOrd for Score {
     }
 }
 
+/// A message for posting a score. Includes the `History` for validation purposes.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ScoreMessage {
     score: Score,
     history: History,
 }
 
+/// Potential errors from score validation.
 #[derive(Debug)]
 pub enum ScoreValidationError {
     NameEmpty,
@@ -78,10 +83,14 @@ impl Display for ScoreValidationError {
 }
 
 impl ScoreMessage {
+    /// Create a new `ScoreMessage` from the given `Score` and `History`.
     pub fn new(score: Score, history: History) -> Self {
         ScoreMessage { score, history }
     }
 
+    /// Extract the `Score`, but only if it is valid.
+    ///
+    /// A valid score will have a 3-letter long alphanumeric name and will match the given history.
     pub fn score(self) -> Result<Score, ScoreValidationError> {
         if self.score.name.is_empty() {
             return Err(ScoreValidationError::NameEmpty);
