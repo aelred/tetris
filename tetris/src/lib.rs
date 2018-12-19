@@ -34,7 +34,6 @@
 //!
 //!     // Draw game state and sleep
 //!     // ...
-//!
 //!     # break;
 //! }
 //! ```
