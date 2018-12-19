@@ -9,8 +9,8 @@ use serde_json;
 use url;
 use url::Url;
 
-use crate::score::{Score, SCORE_ENDPOINT};
 use crate::score::ScoreMessage;
+use crate::score::{Score, SCORE_ENDPOINT};
 
 lazy_static! {
     static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());

@@ -69,7 +69,7 @@ impl Add for Pos {
 
 #[cfg(test)]
 mod tests {
-    use quickcheck::{Arbitrary, Gen, quickcheck};
+    use quickcheck::{quickcheck, Arbitrary, Gen};
 
     use super::*;
 

@@ -3,7 +3,7 @@ use std::panic::{self, AssertUnwindSafe};
 
 extern "C" {
     fn emscripten_set_main_loop_arg(
-        func: extern "C" fn (_: *mut libc::c_void),
+        func: extern "C" fn(_: *mut libc::c_void),
         arg: *mut libc::c_void,
         fps: libc::c_int,
         simulate_infinite_loop: libc::c_int,

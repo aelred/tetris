@@ -3,12 +3,12 @@ use std::time::Duration;
 use std::time::Instant;
 
 use sdl2;
-use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::mixer::LoaderRWops;
+use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::rwops::RWops;
-use sdl2::Sdl;
 use sdl2::ttf;
 use sdl2::video::Window;
+use sdl2::Sdl;
 
 use tetris::State;
 

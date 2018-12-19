@@ -2,8 +2,8 @@ use std;
 
 use sdl2::event::Event;
 use sdl2::event::WindowEvent;
-use sdl2::EventPump;
 use sdl2::keyboard::Keycode;
+use sdl2::EventPump;
 
 use tetris::GameOver;
 use tetris::GameWithHistory;

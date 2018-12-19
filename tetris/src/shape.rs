@@ -366,7 +366,7 @@ static Z_SHAPE: Shape = Shape {
 
 #[cfg(test)]
 mod tests {
-    use quickcheck::{Arbitrary, Gen, quickcheck};
+    use quickcheck::{quickcheck, Arbitrary, Gen};
 
     use super::*;
 

@@ -111,7 +111,10 @@ impl Default for Board {
 
 /// Return whether the given position is out of bounds of the board (including hidden rows).
 fn out_bounds(pos: Pos) -> bool {
-    pos.x() < 0 || pos.y() < 0 || pos.x() >= i16::from(Board::WIDTH) || pos.y() >= i16::from(Board::HEIGHT)
+    pos.x() < 0
+        || pos.y() < 0
+        || pos.x() >= i16::from(Board::WIDTH)
+        || pos.y() >= i16::from(Board::HEIGHT)
 }
 
 #[cfg(test)]
@@ -119,15 +122,15 @@ mod tests {
     use std::mem;
     use std::ptr;
 
-    use quickcheck::{Arbitrary, Gen, quickcheck, TestResult};
+    use quickcheck::{quickcheck, Arbitrary, Gen, TestResult};
 
     use super::*;
 
     impl Arbitrary for Board {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
-                let mut array: [[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize] =
-                    mem::uninitialized();
+                let mut array: [[Option<ShapeColor>; Board::WIDTH as usize];
+                    Board::HEIGHT as usize] = mem::uninitialized();
 
                 for row in &mut array {
                     for cell in row {

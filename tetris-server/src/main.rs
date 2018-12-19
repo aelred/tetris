@@ -10,16 +10,16 @@ use clap::{crate_authors, crate_description, crate_version, value_t};
 use clap::{App, Arg};
 use dirs;
 use hyper;
-use hyper::{Get, Post};
 use hyper::header::{AccessControlAllowOrigin, ContentType};
 use hyper::server::{Handler, Request, Response, Server};
 use hyper::status::StatusCode;
 use hyper::uri::RequestUri::AbsolutePath;
+use hyper::{Get, Post};
 use serde_json;
 
 use tetris::Score;
-use tetris::SCORE_ENDPOINT;
 use tetris::ScoreMessage;
+use tetris::SCORE_ENDPOINT;
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
