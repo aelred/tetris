@@ -1,3 +1,4 @@
+use crate::game::StepResult;
 use crate::piece::Piece;
 use crate::pos::Pos;
 use crate::shape::ShapeColor;
@@ -29,17 +30,17 @@ impl Board {
     /// This can cause a game over if the piece is locked above the visible playing area, which
     /// will be indicated in the return value.
     pub fn lock_piece(&mut self, piece: &Piece) -> FillResult {
-        let mut is_game_over = true;
+        let mut step_result = StepResult::GameOver;
 
         for cell in piece.blocks() {
             if cell.y() > i16::from(Board::HIDE_ROWS) {
-                is_game_over = false;
+                step_result = StepResult::Continue;
             }
             self.fill_pos(cell, piece.shape.color);
         }
 
         FillResult {
-            is_game_over,
+            step_result,
             lines_cleared: self.clear_full_rows(),
         }
     }
@@ -96,7 +97,7 @@ impl Board {
 /// The result of calling [`Board::lock_piece`](struct.Board.html#method.lock_piece), which is
 /// called when locking a piece. Indicates if this caused a game over, or if any lines were cleared.
 pub struct FillResult {
-    pub is_game_over: bool,
+    pub step_result: StepResult,
     pub lines_cleared: u32,
 }
 

@@ -128,13 +128,12 @@ impl GameWithHistory {
     /// Consumes the game and returns the new state. In the event of a game over, the returned state
     /// will be a "game over" state, otherwise it will be the game itself.
     pub fn update(mut self) -> State {
-        let is_game_over = self.game.apply_step();
-
-        if is_game_over {
-            let game_over = GameOver::new(self.game.score, self.history.clone());
-            State::GameOver(game_over)
-        } else {
-            State::Play(self)
+        match self.game.apply_step() {
+            StepResult::GameOver => {
+                let game_over = GameOver::new(self.game.score, self.history.clone());
+                State::GameOver(game_over)
+            }
+            StepResult::Continue => State::Play(self),
         }
     }
 
@@ -248,15 +247,14 @@ impl Game {
         }
     }
 
-    /// Advance the game one frame. Returns true if this is a game over.
-    fn apply_step(&mut self) -> bool {
+    /// Advance the game one frame. Returns whether this is a game over.
+    fn apply_step(&mut self) -> StepResult {
         self.tick.incr();
 
         while self.drop_tick >= Gravity::UNITS_PER_CELL {
             self.drop_tick -= Gravity::UNITS_PER_CELL;
-            let is_game_over = self.drop_piece();
-            if is_game_over {
-                return true;
+            if self.drop_piece() == StepResult::GameOver {
+                return StepResult::GameOver;
             }
         }
 
@@ -267,7 +265,7 @@ impl Game {
         }
         .0;
 
-        false
+        StepResult::Continue
     }
 
     /// Get the normal gravity rate, based on the current level.
@@ -335,8 +333,8 @@ impl Game {
     ///
     /// If the piece can't drop, lock delay is started. If lock delay is over, the piece is locked.
     ///
-    /// Returns true if this is a game over.
-    fn drop_piece(&mut self) -> bool {
+    /// Returns whether this is a game over.
+    fn drop_piece(&mut self) -> StepResult {
         self.piece.down();
 
         if self.piece_overlaps_board() {
@@ -350,15 +348,15 @@ impl Game {
             self.lock_delay = false;
         }
 
-        false
+        StepResult::Continue
     }
 
     /// Lock the piece, clearing any rows and get a new piece from the bag.
     ///
     /// Returns whether this results in a game over.
-    fn lock_piece(&mut self) -> bool {
+    fn lock_piece(&mut self) -> StepResult {
         let FillResult {
-            mut is_game_over,
+            step_result,
             lines_cleared,
         } = self.board.lock_piece(&self.piece);
 
@@ -371,10 +369,10 @@ impl Game {
         self.score += lines_cleared * lines_cleared * 100;
 
         if self.piece_overlaps_board() {
-            is_game_over = true;
+            StepResult::GameOver
+        } else {
+            step_result
         }
-
-        is_game_over
     }
 
     /// Return whether the piece is overlapping the board.
@@ -396,6 +394,13 @@ impl Game {
     fn try_wall_kick(&mut self) -> bool {
         self.try_move_right() || self.try_move_left()
     }
+}
+
+/// Result from applying a move or step in a game. The game may continue or it is a game over.
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum StepResult {
+    Continue,
+    GameOver,
 }
 
 /// A history of a game, that can be replayed. This is useful for verifying high scores.
@@ -430,8 +435,7 @@ impl History {
 
         for &(action_tick, action) in &self.actions {
             while game.tick < action_tick {
-                let is_game_over = game.apply_step();
-                if is_game_over {
+                if game.apply_step() == StepResult::GameOver {
                     return game.score;
                 }
             }
@@ -441,8 +445,7 @@ impl History {
 
         // after actions stopped, the game will have continued until a game over
         loop {
-            let is_game_over = game.apply_step();
-            if is_game_over {
+            if game.apply_step() == StepResult::GameOver {
                 return game.score;
             }
         }
