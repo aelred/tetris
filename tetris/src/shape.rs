@@ -74,7 +74,7 @@ impl Bag {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct Rotation(i8);
 
 impl Rotation {
@@ -90,12 +90,6 @@ impl Rotation {
 /// Calculates modulo. This is distinct from `%`, which calculates the remainder.
 fn modulo(x: i8, y: i8) -> i8 {
     ((x % y) + y) % y
-}
-
-impl Default for Rotation {
-    fn default() -> Rotation {
-        Rotation(0)
-    }
 }
 
 #[derive(PartialEq, Clone, Debug, Copy)]

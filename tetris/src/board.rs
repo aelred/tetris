@@ -5,7 +5,7 @@ use crate::shape::ShapeColor;
 
 /// The board state, describing which cells are full and what colour tetromino they were filled
 /// with.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Board {
     pub grid: [[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize],
 }
@@ -99,15 +99,6 @@ impl Board {
 pub struct FillResult {
     pub step_result: StepResult,
     pub lines_cleared: u32,
-}
-
-impl Default for Board {
-    /// Returns an empty board.
-    fn default() -> Self {
-        Board {
-            grid: [[None; Board::WIDTH as usize]; Board::HEIGHT as usize],
-        }
-    }
 }
 
 /// Return whether the given position is out of bounds of the board (including hidden rows).
