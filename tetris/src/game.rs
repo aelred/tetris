@@ -14,6 +14,7 @@ use crate::piece::Piece;
 use crate::shape::Bag;
 use crate::state::Paused;
 use crate::state::State;
+use crate::Shape;
 
 /// The rate at which pieces fall, measured in hundredths of cells per frame.
 ///
@@ -188,7 +189,7 @@ pub struct Game {
     pub board: Board,
 
     /// A bag to pull new pieces from.
-    pub bag: Bag,
+    bag: Bag,
 
     /// How far the piece has dropped through the current cell - once it reaches 100 the piece
     /// drops one cell, or locks.
@@ -227,6 +228,11 @@ impl Game {
             score: 0,
             tick: Tick::new(),
         }
+    }
+
+    /// Get the next shape that will be played
+    pub fn next_shape(&self) -> Shape {
+        self.bag.peek()
     }
 
     /// Apply the given action to the game.

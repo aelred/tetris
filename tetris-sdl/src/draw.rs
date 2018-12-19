@@ -120,7 +120,7 @@ impl<'a> Drawer<'a> {
     pub fn draw_game(&mut self, game: &Game) {
         self.draw_board(&game.board);
         self.draw_piece(&game.piece);
-        self.draw_next(game.bag.peek());
+        self.draw_next(game.next_shape());
         self.draw_game_score(game);
     }
 
