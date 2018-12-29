@@ -9,7 +9,7 @@ pub struct Pos {
 
 impl Pos {
     /// Create a new position.
-    pub fn new(x: i16, y: i16) -> Pos {
+    pub const fn new(x: i16, y: i16) -> Pos {
         Pos { x, y }
     }
 

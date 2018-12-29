@@ -1,5 +1,3 @@
-use lazy_static::lazy_static;
-
 use crate::Board;
 use crate::Pos;
 use crate::Rotation;
@@ -7,6 +5,9 @@ use crate::Shape;
 
 /// The initial X position that a piece spawns on the board.
 const INITIAL_X: i16 = Board::WIDTH as i16 / 2 - 2;
+
+/// The initial position that a piece spawns on the board.
+const INITIAL_POS: Pos = Pos::new(INITIAL_X, 0);
 
 /// A tetromino piece in play.
 #[derive(Debug)]
@@ -27,7 +28,7 @@ impl Piece {
         Piece {
             shape,
             rot: Rotation::default(),
-            pos: *INITIAL_POS,
+            pos: INITIAL_POS,
         }
     }
 
@@ -69,9 +70,4 @@ impl Piece {
             .map(|pos| *pos + self.pos)
             .collect()
     }
-}
-
-lazy_static! {
-    /// The initial position that a piece spawns on the board.
-    static ref INITIAL_POS: Pos = Pos::new(INITIAL_X, 0);
 }
