@@ -59,7 +59,7 @@ impl<'a> Drawer<'a> {
     pub fn draw_state(&mut self, state: &State) {
         match state {
             State::Title(_) => self.title_draw(),
-            State::Play(game) => self.draw_game(&game.game),
+            State::Play(game) => self.draw_game(game.game()),
             State::Paused(_) => self.pause_draw(),
             State::GameOver(game_over) => self.draw_game_over(game_over),
         }
@@ -118,8 +118,8 @@ impl<'a> Drawer<'a> {
     }
 
     pub fn draw_game(&mut self, game: &Game) {
-        self.draw_board(&game.board);
-        self.draw_piece(&game.piece);
+        self.draw_board(game.board());
+        self.draw_piece(game.piece());
         self.draw_next(game.next_shape());
         self.draw_game_score(game);
     }
@@ -158,14 +158,14 @@ impl<'a> Drawer<'a> {
             .draw("lines")
             .size(2)
             .left()
-            .draw(&game.lines_cleared.to_string())
+            .draw(&game.lines_cleared().to_string())
             .size(1)
             .left()
             .offset(0, PAD)
             .draw("score")
             .size(2)
             .left()
-            .draw(&game.score.to_string());
+            .draw(&game.score().to_string());
     }
 
     fn draw_piece(&mut self, piece: &Piece) {

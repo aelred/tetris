@@ -54,7 +54,7 @@ pub fn draw<W: Write>(stdout: &mut W, state: &mut State) -> Result<()> {
             draw_title(&mut buffer)?;
         }
         State::Play(game) => {
-            draw_game(&mut buffer, &game.game)?;
+            draw_game(&mut buffer, game.game())?;
         }
         State::Paused(_) => {
             // TODO
@@ -78,8 +78,8 @@ fn draw_title<W: Write>(stdout: &mut W) -> Result<()> {
 
 fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
     draw_border(stdout)?;
-    draw_board(stdout, &game.board)?;
-    draw_piece(stdout, &game.piece)
+    draw_board(stdout, game.board())?;
+    draw_piece(stdout, game.piece())
 }
 
 fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {

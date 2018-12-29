@@ -108,7 +108,7 @@ impl Tick {
 /// This is used for live games, so the history can be sent to the server and used to verify the
 /// score.
 pub struct GameWithHistory {
-    pub game: Box<Game>,
+    game: Box<Game>,
     history: History,
 }
 
@@ -124,6 +124,11 @@ impl Default for GameWithHistory {
 }
 
 impl GameWithHistory {
+    /// Get the game that is being played and recorded.
+    pub fn game(&self) -> &Game {
+        &self.game
+    }
+
     /// Advance the game one frame.
     ///
     /// Consumes the game and returns the new state. In the event of a game over, the returned state
@@ -183,10 +188,10 @@ impl GameWithHistory {
 /// A game of Tetris in-progress.
 pub struct Game {
     /// The current piece that the user is placing.
-    pub piece: Piece,
+    piece: Piece,
 
     /// The board, made up of blocks from old pieces.
-    pub board: Board,
+    board: Board,
 
     /// A bag to pull new pieces from.
     bag: Bag,
@@ -204,10 +209,10 @@ pub struct Game {
     drop: Drop,
 
     /// The number of lines that have been cleared.
-    pub lines_cleared: u32,
+    lines_cleared: u32,
 
     /// The player's score.
-    pub score: u32,
+    score: u32,
 
     /// Number of frames since the game has started.
     tick: Tick,
@@ -230,9 +235,29 @@ impl Game {
         }
     }
 
+    /// Get the current piece that the user is placing.
+    pub fn piece(&self) -> &Piece {
+        &self.piece
+    }
+
+    /// Get the board, made up of blocks from old pieces.
+    pub fn board(&self) -> &Board {
+        &self.board
+    }
+
     /// Get the next shape that will be played
     pub fn next_shape(&self) -> Shape {
         self.bag.peek()
+    }
+
+    /// Get the number of lines that have been cleared.
+    pub fn lines_cleared(&self) -> u32 {
+        self.lines_cleared
+    }
+
+    /// Get the player's score.
+    pub fn score(&self) -> u32 {
+        self.score
     }
 
     /// Apply the given action to the game.
