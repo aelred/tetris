@@ -173,7 +173,7 @@ impl GameWithHistory {
         self.apply_action(Action::StopDrop);
     }
 
-    /// Pause the game, consuming the current state and returing a "paused" state.
+    /// Pause the game, consuming the current state and returning a "paused" state.
     pub fn pause(self) -> State {
         State::Paused(Paused(self))
     }
