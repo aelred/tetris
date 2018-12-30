@@ -11,8 +11,8 @@ use sdl2::ttf::Font;
 use sdl2::video::Window;
 
 use tetris::Board;
-use tetris::Game;
 use tetris::GameOver;
+use tetris::GameWithHistory;
 use tetris::HighScores;
 use tetris::Piece;
 use tetris::Pos;
@@ -59,7 +59,7 @@ impl<'a> Drawer<'a> {
     pub fn draw_state(&mut self, state: &State) {
         match state {
             State::Title(_) => self.title_draw(),
-            State::Play(game) => self.draw_game(game.game()),
+            State::Play(game) => self.draw_game(game),
             State::Paused(_) => self.pause_draw(),
             State::GameOver(game_over) => self.draw_game_over(game_over),
         }
@@ -117,7 +117,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_game(&mut self, game: &Game) {
+    pub fn draw_game(&mut self, game: &GameWithHistory) {
         self.draw_board(game.board());
         self.draw_piece(game.piece());
         self.draw_next(game.next_shape());
@@ -151,7 +151,7 @@ impl<'a> Drawer<'a> {
         self.draw_shape(next, Rotation::default(), Pos::new(1, 1));
     }
 
-    fn draw_game_score(&mut self, game: &Game) {
+    fn draw_game_score(&mut self, game: &GameWithHistory) {
         self.set_viewport(*SCORE_VIEW);
 
         self.text()

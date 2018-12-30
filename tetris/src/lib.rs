@@ -39,7 +39,7 @@
 //! ```
 
 pub use self::board::Board;
-pub use self::game::{Game, GameWithHistory};
+pub use self::game::GameWithHistory;
 pub use self::game_over::{GameOver, HighScores};
 pub use self::piece::Piece;
 pub use self::pos::Pos;

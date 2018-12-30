@@ -6,7 +6,7 @@ use termion::color;
 use termion::cursor;
 
 use tetris::Board;
-use tetris::Game;
+use tetris::GameWithHistory;
 use tetris::Piece;
 use tetris::ShapeColor;
 use tetris::State;
@@ -54,7 +54,7 @@ pub fn draw<W: Write>(stdout: &mut W, state: &mut State) -> Result<()> {
             draw_title(&mut buffer)?;
         }
         State::Play(game) => {
-            draw_game(&mut buffer, game.game())?;
+            draw_game(&mut buffer, game)?;
         }
         State::Paused(_) => {
             // TODO
@@ -76,7 +76,7 @@ fn draw_title<W: Write>(stdout: &mut W) -> Result<()> {
     Ok(())
 }
 
-fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
+fn draw_game<W: Write>(stdout: &mut W, game: &GameWithHistory) -> Result<()> {
     draw_border(stdout)?;
     draw_board(stdout, game.board())?;
     draw_piece(stdout, game.piece())
