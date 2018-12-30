@@ -107,46 +107,46 @@ impl Tick {
 ///
 /// This is used for live games, so the history can be sent to the server and used to verify the
 /// score.
-pub struct GameWithHistory {
-    game: Box<Game>,
+pub struct Game {
+    game_state: Box<GameState>,
     history: History,
 }
 
-impl Default for GameWithHistory {
+impl Default for Game {
     /// Create a new game with a random seed and empty history.
     fn default() -> Self {
         let seed = rand::random();
-        GameWithHistory {
-            game: Box::new(Game::new(seed)),
+        Game {
+            game_state: Box::new(GameState::new(seed)),
             history: History::new(seed),
         }
     }
 }
 
-impl GameWithHistory {
+impl Game {
     /// Get the current piece that the user is placing.
     pub fn piece(&self) -> &Piece {
-        &self.game.piece
+        &self.game_state.piece
     }
 
     /// Get the board, made up of blocks from old pieces.
     pub fn board(&self) -> &Board {
-        &self.game.board
+        &self.game_state.board
     }
 
     /// Get the next shape that will be played
     pub fn next_shape(&self) -> Shape {
-        self.game.bag.peek()
+        self.game_state.bag.peek()
     }
 
     /// Get the number of lines that have been cleared.
     pub fn lines_cleared(&self) -> u32 {
-        self.game.lines_cleared
+        self.game_state.lines_cleared
     }
 
     /// Get the player's score.
     pub fn score(&self) -> u32 {
-        self.game.score
+        self.game_state.score
     }
 
     /// Advance the game one frame.
@@ -154,9 +154,9 @@ impl GameWithHistory {
     /// Consumes the game and returns the new state. In the event of a game over, the returned state
     /// will be a "game over" state, otherwise it will be the game itself.
     pub fn update(mut self) -> State {
-        match self.game.apply_step() {
+        match self.game_state.apply_step() {
             StepResult::GameOver => {
-                let game_over = GameOver::new(self.game.score, self.history.clone());
+                let game_over = GameOver::new(self.game_state.score, self.history.clone());
                 State::GameOver(game_over)
             }
             StepResult::Continue => State::Play(self),
@@ -200,13 +200,13 @@ impl GameWithHistory {
 
     /// Apply the given action to the game and record it in the history.
     fn apply_action(&mut self, action: Action) {
-        self.history.push_action(self.game.tick, action);
-        self.game.apply_action(action);
+        self.history.push_action(self.game_state.tick, action);
+        self.game_state.apply_action(action);
     }
 }
 
 /// A game of Tetris in-progress.
-struct Game {
+struct GameState {
     /// The current piece that the user is placing.
     piece: Piece,
 
@@ -238,11 +238,11 @@ struct Game {
     tick: Tick,
 }
 
-impl Game {
+impl GameState {
     /// Create a new game from the given seed, which determines the order pieces appear.
-    fn new(seed: [u32; 4]) -> Game {
+    fn new(seed: [u32; 4]) -> GameState {
         let mut bag = Bag::new(XorShiftRng::from_seed(seed));
-        Game {
+        GameState {
             piece: Piece::new(bag.pop()),
             board: Board::default(),
             bag,
@@ -457,7 +457,7 @@ impl History {
 
     /// Replay a game and return the resulting score.
     pub fn replay(&self) -> u32 {
-        let mut game = Game::new(self.seed);
+        let mut game = GameState::new(self.seed);
 
         for &(action_tick, action) in &self.actions {
             while game.tick < action_tick {

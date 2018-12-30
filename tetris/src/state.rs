@@ -1,9 +1,9 @@
-use crate::game::GameWithHistory;
+use crate::game::Game;
 use crate::game_over::GameOver;
 
 pub enum State {
     Title(Title),
-    Play(GameWithHistory),
+    Play(Game),
     Paused(Paused),
     GameOver(GameOver),
 }
@@ -14,10 +14,10 @@ impl State {
     }
 
     pub fn play() -> State {
-        State::from(GameWithHistory::default())
+        State::from(Game::default())
     }
 
-    pub fn paused(game_with_history: GameWithHistory) -> State {
+    pub fn paused(game_with_history: Game) -> State {
         State::from(Paused(game_with_history))
     }
 
@@ -35,8 +35,8 @@ impl From<Title> for State {
     }
 }
 
-impl From<GameWithHistory> for State {
-    fn from(game_with_history: GameWithHistory) -> Self {
+impl From<Game> for State {
+    fn from(game_with_history: Game) -> Self {
         State::Play(game_with_history)
     }
 }
@@ -67,7 +67,7 @@ impl Title {
     }
 }
 
-pub struct Paused(pub GameWithHistory);
+pub struct Paused(pub Game);
 
 impl Paused {
     pub fn unpause(self) -> State {

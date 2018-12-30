@@ -5,8 +5,8 @@ use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::EventPump;
 
+use tetris::Game;
 use tetris::GameOver;
-use tetris::GameWithHistory;
 use tetris::Paused;
 use tetris::State;
 use tetris::Title;
@@ -69,7 +69,7 @@ impl EventHandler {
         }
     }
 
-    fn handle_game(&mut self, mut game: GameWithHistory, event: &Event) -> State {
+    fn handle_game(&mut self, mut game: Game, event: &Event) -> State {
         match *event {
             Event::Window {
                 win_event: WindowEvent::FocusLost,

@@ -11,8 +11,8 @@ use sdl2::ttf::Font;
 use sdl2::video::Window;
 
 use tetris::Board;
+use tetris::Game;
 use tetris::GameOver;
-use tetris::GameWithHistory;
 use tetris::HighScores;
 use tetris::Piece;
 use tetris::Pos;
@@ -117,7 +117,7 @@ impl<'a> Drawer<'a> {
         }
     }
 
-    pub fn draw_game(&mut self, game: &GameWithHistory) {
+    pub fn draw_game(&mut self, game: &Game) {
         self.draw_board(game.board());
         self.draw_piece(game.piece());
         self.draw_next(game.next_shape());
@@ -151,7 +151,7 @@ impl<'a> Drawer<'a> {
         self.draw_shape(next, Rotation::default(), Pos::new(1, 1));
     }
 
-    fn draw_game_score(&mut self, game: &GameWithHistory) {
+    fn draw_game_score(&mut self, game: &Game) {
         self.set_viewport(*SCORE_VIEW);
 
         self.text()

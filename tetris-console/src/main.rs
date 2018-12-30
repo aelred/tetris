@@ -10,7 +10,7 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-use tetris::GameWithHistory;
+use tetris::Game;
 use tetris::State;
 
 mod draw;
@@ -62,7 +62,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn handle_key_in_game(mut game: GameWithHistory, key: Key) -> State {
+fn handle_key_in_game(mut game: Game, key: Key) -> State {
     match key {
         Key::Up => game.rotate(),
         Key::Left => game.move_left(),
