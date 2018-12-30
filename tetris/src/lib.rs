@@ -12,12 +12,12 @@
 //!         Title(title) => {
 //!             title.start_game()
 //!         },
-//!         Play(mut game) => {
+//!         Play(ref mut game) => {
 //!             // Play some random moves
 //!             game.move_left();
 //!             game.rotate();
 //!             game.start_hard_drop();
-//!             game.into()  // `.into()` transforms the inner states back into the `State` enum
+//!             state
 //!         }
 //!         Paused(paused) => {
 //!             paused.unpause()
