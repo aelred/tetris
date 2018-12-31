@@ -48,11 +48,11 @@ fn main() -> Result<()> {
             state = match state {
                 State::Title(title) => match key {
                     Key::Char('\n') => title.start_game(),
-                    _ => State::from(title),
+                    _ => State::Title(title),
                 },
                 State::Play(game) => handle_key_in_game(game, key),
                 State::Paused(paused) => paused.unpause(),
-                State::GameOver(game_over) => State::from(game_over),
+                State::GameOver(game_over) => State::GameOver(game_over),
             };
         }
 
@@ -73,5 +73,5 @@ fn handle_key_in_game(mut game: Game, key: Key) -> State {
         _ => {}
     };
 
-    State::from(game)
+    State::Play(game)
 }

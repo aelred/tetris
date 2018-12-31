@@ -16,17 +16,17 @@ pub enum State {
 impl State {
     /// Create a title screen state.
     pub fn title() -> State {
-        State::from(Title)
+        State::Title(Title)
     }
 
     /// Create a game-play state.
     pub fn play() -> State {
-        State::from(Game::default())
+        State::Play(Game::default())
     }
 
     /// Create a paused state for the given game.
     pub fn paused(game: Game) -> State {
-        State::from(Paused(game))
+        State::Paused(Paused(game))
     }
 
     /// Update the given state, ticking time forward once.
@@ -35,30 +35,6 @@ impl State {
             State::Play(game) => game.update(),
             _ => self,
         }
-    }
-}
-
-impl From<Title> for State {
-    fn from(title: Title) -> Self {
-        State::Title(title)
-    }
-}
-
-impl From<Game> for State {
-    fn from(game_with_history: Game) -> Self {
-        State::Play(game_with_history)
-    }
-}
-
-impl From<Paused> for State {
-    fn from(paused: Paused) -> Self {
-        State::Paused(paused)
-    }
-}
-
-impl From<GameOver> for State {
-    fn from(game_over: GameOver) -> Self {
-        State::GameOver(game_over)
     }
 }
 
@@ -84,6 +60,6 @@ pub struct Paused(pub Game);
 impl Paused {
     /// Unpause the game.
     pub fn unpause(self) -> State {
-        State::from(self.0)
+        State::Play(self.0)
     }
 }

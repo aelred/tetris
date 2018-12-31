@@ -110,7 +110,7 @@ impl GameOver {
             }
             State::play()
         } else {
-            State::from(self)
+            State::GameOver(self)
         }
     }
 

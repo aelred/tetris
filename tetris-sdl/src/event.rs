@@ -65,7 +65,7 @@ impl EventHandler {
                 ..
             }
             | Event::FingerUp { .. } => title.start_game(),
-            _ => State::from(title),
+            _ => State::Title(title),
         }
     }
 
@@ -114,7 +114,7 @@ impl EventHandler {
             }
             _ => {}
         }
-        State::from(game)
+        State::Play(game)
     }
 
     fn handle_paused(&mut self, paused: Paused, event: &Event) -> State {
@@ -123,7 +123,7 @@ impl EventHandler {
                 win_event: WindowEvent::FocusGained,
                 ..
             } => paused.unpause(),
-            _ => State::from(paused),
+            _ => State::Paused(paused),
         }
     }
 
@@ -152,7 +152,7 @@ impl EventHandler {
             _ => {}
         }
 
-        State::from(game_over)
+        State::GameOver(game_over)
     }
 }
 
