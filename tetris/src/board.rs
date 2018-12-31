@@ -7,7 +7,7 @@ use crate::shape::ShapeColor;
 /// with.
 #[derive(Clone, Debug, Default)]
 pub struct Board {
-    pub grid: [[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize],
+    grid: [[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize],
 }
 
 impl Board {
@@ -24,6 +24,17 @@ impl Board {
 
     /// Number of visible rows, based on total height and number of hidden rows.
     pub const VISIBLE_ROWS: u8 = Board::HEIGHT - Board::HIDE_ROWS;
+
+    /// Get the grid of cells of fixed tetrominos.
+    pub fn grid(&self) -> &[[Option<ShapeColor>; Board::WIDTH as usize]; Board::HEIGHT as usize] {
+        &self.grid
+    }
+
+    /// Get the visible grid of cells of fixed tetrominos, excluding any rows above the visible
+    /// portion of the board.
+    pub fn visible_grid(&self) -> &[[Option<ShapeColor>; Board::WIDTH as usize]] {
+        &self.grid[Board::HIDE_ROWS as usize..]
+    }
 
     /// Lock a piece, attaching it to the board permanently and potentially clearing some rows.
     ///

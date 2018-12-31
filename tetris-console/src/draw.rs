@@ -83,7 +83,7 @@ fn draw_game<W: Write>(stdout: &mut W, game: &Game) -> Result<()> {
 }
 
 fn draw_board<W: Write>(stdout: &mut W, board: &Board) -> Result<()> {
-    for (num, row) in board.grid[Board::HIDE_ROWS as usize..].iter().enumerate() {
+    for (num, row) in board.visible_grid().iter().enumerate() {
         write!(stdout, "{}", cursor::Goto(2, num as u16 + 2))?;
 
         for cell in row {

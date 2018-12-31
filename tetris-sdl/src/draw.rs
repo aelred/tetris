@@ -135,7 +135,7 @@ impl<'a> Drawer<'a> {
 
         for y in Board::HIDE_ROWS..Board::HEIGHT {
             for x in 0..Board::WIDTH {
-                if let Some(color) = board.grid[y as usize][x as usize] {
+                if let Some(color) = board.grid()[y as usize][x as usize] {
                     let y = y - Board::HIDE_ROWS;
                     let cell_pos = Pos::new(i16::from(x), i16::from(y));
                     self.draw_block(cell_pos, shape_color_to_rgb(color))
