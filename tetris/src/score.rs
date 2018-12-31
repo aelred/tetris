@@ -14,7 +14,9 @@ pub const SCORE_ENDPOINT: &str = "/scores";
 /// A score on a scoreboard.
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug)]
 pub struct Score {
+    /// The score as a number.
     pub value: u32,
+    /// The name of the player who achieved this score.
     pub name: String,
 }
 

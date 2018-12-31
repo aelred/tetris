@@ -38,6 +38,8 @@
 //! }
 //! ```
 
+#![deny(missing_docs)]
+
 pub use self::board::Board;
 pub use self::game::Game;
 pub use self::game_over::{GameOver, HighScores};

@@ -11,6 +11,14 @@ use crate::pos::Pos;
 const NUM_SHAPES: usize = 7;
 const NUM_ROTATIONS: i8 = 4;
 
+/// A bag of shapes that is used to produce a random sequence of shapes in the game.
+///
+/// The random sequence is designed to behave like a bag containing all seven shapes. Shapes are
+/// pulled from the bag one by one until the bag is empty, then all seven shapes are returned
+/// to the bag.
+///
+/// The result is a random sequence that feels "natural", with an even distribution of pieces over
+/// time.
 #[derive(Clone)]
 pub struct Bag {
     shapes: [Shape; NUM_SHAPES],
@@ -29,6 +37,7 @@ impl fmt::Debug for Bag {
 }
 
 impl Bag {
+    /// Create a new bag with the given random number generator
     pub fn new(mut rng: XorShiftRng) -> Bag {
         Bag {
             shapes: Bag::random_sequence(&mut rng),
@@ -37,10 +46,12 @@ impl Bag {
         }
     }
 
+    /// Peek at the next shape without removing it.
     pub fn peek(&self) -> Shape {
         self.shapes[self.index]
     }
 
+    /// Remove and return the next shape.
     pub fn pop(&mut self) -> Shape {
         let next = self.shapes[self.index];
 
@@ -74,14 +85,17 @@ impl Bag {
     }
 }
 
+/// The 90-degree rotation of a shape, so can be one of four values.
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct Rotation(i8);
 
 impl Rotation {
+    /// Rotate clockwise 90 degrees.
     pub fn clockwise(self) -> Rotation {
         Rotation(modulo(self.0 + 1, NUM_ROTATIONS))
     }
 
+    /// Rotate anti-clockwise 90 degrees.
     pub fn anticlockwise(self) -> Rotation {
         Rotation(modulo(self.0 - 1, NUM_ROTATIONS))
     }
@@ -92,27 +106,49 @@ fn modulo(x: i8, y: i8) -> i8 {
     ((x % y) + y) % y
 }
 
+/// The different tetromino colors, classified by shape.
 #[derive(PartialEq, Clone, Debug, Copy)]
 pub enum ShapeColor {
+    /// The 'O' or 'square' shape.
     O,
+    /// The 'I' shape.
     I,
+    /// The 'J' shape.
     J,
+    /// The 'L' shape.
     L,
+    /// The 'S' shape.
     S,
+    /// The 'T' shape.
     T,
+    /// The 'Z' shape.
     Z,
 }
 
+/// A tetromino shape, described by its appearance at all rotations, plus its colour.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Shape {
+    /// The shape's appearance across all four rotations, stored in a u16. This is a compact
+    /// binary 'bitfield' representation like so:
+    /// ```
+    /// // _ _ _ _
+    /// // _ X _ _
+    /// // _ X _ _
+    /// // _ X X _
+    /// let l_shape = 0b_0000_0100_0100_0110;
+    /// ```
     rotations: [u16; 4],
+    /// The colour of the shape.
     pub color: ShapeColor,
 }
 
 impl Shape {
+    /// The maximum width of a shape.
     pub const WIDTH: u8 = 4;
+    /// The maximum height of a shape.
     pub const HEIGHT: u8 = 4;
 
+    /// Get all the blocks that comprise this shape with the given rotation.
     pub fn blocks(&self, rot: Rotation) -> Vec<Pos> {
         let mut blocks = Vec::new();
 
