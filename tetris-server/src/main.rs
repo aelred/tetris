@@ -55,7 +55,7 @@ impl ScoresHandler {
     }
 }
 
-#[get("/scores)]
+#[get("/scores")]
 fn get_scores(scores: State<ScoresHandler>) -> Json<Vec<Score>> {
     Json(scores.get_hiscores())
 }
