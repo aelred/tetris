@@ -22,9 +22,10 @@ jobs:
   build-server:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Build server
         run: cd tetris-server && cargo build --release
-      - name: Upload artifaction
+      - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           path: target/release/tetris-server
