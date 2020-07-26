@@ -2,7 +2,6 @@ use std::cmp;
 use std::ops::Add;
 use std::ops::Mul;
 
-use rand;
 use rand::SeedableRng;
 use rand::XorShiftRng;
 use serde_derive::{Deserialize, Serialize};
@@ -156,7 +155,7 @@ impl Game {
     pub fn update(mut self) -> State {
         match self.game_state.apply_step() {
             StepResult::GameOver => {
-                let game_over = GameOver::new(self.game_state.score, self.history.clone());
+                let game_over = GameOver::new(self.game_state.score, self.history);
                 State::GameOver(game_over)
             }
             StepResult::Continue => State::Play(self),

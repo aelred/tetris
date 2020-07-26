@@ -45,7 +45,7 @@ pub use self::game::Game;
 pub use self::game_over::{GameOver, HighScores};
 pub use self::piece::Piece;
 pub use self::pos::Pos;
-pub use self::score::{Score, ScoreMessage, SCORE_ENDPOINT};
+pub use self::score::{Score, ScoreMessage, ScoreValidationError, SCORE_ENDPOINT};
 pub use self::shape::{Rotation, Shape, ShapeColor};
 pub use self::state::{Paused, State, Title};
 

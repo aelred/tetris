@@ -105,7 +105,7 @@ impl GameOver {
     pub fn submit(self) -> State {
         if !self.posting_hiscore() || !self.score.name.is_empty() {
             if self.posting_hiscore() {
-                let message = ScoreMessage::new(self.score.clone(), self.history.clone());
+                let message = ScoreMessage::new(self.score.clone(), self.history);
                 rest::post_hiscore(&message);
             }
             State::play()

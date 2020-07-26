@@ -1,12 +1,8 @@
 use std::error::Error;
 
-#[cfg(not(target_os = "emscripten"))]
-use hyper;
 use lazy_static::lazy_static;
 #[cfg(target_os = "emscripten")]
 use libc;
-use serde_json;
-use url;
 use url::Url;
 
 use crate::score::ScoreMessage;
@@ -42,7 +38,7 @@ impl Client {
 #[cfg(not(target_os = "emscripten"))]
 struct Client {
     url: Url,
-    hyper_client: hyper::client::Client,
+    reqwest_client: reqwest::blocking::Client,
 }
 
 #[cfg(not(target_os = "emscripten"))]
@@ -50,7 +46,7 @@ impl Client {
     fn new(url: Url) -> Self {
         Client {
             url,
-            hyper_client: hyper::client::Client::new(),
+            reqwest_client: reqwest::blocking::Client::new(),
         }
     }
 
@@ -58,15 +54,15 @@ impl Client {
         use std::io::Read;
 
         let mut body = String::new();
-        let mut res = self.hyper_client.get(self.scores_endpoint()).send()?;
+        let mut res = self.reqwest_client.get(self.scores_endpoint()).send()?;
         res.read_to_string(&mut body)?;
         Ok(body)
     }
 
     fn post_raw_hiscores(&self, score: &str) -> Result<()> {
-        self.hyper_client
+        self.reqwest_client
             .post(self.scores_endpoint())
-            .body(score.as_bytes())
+            .body(score.to_string())
             .send()?;
         Ok(())
     }

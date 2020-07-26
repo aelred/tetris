@@ -49,11 +49,17 @@ pub struct ScoreMessage {
 /// Potential errors from score validation.
 #[derive(Debug)]
 pub enum ScoreValidationError {
+    /// Name should not be empty
     NameEmpty,
+    /// Name must be at most 3 characters
     NameTooLong(usize),
+    /// Name must contain only alphanumeric characters
     NameNotAlphanumeric(String),
+    /// Score does not match game history
     UnexpectedScore {
+        /// The original score message
         score_message: Box<ScoreMessage>,
+        /// The expected score, which didn't match the score from score_message
         expected_score: u32,
     },
 }

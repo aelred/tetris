@@ -2,7 +2,6 @@ use std::cmp::max;
 use std::time::Duration;
 use std::time::Instant;
 
-use sdl2;
 use sdl2::mixer::LoaderRWops;
 use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::rwops::RWops;
@@ -93,7 +92,6 @@ fn ttf_context() -> &'static ttf::Sdl2TtfContext {
 #[cfg(not(target_os = "emscripten"))]
 fn play_tetris(mut context: Context<'_>) {
     use std::thread::sleep;
-    use std::time::Duration;
 
     const TIME_BETWEEN_FRAMES_IN_MS: u64 = 33;
 

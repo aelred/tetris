@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 tetris = {path="../tetris", version="0.1.0"}
-hyper = "0.10.5"
+rocket = "0.4.5"
+rocket_contrib = {version="0.4.5", features=["json"]}
 serde_json = "1.0"
-clap = "2.26"
 dirs = "1.0"

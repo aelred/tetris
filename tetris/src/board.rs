@@ -122,7 +122,6 @@ fn out_bounds(pos: Pos) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use std::mem;
     use std::ptr;
 
     use quickcheck::{quickcheck, Arbitrary, Gen, TestResult};
@@ -133,7 +132,8 @@ mod tests {
         fn arbitrary<G: Gen>(g: &mut G) -> Board {
             unsafe {
                 let mut array: [[Option<ShapeColor>; Board::WIDTH as usize];
-                    Board::HEIGHT as usize] = mem::uninitialized();
+                    Board::HEIGHT as usize] =
+                    [[None; Board::WIDTH as usize]; Board::HEIGHT as usize];
 
                 for row in &mut array {
                     for cell in row {
