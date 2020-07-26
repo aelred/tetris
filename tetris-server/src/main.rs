@@ -111,8 +111,6 @@ impl Handler for ScoresHandler {
                 }
             }
         };
-
-        return;
     }
 }
 
