@@ -4,7 +4,7 @@
 set -e
 set -o pipefail
 
-cd ~/sites/tetris
+cd ~/tetris
 
 git fetch --all
 git reset --hard origin/master
