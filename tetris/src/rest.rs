@@ -9,7 +9,7 @@ use crate::score::ScoreMessage;
 use crate::score::{Score, SCORE_ENDPOINT};
 
 lazy_static! {
-    static ref CLIENT: Client = Client::new(Url::parse("http://tetris.ael.red").unwrap());
+    static ref CLIENT: Client = Client::new(Url::parse("https://tetris.ael.red").unwrap());
 }
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
