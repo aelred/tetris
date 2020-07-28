@@ -82,3 +82,5 @@ jobs:
           key: ${{ secrets.KEY }}
           source: tetris-sdl-wasm/*
           target: /var/www/tetris.${{ secrets.HOST }}
+          strip_components: 1
+          rm: true
