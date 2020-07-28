@@ -19,7 +19,6 @@ jobs:
   
   build-server:
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - uses: actions/checkout@v2
       - name: Build server
@@ -32,7 +31,7 @@ jobs:
 
   deploy-server:
     runs-on: ubuntu-latest
-    needs: build-server
+    needs: [test, build-server]
     steps:
       - uses: actions/download-artifact@v2
         with:
@@ -47,3 +46,16 @@ jobs:
           key: ${{ secrets.KEY }}
           source: tetris-server
           target: /opt/tetris/bin
+
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: mymindstorm/setup-emsdk@v6
+      - name: Build server
+        run: cd tetris-sdl && cargo build --release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tetris-sdl
+          path: target/release/tetris-sdl
