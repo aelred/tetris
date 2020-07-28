@@ -63,6 +63,7 @@ jobs:
           path: |
             target/wasm32-unknown-emscripten/release/tetris-sdl.wasm
             target/wasm32-unknown-emscripten/release/tetris-sdl.js
+            static/*
 
   deploy-wasm-client:
     runs-on: ubuntu-latest
@@ -71,13 +72,12 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: tetris-sdl-wasm
-      - name: Move compiled files to static folder
-        run: cp tetris-sdl.wasm static/ && cp tetris-sdl.js static/
+          path: tetris-sdl-wasm
       - name: Deploy wasm client
         uses: appleboy/scp-action@v0.1.1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-          source: static/*
+          source: tetris-sdl-wasm/*
           target: /var/www/tetris.${{ secrets.HOST }}
