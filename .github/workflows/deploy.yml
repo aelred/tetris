@@ -52,6 +52,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: mymindstorm/setup-emsdk@v6
+      - name: Add wasm target
+        run: rustup target add wasm32-unknown-emscripten --toolchain nightly 
       - name: Build wasm client
         run: cd tetris-sdl && cargo build --release --target wasm32-unknown-emscripten
       - name: Upload artifact
