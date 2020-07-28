@@ -60,7 +60,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: tetris-sdl-wasm
-          path: target/wasm32-unknown-emscripten/release/
+          path: |
+            target/wasm32-unknown-emscripten/release/tetris-sdl.wasm
+            target/wasm32-unknown-emscripten/release/tetris-sdl.js
 
   deploy-wasm-client:
     runs-on: ubuntu-latest
