@@ -37,8 +37,8 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: tetris-server
-            - name: Publish cv
-      - uses: appleboy/scp-action@v0.1.1
+      - name: Deploy server
+        uses: appleboy/scp-action@v0.1.1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
