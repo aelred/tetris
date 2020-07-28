@@ -47,15 +47,15 @@ jobs:
           source: tetris-server
           target: /opt/tetris/bin
 
-  build-client:
+  build-wasm-client:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: mymindstorm/setup-emsdk@v6
-      - name: Build server
-        run: cd tetris-sdl && cargo build --release
+      - name: Build wasm client
+        run: cd tetris-sdl && cargo build --release --target wasm32-unknown-emscripten
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: tetris-sdl
-          path: target/release/tetris-sdl
+          name: tetris-sdl-wasm
+          path: target/wasm32-unknown-emscripten/release/
