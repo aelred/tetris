@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: mymindstorm/setup-emsdk@v6
+      - uses: mymindstorm/setup-emsdk@v8
       - name: Add wasm target
         run: rustup target add wasm32-unknown-emscripten
       - name: Build wasm client
