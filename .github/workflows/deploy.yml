@@ -68,25 +68,7 @@ jobs:
           name: tetris-sdl-wasm
           path: static/
 
-  deploy-wasm-client-to-server:
-    runs-on: ubuntu-latest
-    needs: [test, build-wasm-client]
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: tetris-sdl-wasm
-          path: tetris-sdl-wasm
-      - name: Deploy wasm client
-        uses: appleboy/scp-action@v0.1.1
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          source: tetris-sdl-wasm/*
-          target: /var/www/tetris.${{ secrets.HOST }}
-          strip_components: 1
-
-  deploy-wasm-client-to-s3:
+  deploy-wasm-client:
     runs-on: ubuntu-latest
     needs: [test, build-wasm-client]
     steps:
