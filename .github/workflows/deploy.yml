@@ -17,22 +17,11 @@ jobs:
     - name: Run tests
       run: cargo test
 
-  build-server:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build server
-        run: cd tetris-server && cargo build --release
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: tetris-server
-          path: target/release/tetris-server
-
   publish-server:
     env:
       IMAGE: aelred/tetris-server
     runs-on: ubuntu-latest
+    needs: [test]
     steps:
       - name: Generate build ID
         id: prep
@@ -51,24 +40,6 @@ jobs:
         with:
           push: true
           tags: ${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
-
-  deploy-server:
-    runs-on: ubuntu-latest
-    needs: [test, build-server]
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: tetris-server
-      - name: Mark executable
-        run: chmod u+x tetris-server
-      - name: Deploy server
-        uses: appleboy/scp-action@v0.1.1
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          source: tetris-server
-          target: /opt/tetris/bin
 
   build-wasm-client:
     runs-on: ubuntu-latest
