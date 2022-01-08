@@ -137,22 +137,22 @@ mod tests {
 
     #[test]
     fn correctly_recognise_a_valid_short_game() {
-        let body = include_str!("../resources/games/short.json");
+        let body = include_str!("../../resources/games/short.json");
         let message: ScoreMessage = serde_json::from_str(&body).unwrap();
         assert_eq!(
             message.score().unwrap(),
-            Score::new(1700, "AEL".to_string())
+            Score::new(1700, "SHT".to_string())
         );
     }
 
     #[test]
     #[ignore] // TODO: fix whatever causes this to fail
     fn correctly_recognise_a_valid_long_game() {
-        let body = include_str!("../resources/games/long.json");
+        let body = include_str!("../../resources/games/long.json");
         let message: ScoreMessage = serde_json::from_str(&body).unwrap();
         assert_eq!(
             message.score().unwrap(),
-            Score::new(24800, "AEL".to_string())
+            Score::new(24800, "LNG".to_string())
         );
     }
 }
