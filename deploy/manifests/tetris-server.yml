@@ -72,43 +72,6 @@ spec:
                 port:
                   number: 8000
 ---
-apiVersion: image.toolkit.fluxcd.io/v1alpha1
-kind: ImageRepository
-metadata:
-  name: tetris-server
-  namespace: flux-system
-spec:
-  image: docker.io/aelred/tetris-server
-  interval: 1m0s
----
-apiVersion: image.toolkit.fluxcd.io/v1alpha1
-kind: ImagePolicy
-metadata:
-  name: tetris-server
-  namespace: flux-system
-spec:
-  imageRepositoryRef:
-    name: tetris-server
-  filterTags:
-    pattern: '^master-[a-fA-F0-9]+-(?P<ts>.*)'
-    extract: '$ts'
-  policy:
-    numerical:
-      order: asc
----
-apiVersion: notification.toolkit.fluxcd.io/v1beta1
-kind: Receiver
-metadata:
-  name: tetris-server
-  namespace: flux-system
-spec:
-  type: dockerhub
-  secretRef:
-    name: webhook-token
-  resources:
-    - kind: ImageRepository
-      name: tetris-server
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
