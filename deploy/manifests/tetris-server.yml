@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tetris-server
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tetris-server
+  template:
+    metadata:
+      labels:
+        app: tetris-server
+    spec:
+      containers:
+        - name: tetris-server
+          image: docker.io/aelred/tetris-server:master-a3b1ca24-1641661204 # {"$imagepolicy": "flux-system:tetris-server"}
+          env:
+            - name: ROCKET_PORT
+              value: "8000"
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: "/root/.tetris/"
+              name: tetris-storage
+      volumes:
+        - name: tetris-storage
+          persistentVolumeClaim:
+            claimName: tetris-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tetris-server
+  namespace: default
+spec:
+  selector:
+    app: tetris-server
+  ports:
+    - protocol: TCP
+      port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tetris-server
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: https://tetris.ael.red
+spec:
+  tls:
+    - hosts:
+        - api.tetris.ael.red
+      secretName: tetris-server-tls
+  rules:
+    - host: api.tetris.ael.red
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: tetris-server
+                port:
+                  number: 8000
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImageRepository
+metadata:
+  name: tetris-server
+  namespace: flux-system
+spec:
+  image: docker.io/aelred/tetris-server
+  interval: 1m0s
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImagePolicy
+metadata:
+  name: tetris-server
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: tetris-server
+  filterTags:
+    pattern: '^master-[a-fA-F0-9]+-(?P<ts>.*)'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta1
+kind: Receiver
+metadata:
+  name: tetris-server
+  namespace: flux-system
+spec:
+  type: dockerhub
+  secretRef:
+    name: webhook-token
+  resources:
+    - kind: ImageRepository
+      name: tetris-server
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tetris-server
+  namespace: default
+spec:
+  accessModes: [ReadWriteMany]
+  resources:
+    requests:
+      storage: 2Ki
