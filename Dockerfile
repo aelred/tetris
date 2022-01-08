@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.0-experimental
-FROM rust:1.47 as build
+FROM rustlang/rust:nightly as build
 WORKDIR /tmp
 RUN USER=root cargo new --bin builder
 WORKDIR /tmp/builder
