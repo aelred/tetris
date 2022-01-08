@@ -25,6 +25,10 @@ spec:
           volumeMounts:
             - mountPath: "/root/.tetris/"
               name: tetris-storage
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /scores
       volumes:
         - name: tetris-storage
           persistentVolumeClaim:
