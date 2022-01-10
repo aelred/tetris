@@ -12,10 +12,6 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.0.2"
     }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "~> 1.10.0"
-    }
   }
 }
 
@@ -24,8 +20,6 @@ provider aws {
 }
 
 provider github {}
-
-provider kubectl {}
 
 provider kubernetes {
   config_path = "~/.kube/config"
