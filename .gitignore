@@ -7,3 +7,6 @@ static/tetris_sdl.wasm
 .idea
 .vscode
 *.iml
+**/.terraform/*
+*.tfstate
+*.tfstate.*
