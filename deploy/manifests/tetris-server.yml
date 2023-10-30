@@ -53,8 +53,7 @@ metadata:
   namespace: default
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: https://tetris.ael.red
+    ingress.kubernetes.io/custom-request-headers: "Access-Control-Allow-Origin: https://tetris.ael.red"
 spec:
   tls:
     - hosts:
