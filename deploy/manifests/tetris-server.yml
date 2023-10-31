@@ -80,7 +80,7 @@ spec:
   headers:
     accessControlAllowMethods: ["*"]
     accessControlAllowHeaders: ["*"]
-    accessControlAllowOriginList: ["https://tetris.ael.red"]
+    accessControlAllowOrigin: ["https://tetris.ael.red"]
     accessControlMaxAge: 100
     addVaryHeader: true
 ---
