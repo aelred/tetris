@@ -53,7 +53,7 @@ metadata:
   namespace: default
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    traefik.ingress.kubernetes.io/router.middlewares: tetris-server-cors
+    traefik.ingress.kubernetes.io/middleware: tetris-server-cors
 spec:
   tls:
     - hosts:
