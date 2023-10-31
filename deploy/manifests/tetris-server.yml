@@ -78,8 +78,11 @@ metadata:
   namespace: default
 spec:
   headers:
-    accessControlAllowOriginList:
-      - "https://tetris.ael.red"
+    accessControlAllowMethods: ["*"]
+    accessControlAllowHeaders: ["*"]
+    accessControlAllowOriginList: ["https://tetris.ael.red"]
+    accessControlMaxAge: 100
+    addVaryHeader: true
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
