@@ -9,8 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - name: Install SDL
-      run: sudo apt-get update && sudo apt-get install libsdl2-dev libsdl2-ttf-dev libsdl2-mixer-dev
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install libssl-dev libsdl2-dev libsdl2-ttf-dev libsdl2-mixer-dev
     - uses: actions/checkout@v2
     - name: Install Rust toolchain
       run: rustup show  # Don't be fooled by "show", it installs the toolchain in rust-toolchain.toml
