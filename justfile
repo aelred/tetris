@@ -4,6 +4,9 @@ install:
 init-wasm:
     rustup target add wasm32-unknown-emscripten
 
+build-server:
+    cargo build --release --package tetris-server
+
 build-wasm: init-wasm
     cd tetris-sdl && cargo build --release --target wasm32-unknown-emscripten
     cp target/wasm32-unknown-emscripten/release/tetris_sdl.wasm static/

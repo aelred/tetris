@@ -1,15 +1,16 @@
-FROM rust:1.73.0 as server-build
-WORKDIR /build
-COPY . .
-RUN cargo build --release --package tetris-server
-
-FROM rust:1.73.0 as wasm-build
+FROM rust:1.73.0 as build
 RUN cargo install just
-RUN git clone --depth=1 https://github.com/emscripten-core/emsdk.git
-RUN cd emsdk && ./emsdk install 3.1.43
-RUN cd emsdk && ./emsdk activate 3.1.43
-ENV PATH="/emsdk:/emsdk/upstream/emscripten:${PATH}"
 WORKDIR /build
+
+FROM build as server-build
+COPY . .
+RUN just build-server
+
+FROM build as wasm-build
+RUN cd / && git clone --depth=1 https://github.com/emscripten-core/emsdk.git
+RUN cd /emsdk && ./emsdk install 3.1.43
+RUN cd /emsdk && ./emsdk activate 3.1.43
+ENV PATH="/emsdk:/emsdk/upstream/emscripten:${PATH}"
 COPY justfile .
 RUN just init-wasm
 COPY . .
