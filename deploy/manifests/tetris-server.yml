@@ -56,10 +56,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - api.tetris.ael.red
+        - tetris.ael.red
       secretName: tetris-server-tls
   rules:
-    - host: api.tetris.ael.red
+    - host: tetris.ael.red
       http:
         paths:
           - pathType: Prefix
