@@ -1,2 +1,2 @@
 [target.wasm32-unknown-emscripten]
-rustflags = ["-C", "link-args=-s USE_SDL=2 -s USE_SDL_TTF=2 -s USE_OGG=1"]
+rustflags = ["-C", "link-args=-s USE_SDL=2 -s USE_SDL_TTF=2 -s USE_SDL_MIXER=2 -s USE_OGG=1"]

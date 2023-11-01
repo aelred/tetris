@@ -1,16 +1,25 @@
-# syntax=docker/dockerfile:1.0-experimental
-FROM rustlang/rust:nightly as build
-WORKDIR /tmp
-RUN USER=root cargo new --bin builder
-WORKDIR /tmp/builder
+FROM rust:1.73.0 as server-build
+WORKDIR /build
 COPY . .
-RUN --mount=type=cache,target=../../usr/local/cargo/registry \
-    --mount=type=cache,target=../../usr/local/cargo/registry \
-    --mount=type=cache,target=target \
-    cargo build --release --package tetris-server
-RUN --mount=type=cache,target=target cp target/release/tetris-server /tmp/server
+RUN cargo build --release --package tetris-server
 
-FROM debian:buster-slim
+FROM rust:1.73.0 as wasm-build
+RUN cargo install just
+RUN git clone --depth=1 https://github.com/emscripten-core/emsdk.git
+RUN cd emsdk && ./emsdk install 3.1.43
+RUN cd emsdk && ./emsdk activate 3.1.43
+ENV PATH="/emsdk:/emsdk/upstream/emscripten:${PATH}"
+WORKDIR /build
+COPY justfile .
+RUN just init-wasm
+COPY . .
+RUN just build-wasm
+
+FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y libssl-dev
-COPY --from=build /tmp/server /bin
-ENTRYPOINT ["server"]
+COPY --from=server-build /build/target/release/tetris-server /bin
+COPY --from=wasm-build /build/static /static
+ENV ROCKET_ADDRESS=0.0.0.0
+ENV STATIC_FILES /static
+EXPOSE 8000
+ENTRYPOINT ["tetris-server"]

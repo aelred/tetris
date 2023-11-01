@@ -167,11 +167,11 @@ impl Shape {
 /// Create a tetromino shape as a compact `u16` bit array.
 ///
 /// e.g.
-/// ```
+/// ```ignore
 /// tet!(_ _ _ _
 ///      _ X _ _
 ///      _ X _ _
-///      _ X X _),
+///      _ X X _)
 /// ```
 ///
 macro_rules! tet {

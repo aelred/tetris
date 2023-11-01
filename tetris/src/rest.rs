@@ -3,13 +3,14 @@ use std::error::Error;
 use lazy_static::lazy_static;
 #[cfg(target_os = "emscripten")]
 use libc;
+#[cfg(not(target_os = "emscripten"))]
 use url::Url;
 
 use crate::score::ScoreMessage;
 use crate::score::{Score, SCORE_ENDPOINT};
 
 lazy_static! {
-    static ref CLIENT: Client = Client::new(Url::parse("https://api.tetris.ael.red").unwrap());
+    static ref CLIENT: Client = Client::new();
 }
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
@@ -29,12 +30,6 @@ pub fn post_hiscore(score: &ScoreMessage) {
     }
 }
 
-impl Client {
-    fn scores_endpoint(&self) -> Url {
-        self.url.join(SCORE_ENDPOINT).unwrap()
-    }
-}
-
 #[cfg(not(target_os = "emscripten"))]
 struct Client {
     url: Url,
@@ -43,11 +38,15 @@ struct Client {
 
 #[cfg(not(target_os = "emscripten"))]
 impl Client {
-    fn new(url: Url) -> Self {
+    fn new() -> Self {
         Client {
-            url,
+            url: Url::parse("https://tetris.ael.red").unwrap(),
             reqwest_client: reqwest::blocking::Client::new(),
         }
+    }
+
+    fn scores_endpoint(&self) -> Url {
+        self.url.join(SCORE_ENDPOINT).unwrap()
     }
 
     fn get_raw_hiscores(&self) -> Result<String> {
@@ -69,9 +68,7 @@ impl Client {
 }
 
 #[cfg(target_os = "emscripten")]
-struct Client {
-    url: Url,
-}
+struct Client;
 
 #[cfg(target_os = "emscripten")]
 extern "C" {
@@ -81,8 +78,8 @@ extern "C" {
 
 #[cfg(target_os = "emscripten")]
 impl Client {
-    fn new(url: Url) -> Self {
-        Client { url }
+    fn new() -> Self {
+        Client
     }
 
     fn run_script(script: &str) {
@@ -113,7 +110,7 @@ impl Client {
             req.send(null);
             return req.responseText;
         }}())"#,
-            self.scores_endpoint()
+            SCORE_ENDPOINT
         );
 
         Ok(Client::run_script_string(&script))
@@ -126,8 +123,7 @@ impl Client {
             req.open("POST", "{}", false);
             req.send(JSON.stringify({}));
         }}())"#,
-            self.scores_endpoint(),
-            score
+            SCORE_ENDPOINT, score
         );
 
         Client::run_script(&script);

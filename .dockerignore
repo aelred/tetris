@@ -1,2 +1,3 @@
 **/target
-static
+static/tetris_sdl.wasm
+static/tetris_sdl.js

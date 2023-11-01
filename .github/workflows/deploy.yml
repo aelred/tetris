@@ -15,9 +15,9 @@ jobs:
     - name: Install Rust toolchain
       run: rustup show  # Don't be fooled by "show", it installs the toolchain in rust-toolchain.toml
     - name: Run tests
-      run: cargo test
+      run: just test
 
-  publish-server:
+  publish:
     if: github.ref == 'refs/heads/master'
     env:
       IMAGE: aelred/tetris-server
@@ -41,42 +41,3 @@ jobs:
         with:
           push: true
           tags: ${{ env.IMAGE }}:${{ steps.prep.outputs.BUILD_ID }}
-
-  build-wasm-client:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: mymindstorm/setup-emsdk@v8
-        with:
-          version: 1.40.1
-      - name: Add wasm target
-        run: rustup target add wasm32-unknown-emscripten
-      - name: Build wasm client
-        run: cd tetris-sdl && cargo build --release --target wasm32-unknown-emscripten
-      - name: Move wasm and js to static folder
-        run: |
-          mv target/wasm32-unknown-emscripten/release/tetris_sdl.wasm static/
-          mv target/wasm32-unknown-emscripten/release/tetris-sdl.js static/
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: tetris-sdl-wasm
-          path: static/
-
-  deploy-wasm-client:
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    needs: [test, build-wasm-client]
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: tetris-sdl-wasm
-          path: tetris-sdl-wasm
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-      - name: Deploy wasm client to S3
-        run: aws s3 sync tetris-sdl-wasm s3://${{ secrets.STATIC_SITE_BUCKET }}/ --delete

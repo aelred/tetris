@@ -3,6 +3,7 @@ use std::time::Duration;
 use std::time::Instant;
 
 use sdl2::mixer::LoaderRWops;
+use sdl2::mixer::Music;
 use sdl2::mixer::{AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::rwops::RWops;
 use sdl2::ttf;
@@ -22,7 +23,7 @@ mod event;
 #[cfg(target_os = "emscripten")]
 mod emscripten;
 
-const TIME_BETWEEN_UPDATES_IN_MS: u64 = 33;
+const FPS: u16 = 60;
 
 static FONT_DATA: &[u8] = include_bytes!("../resources/8-BIT WONDER.TTF");
 static MUSIC_DATA: &[u8] = include_bytes!("../resources/tetris.ogg");
@@ -62,6 +63,7 @@ fn main() {
     let chunk_size = 1_024;
     sdl2::mixer::open_audio(frequency, format, channels, chunk_size).unwrap();
 
+    Music::set_volume(16);
     let music_data = RWops::from_bytes(MUSIC_DATA).unwrap();
     let music = music_data.load_music().unwrap();
     music.play(1).unwrap();
@@ -105,11 +107,8 @@ fn play_tetris(mut context: Context<'_>) {
 
 #[cfg(target_os = "emscripten")]
 fn play_tetris(mut context: Context<'static>) {
-    use crate::emscripten;
-
     context.drawer.present();
-
-    emscripten::set_main_loop(move || context.main_loop(), 0);
+    emscripten::set_main_loop(move || context.main_loop(), FPS.into());
 }
 
 impl Context<'_> {
@@ -117,17 +116,24 @@ impl Context<'_> {
         let mut state = self.state.take().unwrap();
         state = self.event_handler.handle(state);
 
-        // Check if enough time has passed to tick the game forward.
-        // This makes the game speed independent of the frame rate.
-        let time_between_updates = Duration::from_millis(TIME_BETWEEN_UPDATES_IN_MS);
         let now = Instant::now();
-        let time_since_last_update = now - self.last_update;
-        let num_updates =
-            time_since_last_update.subsec_millis() / time_between_updates.subsec_millis();
+
+        let num_updates = if cfg!(target_os = "emscripten") {
+            // Web browser APIs don't let us check precise timings
+            1
+        } else {
+            // Check if enough time has passed to tick the game forward.
+            // This makes the game speed independent of the frame rate.
+            let time_between_updates = Duration::from_millis((1000 / FPS).into());
+            let time_since_last_update = now - self.last_update;
+            time_since_last_update.as_millis() / time_between_updates.as_millis()
+        };
 
         for _ in 0..num_updates {
             state = state.update();
-            self.last_update = now;
+            if cfg!(not(target_os = "emscripten")) {
+                self.last_update = now;
+            }
         }
 
         self.drawer.clear();
