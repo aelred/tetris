@@ -5,9 +5,8 @@ authors = ["Felix Chapman <aelred717@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-tetris = {path="../tetris", version="0.1.0"}
-rocket = "0.4.10"
-rocket_contrib = {version="0.4.5", features=["json"]}
+tetris = { path = "../tetris", version = "0.1.0" }
+rocket = { version = "0.5.0-rc", features = ["json"] }
 serde_json = "1.0"
 dirs = "1.0"
 fslock = "0.2.1"
