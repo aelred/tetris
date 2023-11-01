@@ -53,7 +53,6 @@ metadata:
   namespace: default
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    traefik.ingress.kubernetes.io/middleware: tetris-server-cors
 spec:
   tls:
     - hosts:
@@ -70,19 +69,6 @@ spec:
                 name: tetris-server
                 port:
                   number: 8000
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: tetris-server-cors
-  namespace: default
-spec:
-  headers:
-    accessControlAllowMethods: ["*"]
-    accessControlAllowHeaders: ["*"]
-    accessControlAllowOrigin: ["https://tetris.ael.red"]
-    accessControlMaxAge: 100
-    addVaryHeader: true
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
